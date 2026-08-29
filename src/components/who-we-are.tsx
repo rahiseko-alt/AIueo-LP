@@ -19,7 +19,7 @@ export function WhoWeAre() {
   return (
     <section id="about" className="border-b border-[rgba(240,237,232,0.08)] bg-[#080808]">
       <div className="who-grid min-h-[560px]">
-        {/* Left: Photo Slider */}
+        {/* Left: Photo Slider of Events & Meetups */}
         <div className="relative min-h-[380px] w-full overflow-hidden bg-[#0e0e0e] md:min-h-[560px]">
           <div
             className="flex h-full w-full transition-transform duration-500 ease-out"
@@ -33,8 +33,8 @@ export function WhoWeAre() {
                   fill
                   className="object-cover"
                 />
-                <div className="absolute inset-0 bg-black/20" />
-                <div className="absolute bottom-4 left-6 rounded bg-black/70 px-3 py-1 font-mono text-xs text-[#f0ede8] backdrop-blur-sm">
+                <div className="absolute inset-0 bg-black/25" />
+                <div className="absolute bottom-4 left-6 rounded bg-black/75 px-3 py-1 font-mono text-xs text-[#f0ede8] backdrop-blur-sm">
                   {photo.caption}
                 </div>
               </div>
@@ -76,25 +76,25 @@ export function WhoWeAre() {
         <div className="flex flex-col justify-center p-8 sm:p-12 md:p-16">
           <div className="sec-eyebrow">01 / WHO WE ARE</div>
           <h2 className="sec-title text-[#f0ede8]">
-            AI League was founded on a simple premise: Prioritising the Action over the Pitch.
+            Prioritising the Experience over the Pitch.
           </h2>
 
           <div className="mt-8 space-y-4 font-sans text-sm font-light leading-relaxed text-[rgba(240,237,232,0.8)] sm:text-base">
             <p>
-              交流会で100枚名刺を交換しても、「今度何かやりましょう」で終われば実質的には0のままです。
+              交流会で名刺を何十枚配っても、「今度何かやりましょう」で終われば実質的には何も生まれていません。
             </p>
             <p>
-              AI League AIueo は、草野球のように週末に集まり、AIを触り、1つのプロトタイプを作る草AIチームです。
-              営業ピッチも、長文の経歴書も不要。まずは1つの実験を一緒に行う。そこから「1 + 1 = 2」の掛け算が始まります。
+              AI League AIueo は、草野球のように週末に集まり、AIを体験し、人と人が気軽につながる「草AIイベント同盟」です。
             </p>
             <p>
-              エンジニア、デザイナー、プランナー、AI愛好家がそれぞれの得意を持ち寄り、オープンに共創する現場です。
+              難しい開発知識は不要。美味しいドリンクや食事を楽しみながら、AIで遊んだり、面白い使い方をシェアしたり、一緒にイベントを作ったり。
+              まずは1つのイベントに参加してみる。そこから自然なつながりが始まります。
             </p>
           </div>
 
           <div className="mt-10">
-            <a href="#team" className="btn-ghost">
-              League Members →
+            <a href="#events" className="btn-ghost">
+              Upcoming Events →
             </a>
           </div>
         </div>

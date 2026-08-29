@@ -20,11 +20,11 @@ export function Navbar() {
         {/* Desktop Nav Links */}
         <ul className="hidden items-center justify-center gap-0 md:flex">
           {[
-            { label: 'About Us', href: '#about' },
-            { label: 'Events', href: '#events' },
-            { label: 'Projects', href: '#projects' },
-            { label: 'Activities', href: '#recent' },
-            { label: 'League Members', href: '#team' },
+            { label: 'About', href: '#about' },
+            { label: 'Upcoming Events', href: '#events' },
+            { label: 'Event Series', href: '#series' },
+            { label: 'Recent Logs', href: '#recent' },
+            { label: 'Community', href: '#team' },
             { label: 'Archive', href: '#archive' },
           ].map((item) => (
             <li key={item.label}>
@@ -42,10 +42,10 @@ export function Navbar() {
         {/* Right CTA / Menu */}
         <div className="flex items-center gap-3">
           <Link
-            href="#join"
+            href="#events"
             className="hidden font-mono text-[11px] font-semibold tracking-[0.18em] text-white uppercase transition hover:text-[#c8a45a] sm:inline-block"
           >
-            Join the League
+            Join an Event
           </Link>
           <button
             onClick={() => setIsDrawerOpen(!isDrawerOpen)}
@@ -76,13 +76,13 @@ export function Navbar() {
         <div className="fixed inset-0 top-[68px] z-40 flex flex-col items-center justify-center gap-6 bg-[#080808]/98 px-6 backdrop-blur-3xl md:hidden animate-fadeIn">
           {[
             { label: 'Home', href: '#home' },
-            { label: 'About Us', href: '#about' },
-            { label: 'Events', href: '#events' },
-            { label: 'Projects', href: '#projects' },
-            { label: 'Activities', href: '#recent' },
-            { label: 'League Members', href: '#team' },
+            { label: 'About', href: '#about' },
+            { label: 'Upcoming Events', href: '#events' },
+            { label: 'Event Series', href: '#series' },
+            { label: 'Recent Logs', href: '#recent' },
+            { label: 'Community', href: '#team' },
             { label: 'Archive', href: '#archive' },
-            { label: 'Join the League', href: '#join' },
+            { label: 'Join an Event', href: '#events' },
           ].map((item) => (
             <Link
               key={item.label}

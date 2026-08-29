@@ -1,29 +1,57 @@
+'use client';
+
+import { useState } from 'react';
 import Image from 'next/image';
 import { Activity } from '@/types';
-import { MapPin, Users } from 'lucide-react';
+import { MapPin, Calendar, Users } from 'lucide-react';
 
 interface UpcomingEventsProps {
   activities: Activity[];
 }
 
 export function UpcomingEvents({ activities }: UpcomingEventsProps) {
+  const [filter, setFilter] = useState('ALL');
+
+  const filterButtons = ['ALL', 'COMMUNITY', 'CREATIVE', 'AI'];
+
+  const filteredActivities = filter === 'ALL'
+    ? activities
+    : activities.filter((act) => act.tags.includes(filter as any));
+
   return (
     <section id="events" className="border-b border-[rgba(240,237,232,0.08)] bg-[#080808] py-20">
       <div className="mx-auto max-w-7xl px-6 md:px-10">
         {/* Header */}
         <div className="flex flex-wrap items-baseline justify-between gap-4 border-b border-[rgba(240,237,232,0.08)] pb-6">
           <div>
-            <div className="sec-eyebrow">02 / CALENDAR & MEETUPS</div>
+            <div className="sec-eyebrow">02 / CALENDAR & EXPERIENCES</div>
             <h2 className="sec-title text-[#f0ede8]">Upcoming Events</h2>
           </div>
-          <a href="#join" className="btn-ghost">
-            View All Schedule →
-          </a>
+          <span className="font-mono text-xs text-[#c8a45a]">
+            {filteredActivities.length} UPCOMING SESSIONS
+          </span>
+        </div>
+
+        {/* Activity Filter Bar */}
+        <div className="mt-8 flex flex-wrap gap-2">
+          {filterButtons.map((btn) => (
+            <button
+              key={btn}
+              onClick={() => setFilter(btn)}
+              className={`rounded-full px-4 py-1.5 font-mono text-xs font-medium tracking-wider uppercase transition-all ${
+                filter === btn
+                  ? 'border border-[#c8a45a] bg-[#c8a45a] text-[#080808]'
+                  : 'border border-[rgba(240,237,232,0.15)] bg-transparent text-[rgba(240,237,232,0.7)] hover:border-[#c8a45a] hover:text-[#c8a45a]'
+              }`}
+            >
+              {btn}
+            </button>
+          ))}
         </div>
 
         {/* 4-column Grid */}
-        <div className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-          {activities.map((act) => (
+        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+          {filteredActivities.map((act) => (
             <div
               key={act.id}
               className="group flex flex-col justify-between overflow-hidden rounded-xl border border-[rgba(240,237,232,0.08)] bg-[#0e0e0e] transition-all duration-300 hover:-translate-y-2 hover:border-[rgba(200,164,90,0.4)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.6)]"
