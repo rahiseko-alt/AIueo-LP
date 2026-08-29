@@ -1,0 +1,135 @@
+import { Activity, Person, Project } from '@/types';
+
+export const mockPeople: Person[] = [
+  {
+    id: 'person-1',
+    name: '山田 太郎',
+    role: 'Product Designer',
+    avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
+    activityIds: ['act-1', 'act-3'],
+  },
+  {
+    id: 'person-2',
+    name: '佐藤 美咲',
+    role: 'Frontend Engineer',
+    avatarUrl: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80',
+    activityIds: ['act-2', 'act-4'],
+  },
+  {
+    id: 'person-3',
+    name: '鈴木 健一',
+    role: 'Community Builder',
+    avatarUrl: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
+    activityIds: ['act-1', 'act-2', 'act-5'],
+  },
+];
+
+export const mockHeroActivity: Activity = {
+  id: 'act-hero',
+  title: 'AI × Design Sprint #04 — 現場のプロトタイプ実装会',
+  summary: '次世代UIと生成AIを組み合わせた実践的ワークショップ。デザイナーとエンジニアが1日で動くモックを作る現場。',
+  category: 'EVENT',
+  tags: ['AI', 'CREATIVE', 'DEVELOPMENT'],
+  status: 'UPCOMING',
+  date: '2026-09-20',
+  displayDate: '2026.09.20 SAT',
+  imageUrl: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&auto=format&fit=crop&q=80',
+  location: 'Shibuya Tokyo / Hybrid',
+  actionUrl: '#join',
+  actionLabel: '参加する',
+  isHero: true,
+};
+
+export const mockNextActivities: Activity[] = [
+  {
+    id: 'act-next-1',
+    title: 'Local Hackday 2026 秋',
+    summary: '地域の課題をオープンデータとコードで解決する週末集中ハッカソン。',
+    category: 'EVENT',
+    tags: ['LOCAL', 'DEVELOPMENT', 'COMMUNITY'],
+    status: 'UPCOMING',
+    date: '2026-10-04',
+    displayDate: '2026.10.04 SUN',
+    imageUrl: 'https://images.unsplash.com/photo-1531482615713-2afd69097998?w=800&auto=format&fit=crop&q=80',
+    actionUrl: '#join',
+    actionLabel: '参加登録',
+  },
+  {
+    id: 'act-next-2',
+    title: 'Creative Coding Meetup #12',
+    summary: 'Shader / WebGL / Generative Art の実験作を持ち寄り発表する交流会。',
+    category: 'EVENT',
+    tags: ['CREATIVE', 'DEVELOPMENT'],
+    status: 'UPCOMING',
+    date: '2026-10-18',
+    displayDate: '2026.10.18 SUN',
+    imageUrl: 'https://images.unsplash.com/photo-1515187029135-18ee286d815b?w=800&auto=format&fit=crop&q=80',
+    actionUrl: '#join',
+    actionLabel: '参加登録',
+  },
+];
+
+export const mockProjects: Project[] = [
+  {
+    id: 'proj-1',
+    title: 'オープンプロトタイピング・ラボ',
+    summary: '週1回オンラインで新しいライブラリやAIモデルを検証し、成果物をオープンソースとして公開する継続ラボ。',
+    status: 'ACTIVE',
+    tags: ['DEVELOPMENT', 'COMMUNITY', 'AI'],
+    imageUrl: 'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=800&auto=format&fit=crop&q=80',
+    partnerIds: ['person-1', 'person-2'],
+    actionUrl: '#join',
+  },
+  {
+    id: 'proj-2',
+    title: 'クリエイター向けAI実践カリキュラム共同開発',
+    summary: '現役クリエイターとともに、実務で使える実践的プロンプティング・自動化ワークフローを教材化。',
+    status: 'RECRUITING',
+    tags: ['EDUCATION', 'CREATIVE', 'AI'],
+    imageUrl: 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=800&auto=format&fit=crop&q=80',
+    partnerIds: ['person-3'],
+    actionUrl: '#join',
+  },
+];
+
+export const mockRecentActivities: Activity[] = [
+  {
+    id: 'act-1',
+    title: 'AI活用型デザインシステム構築ワークショップ',
+    summary: 'FigmaとAIコード生成を直結させたデザイントークン運用の実証実験。',
+    category: 'ACTIVITY',
+    tags: ['CREATIVE', 'AI'],
+    status: 'COMPLETED',
+    date: '2026-08-15',
+    displayDate: '2026.08.15',
+    imageUrl: 'https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?w=800&auto=format&fit=crop&q=80',
+    participantCount: 24,
+    partnerIds: ['person-1', 'person-3'],
+  },
+  {
+    id: 'act-2',
+    title: 'コミュニティ主導型 Web3/AI 勉強会 #08',
+    summary: '分散型データストレージとエージェント連携についてのライトニングトーク大会。',
+    category: 'EVENT',
+    tags: ['COMMUNITY', 'DEVELOPMENT'],
+    status: 'COMPLETED',
+    date: '2026-07-28',
+    displayDate: '2026.07.28',
+    imageUrl: 'https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=800&auto=format&fit=crop&q=80',
+    participantCount: 40,
+    partnerIds: ['person-2', 'person-3'],
+  },
+  {
+    id: 'act-3',
+    title: 'オープンソースUIキット共同リリース',
+    summary: '3名のコラボレーターと共にアクセシビリティ対応のモダンコンポーネント集を公開。',
+    category: 'PROJECT',
+    tags: ['DEVELOPMENT', 'CREATIVE'],
+    status: 'COMPLETED',
+    date: '2026-06-10',
+    displayDate: '2026.06.10',
+    imageUrl: 'https://images.unsplash.com/photo-1551288049-bebda4e38f71?w=800&auto=format&fit=crop&q=80',
+    participantCount: 12,
+    partnerIds: ['person-1'],
+  },
+];
