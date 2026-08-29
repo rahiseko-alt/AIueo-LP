@@ -1,34 +1,34 @@
-import { Sparkles, MessageSquare, Code2, Users, ArrowUpRight } from 'lucide-react';
+import { Sparkles, MessageSquare, Code2, Users, ArrowUpRight, PlusCircle } from 'lucide-react';
 
 export function JoinSection() {
   const options = [
     {
+      icon: <PlusCircle className="h-5 w-5 text-[#c8a45a]" />,
+      title: '「こういうのやりたい！」企画を持ち込む',
+      description: '主婦向け講座、子ども向け教室、勉強会、開発企画など、自分のやりたい企画を同盟に提案・募集。',
+      action: '企画を提案する',
+      href: 'mailto:rahiseko@gmail.com?subject=【AIueo】新しい企画・イベントの持ち込み',
+    },
+    {
       icon: <Users className="h-5 w-5 text-[#c8a45a]" />,
-      title: '週末の草イベントに参加する',
-      description: 'ハッカソンやプロトタイピング会に参加して、一緒に手を動かしてみる。',
-      action: 'イベント一覧へ',
+      title: '進行中の企画に助っ人・参加する',
+      description: '受託案件の開発チーム、セミナーのアシスタント、LT登壇など、具体的な活動に合流。',
+      action: '企画一覧を見る',
       href: '#events',
     },
     {
       icon: <MessageSquare className="h-5 w-5 text-[#c8a45a]" />,
-      title: 'Discord / コミュニティに入る',
-      description: '日々のAI検証やプロンプト談義、雑談チャンネルで交流する。',
-      action: 'Discordに参加する',
+      title: 'Discordで企画の壁打ち・仲間集め',
+      description: '「こんな企画考えてるんだけど誰か興味ある？」を気軽に投げて相談できるオンライン同盟。',
+      action: 'Discordに参加',
       href: 'https://discord.com',
     },
     {
-      icon: <Code2 className="h-5 w-5 text-[#c8a45a]" />,
-      title: '共同プロジェクトを立ち上げる',
-      description: 'テーマを持ち寄り、新しいAIツールやOSSを一緒に作る。',
-      action: '企画を相談する',
-      href: 'mailto:rahiseko@gmail.com?subject=AIueo共同企画について',
-    },
-    {
       icon: <Sparkles className="h-5 w-5 text-[#c8a45a]" />,
-      title: '会場・環境を提供する',
-      description: '開発スペース、APIクレジットなどの連携・スポンサーシップ。',
-      action: '連携について連絡する',
-      href: 'mailto:rahiseko@gmail.com?subject=会場・リソース提供について',
+      title: '会場・機材・案件を提供する',
+      description: '公民館、コワーキング、店舗の会場提供や、AI開発の相談・依頼はこちらから。',
+      action: '連携・相談する',
+      href: 'mailto:rahiseko@gmail.com?subject=【AIueo】会場・リソース提供のご相談',
     },
   ];
 
@@ -39,10 +39,13 @@ export function JoinSection() {
 
       <div className="relative mx-auto max-w-7xl px-6 md:px-10">
         <div className="max-w-2xl">
-          <div className="sec-eyebrow">07 / JOIN THE LEAGUE</div>
-          <h2 className="sec-title text-[#f0ede8]">Join the League</h2>
+          <div className="sec-eyebrow">07 / CO-CREATION & ALLIANCE</div>
+          <h2 className="sec-title text-[#f0ede8]">
+            「こういうのやるんですけど、一緒にどうですか？」
+          </h2>
           <p className="mt-4 font-sans text-sm font-light leading-relaxed text-[rgba(240,237,232,0.75)] sm:text-base">
-            まずは1つの活動から。草野球の助っ人のように、イベントへの単発参加から継続プロジェクトまで自由に関われます。
+            誰かの企画に乗っかるもよし、自分の「やりたい」を立ち上げて仲間を巻き込むもよし。
+            AI League AIueo は、具体的な行動と共創が生まれるプラットフォームです。
           </p>
         </div>
 

@@ -2,7 +2,16 @@ export type ActivityStatus = 'UPCOMING' | 'ACTIVE' | 'PLANNING' | 'RECRUITING' |
 
 export type Category = 'EVENT' | 'PROJECT' | 'ACTIVITY' | 'PEOPLE' | 'ARCHIVE' | 'ABOUT';
 
-export type Tag = 'AI' | 'LLM' | 'PROTOTYPE' | 'CREATIVE' | 'DEVELOPMENT' | 'COMMUNITY' | 'HACKATHON';
+export type Tag =
+  | 'AI'
+  | 'LLM'
+  | 'PROTOTYPE'
+  | 'CREATIVE'
+  | 'DEVELOPMENT'
+  | 'COMMUNITY'
+  | 'HACKATHON'
+  | 'EDUCATION'
+  | 'LOCAL';
 
 export interface Person {
   id: string;

@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Activity } from '@/types';
-import { MapPin, Calendar, Users } from 'lucide-react';
+import { MapPin, Users, Sparkles } from 'lucide-react';
 
 interface UpcomingEventsProps {
   activities: Activity[];
@@ -12,7 +12,13 @@ interface UpcomingEventsProps {
 export function UpcomingEvents({ activities }: UpcomingEventsProps) {
   const [filter, setFilter] = useState('ALL');
 
-  const filterButtons = ['ALL', 'COMMUNITY', 'CREATIVE', 'AI'];
+  const filterButtons = [
+    { label: 'ALL (すべて)', val: 'ALL' },
+    { label: 'EDUCATION (主婦・教育)', val: 'EDUCATION' },
+    { label: 'COMMUNITY (地域・子ども)', val: 'COMMUNITY' },
+    { label: 'DEVELOPMENT (受託・開発)', val: 'DEVELOPMENT' },
+    { label: 'CREATIVE (クリエイティブ)', val: 'CREATIVE' },
+  ];
 
   const filteredActivities = filter === 'ALL'
     ? activities
@@ -24,11 +30,11 @@ export function UpcomingEvents({ activities }: UpcomingEventsProps) {
         {/* Header */}
         <div className="flex flex-wrap items-baseline justify-between gap-4 border-b border-[rgba(240,237,232,0.08)] pb-6">
           <div>
-            <div className="sec-eyebrow">02 / CALENDAR & EXPERIENCES</div>
-            <h2 className="sec-title text-[#f0ede8]">Upcoming Events</h2>
+            <div className="sec-eyebrow">02 / ACTIVE INITIATIVES & EVENTS</div>
+            <h2 className="sec-title text-[#f0ede8]">「こういうのやります」進行中の企画</h2>
           </div>
           <span className="font-mono text-xs text-[#c8a45a]">
-            {filteredActivities.length} UPCOMING SESSIONS
+            {filteredActivities.length} ACTIVE PROJECTS / SESSIONS
           </span>
         </div>
 
@@ -36,15 +42,15 @@ export function UpcomingEvents({ activities }: UpcomingEventsProps) {
         <div className="mt-8 flex flex-wrap gap-2">
           {filterButtons.map((btn) => (
             <button
-              key={btn}
-              onClick={() => setFilter(btn)}
+              key={btn.val}
+              onClick={() => setFilter(btn.val)}
               className={`rounded-full px-4 py-1.5 font-mono text-xs font-medium tracking-wider uppercase transition-all ${
-                filter === btn
+                filter === btn.val
                   ? 'border border-[#c8a45a] bg-[#c8a45a] text-[#080808]'
                   : 'border border-[rgba(240,237,232,0.15)] bg-transparent text-[rgba(240,237,232,0.7)] hover:border-[#c8a45a] hover:text-[#c8a45a]'
               }`}
             >
-              {btn}
+              {btn.label}
             </button>
           ))}
         </div>
@@ -92,17 +98,17 @@ export function UpcomingEvents({ activities }: UpcomingEventsProps) {
                     {act.title}
                   </h3>
 
-                  <p className="mt-2 line-clamp-2 font-sans text-xs font-light leading-relaxed text-[rgba(240,237,232,0.65)]">
+                  <p className="mt-2 line-clamp-3 font-sans text-xs font-light leading-relaxed text-[rgba(240,237,232,0.65)]">
                     {act.summary}
                   </p>
                 </div>
 
                 <div className="mt-6 border-t border-[rgba(240,237,232,0.08)] pt-4">
-                  <div className="flex items-center justify-between text-xs">
+                  <div className="flex flex-col gap-1 text-xs">
                     {act.location && (
                       <span className="flex items-center gap-1 font-mono text-[11px] text-[rgba(240,237,232,0.5)]">
-                        <MapPin className="h-3 w-3 text-[#c8a45a]" />
-                        {act.location}
+                        <MapPin className="h-3 w-3 text-[#c8a45a] flex-shrink-0" />
+                        <span className="truncate">{act.location}</span>
                       </span>
                     )}
                     {act.spots && (
@@ -116,7 +122,7 @@ export function UpcomingEvents({ activities }: UpcomingEventsProps) {
                     href={act.actionUrl || '#join'}
                     className="mt-3 block w-full rounded border border-[rgba(240,237,232,0.15)] bg-transparent py-2 text-center font-mono text-[11px] font-medium tracking-wider text-[#f0ede8] uppercase transition-all duration-200 hover:border-[#c8a45a] hover:bg-[#c8a45a] hover:text-[#080808]"
                   >
-                    {act.actionLabel || '参加エントリー'}
+                    {act.actionLabel || '参加・合流する'}
                   </a>
                 </div>
               </div>

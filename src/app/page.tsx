@@ -12,7 +12,7 @@ import { Footer } from '@/components/footer';
 import {
   mockHeroActivity,
   mockUpcomingActivities,
-  mockEventSeries,
+  mockInitiativeFormats,
   mockRecentActivities,
   mockPeople,
 } from '@/data/mock';
@@ -25,7 +25,7 @@ export default function Home() {
         <Hero activity={mockHeroActivity} />
         <WhoWeAre />
         <UpcomingEvents activities={mockUpcomingActivities} />
-        <ProjectsSpotlight series={mockEventSeries} />
+        <ProjectsSpotlight series={mockInitiativeFormats} />
         <RecentLog activities={mockRecentActivities} people={mockPeople} />
         <TeamMembers people={mockPeople} activities={mockRecentActivities} />
         <Testimonials />

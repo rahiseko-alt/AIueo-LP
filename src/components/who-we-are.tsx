@@ -19,7 +19,7 @@ export function WhoWeAre() {
   return (
     <section id="about" className="border-b border-[rgba(240,237,232,0.08)] bg-[#080808]">
       <div className="who-grid min-h-[560px]">
-        {/* Left: Photo Slider of Events & Meetups */}
+        {/* Left: Photo Slider of Real Activities */}
         <div className="relative min-h-[380px] w-full overflow-hidden bg-[#0e0e0e] md:min-h-[560px]">
           <div
             className="flex h-full w-full transition-transform duration-500 ease-out"
@@ -34,7 +34,7 @@ export function WhoWeAre() {
                   className="object-cover"
                 />
                 <div className="absolute inset-0 bg-black/25" />
-                <div className="absolute bottom-4 left-6 rounded bg-black/75 px-3 py-1 font-mono text-xs text-[#f0ede8] backdrop-blur-sm">
+                <div className="absolute bottom-4 left-6 rounded bg-black/80 px-3 py-1 font-mono text-xs text-[#f0ede8] backdrop-blur-sm">
                   {photo.caption}
                 </div>
               </div>
@@ -72,29 +72,33 @@ export function WhoWeAre() {
           </div>
         </div>
 
-        {/* Right: Editorial Narrative (Kinetic Style) */}
+        {/* Right: Editorial Narrative */}
         <div className="flex flex-col justify-center p-8 sm:p-12 md:p-16">
-          <div className="sec-eyebrow">01 / WHO WE ARE</div>
+          <div className="sec-eyebrow">01 / WHY AI LEAGUE EXISTS</div>
           <h2 className="sec-title text-[#f0ede8]">
-            Prioritising the Experience over the Pitch.
+            「0はいくつ集めても0」だから、まず1つの活動を作る。
           </h2>
 
           <div className="mt-8 space-y-4 font-sans text-sm font-light leading-relaxed text-[rgba(240,237,232,0.8)] sm:text-base">
             <p>
-              交流会で名刺を何十枚配っても、「今度何かやりましょう」で終われば実質的には何も生まれていません。
+              交流会で名刺を100枚交換しても、「今度何かやりましょう」で終われば実質的には何も生まれていません。接点だけでは0です。
             </p>
             <p>
-              AI League AIueo は、草野球のように週末に集まり、AIを体験し、人と人が気軽につながる「草AIイベント同盟」です。
+              主婦向けにAIセミナーを開きたい人。地域の子供向けにAI教室をやりたい人。受託開発のチームを組みたい人。深夜にLT会を開きたい人。
             </p>
             <p>
-              難しい開発知識は不要。美味しいドリンクや食事を楽しみながら、AIで遊んだり、面白い使い方をシェアしたり、一緒にイベントを作ったり。
-              まずは1つのイベントに参加してみる。そこから自然なつながりが始まります。
+              ジャンルは一切問いません。AIに関わる人たちがそれぞれの「好きな企画」を実際に立ち上げ、
+              <strong>「こういうのやるんですけど、一緒にどうですか？」</strong>
+              と仲間を募り、形にする場所。それが草AIチーム「AI League AIueo」です。
             </p>
           </div>
 
-          <div className="mt-10">
-            <a href="#events" className="btn-ghost">
-              Upcoming Events →
+          <div className="mt-10 flex flex-wrap gap-4">
+            <a href="#events" className="btn-solid">
+              企画一覧・参加する
+            </a>
+            <a href="#join" className="btn-ghost">
+              企画を持ち込む →
             </a>
           </div>
         </div>
