@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AIueo — Activities & Collaboration",
-  description: "活動・イベント・企画を主役にしたコミュニティ＆共創プラットフォーム",
+  title: "AI League AIueo · Grassroots AI Alliance",
+  description: "AI同盟 / 草AIチーム — 週末に集まり、AIを触り、プロトタイプで遊ぶ同盟。",
 };
 
 export default function RootLayout({
@@ -25,9 +25,9 @@ export default function RootLayout({
   return (
     <html
       lang="ja"
-      className={`${geistSans.variable} ${geistMono.variable} scroll-smooth antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} scroll-smooth antialiased bg-[#080808] text-[#f0ede8]`}
     >
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col bg-[#080808]">{children}</body>
     </html>
   );
 }

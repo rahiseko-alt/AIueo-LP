@@ -1,16 +1,17 @@
 import { Navbar } from '@/components/navbar';
 import { Hero } from '@/components/hero';
-import { NextEvents } from '@/components/next-events';
-import { Projects } from '@/components/projects';
-import { RecentActivities } from '@/components/recent-activities';
-import { People } from '@/components/people';
-import { Join } from '@/components/join';
-import { Archive } from '@/components/archive';
-import { About } from '@/components/about';
+import { WhoWeAre } from '@/components/who-we-are';
+import { UpcomingEvents } from '@/components/upcoming-events';
+import { ProjectsSpotlight } from '@/components/projects-spotlight';
+import { RecentLog } from '@/components/recent-log';
+import { TeamMembers } from '@/components/team-members';
+import { Testimonials } from '@/components/testimonials';
+import { JoinSection } from '@/components/join-section';
+import { ArchiveTimeline } from '@/components/archive-timeline';
 import { Footer } from '@/components/footer';
 import {
   mockHeroActivity,
-  mockNextActivities,
+  mockUpcomingActivities,
   mockProjects,
   mockRecentActivities,
   mockPeople,
@@ -18,17 +19,18 @@ import {
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-white text-zinc-900 selection:bg-zinc-900 selection:text-white dark:bg-zinc-950 dark:text-zinc-50 dark:selection:bg-white dark:selection:text-zinc-950">
+    <div className="min-h-screen bg-[#080808] text-[#f0ede8] selection:bg-[#c8a45a] selection:text-[#080808]">
       <Navbar />
-      <main id="hero">
+      <main>
         <Hero activity={mockHeroActivity} />
-        <NextEvents activities={mockNextActivities} />
-        <Projects projects={mockProjects} />
-        <RecentActivities activities={mockRecentActivities} people={mockPeople} />
-        <People people={mockPeople} activities={mockRecentActivities} />
-        <Join />
-        <Archive />
-        <About />
+        <WhoWeAre />
+        <UpcomingEvents activities={mockUpcomingActivities} />
+        <ProjectsSpotlight projects={mockProjects} />
+        <RecentLog activities={mockRecentActivities} people={mockPeople} />
+        <TeamMembers people={mockPeople} activities={mockRecentActivities} />
+        <Testimonials />
+        <JoinSection />
+        <ArchiveTimeline />
       </main>
       <Footer />
     </div>

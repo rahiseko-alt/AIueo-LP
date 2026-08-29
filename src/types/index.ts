@@ -2,18 +2,13 @@ export type ActivityStatus = 'UPCOMING' | 'ACTIVE' | 'PLANNING' | 'RECRUITING' |
 
 export type Category = 'EVENT' | 'PROJECT' | 'ACTIVITY' | 'PEOPLE' | 'ARCHIVE' | 'ABOUT';
 
-export type Tag = 'AI' | 'BUSINESS' | 'COMMUNITY' | 'EDUCATION' | 'DEVELOPMENT' | 'CREATIVE' | 'LOCAL';
+export type Tag = 'AI' | 'LLM' | 'PROTOTYPE' | 'CREATIVE' | 'DEVELOPMENT' | 'COMMUNITY' | 'HACKATHON';
 
 export interface Person {
   id: string;
   name: string;
   role: string;
-  avatarUrl?: string;
-  links?: {
-    twitter?: string;
-    github?: string;
-    website?: string;
-  };
+  avatarUrl: string;
   activityIds: string[];
 }
 
@@ -21,16 +16,15 @@ export interface Activity {
   id: string;
   title: string;
   summary: string;
-  description?: string;
   category: Category;
   tags: Tag[];
   status: ActivityStatus;
-  date: string; // ISO or YYYY.MM.DD
-  displayDate: string; // e.g. "2026.09.20"
+  date: string;
+  displayDate: string;
   imageUrl: string;
   location?: string;
+  spots?: string;
   participantCount?: number;
-  participants?: Person[];
   partnerIds?: string[];
   actionUrl?: string;
   actionLabel?: string;
@@ -46,4 +40,12 @@ export interface Project {
   imageUrl: string;
   partnerIds: string[];
   actionUrl?: string;
+}
+
+export interface Testimonial {
+  id: string;
+  quote: string;
+  author: string;
+  role: string;
+  activityName: string;
 }
