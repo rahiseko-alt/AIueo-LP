@@ -1,6 +1,7 @@
 import { Navbar } from '@/components/navbar';
 import { Hero } from '@/components/hero';
 import { WhoWeAre } from '@/components/who-we-are';
+import { PhilosophySteps } from '@/components/philosophy-steps';
 import { UpcomingEvents } from '@/components/upcoming-events';
 import { ProjectsSpotlight } from '@/components/projects-spotlight';
 import { RecentLog } from '@/components/recent-log';
@@ -24,6 +25,7 @@ export default function Home() {
       <main>
         <Hero activity={mockHeroActivity} />
         <WhoWeAre />
+        <PhilosophySteps />
         <UpcomingEvents activities={mockUpcomingActivities} />
         <ProjectsSpotlight series={mockInitiativeFormats} />
         <RecentLog activities={mockRecentActivities} people={mockPeople} />

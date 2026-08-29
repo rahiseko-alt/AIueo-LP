@@ -21,8 +21,9 @@ export function Navbar() {
         <ul className="hidden items-center justify-center gap-0 md:flex">
           {[
             { label: 'About', href: '#about' },
-            { label: 'Upcoming Events', href: '#events' },
-            { label: 'Event Series', href: '#series' },
+            { label: 'Philosophy', href: '#philosophy' },
+            { label: 'Events & Projects', href: '#events' },
+            { label: 'Formats', href: '#series' },
             { label: 'Recent Logs', href: '#recent' },
             { label: 'Community', href: '#team' },
             { label: 'Archive', href: '#archive' },
@@ -30,10 +31,10 @@ export function Navbar() {
             <li key={item.label}>
               <Link
                 href={item.href}
-                className="group relative block px-4 py-[22px] font-mono text-[11px] font-medium tracking-[0.14em] text-[rgba(240,237,232,0.75)] uppercase transition-colors hover:text-white"
+                className="group relative block px-3.5 py-[22px] font-mono text-[11px] font-medium tracking-[0.14em] text-[rgba(240,237,232,0.75)] uppercase transition-colors hover:text-white"
               >
                 {item.label}
-                <span className="absolute bottom-0 left-4 right-4 h-[1px] scale-x-0 bg-[#c8a45a] transition-transform duration-300 group-hover:scale-x-100"></span>
+                <span className="absolute bottom-0 left-3.5 right-3.5 h-[1px] scale-x-0 bg-[#c8a45a] transition-transform duration-300 group-hover:scale-x-100"></span>
               </Link>
             </li>
           ))}
@@ -42,10 +43,10 @@ export function Navbar() {
         {/* Right CTA / Menu */}
         <div className="flex items-center gap-3">
           <Link
-            href="#events"
+            href="#join"
             className="hidden font-mono text-[11px] font-semibold tracking-[0.18em] text-white uppercase transition hover:text-[#c8a45a] sm:inline-block"
           >
-            Join an Event
+            Join / Propose
           </Link>
           <button
             onClick={() => setIsDrawerOpen(!isDrawerOpen)}
@@ -77,12 +78,13 @@ export function Navbar() {
           {[
             { label: 'Home', href: '#home' },
             { label: 'About', href: '#about' },
-            { label: 'Upcoming Events', href: '#events' },
-            { label: 'Event Series', href: '#series' },
+            { label: 'Philosophy', href: '#philosophy' },
+            { label: 'Events & Projects', href: '#events' },
+            { label: 'Formats', href: '#series' },
             { label: 'Recent Logs', href: '#recent' },
             { label: 'Community', href: '#team' },
             { label: 'Archive', href: '#archive' },
-            { label: 'Join an Event', href: '#events' },
+            { label: 'Join / Propose', href: '#join' },
           ].map((item) => (
             <Link
               key={item.label}

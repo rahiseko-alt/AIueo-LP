@@ -74,31 +74,29 @@ export function WhoWeAre() {
 
         {/* Right: Editorial Narrative */}
         <div className="flex flex-col justify-center p-8 sm:p-12 md:p-16">
-          <div className="sec-eyebrow">01 / WHY AI LEAGUE EXISTS</div>
+          <div className="sec-eyebrow">01 / WHO WE ARE</div>
           <h2 className="sec-title text-[#f0ede8]">
-            「0はいくつ集めても0」だから、まず1つの活動を作る。
+            「今度何かやりましょう」を、<br />
+            「こういうのやるので、一緒にどうですか？」に変える。
           </h2>
 
           <div className="mt-8 space-y-4 font-sans text-sm font-light leading-relaxed text-[rgba(240,237,232,0.8)] sm:text-base">
             <p>
-              交流会で名刺を100枚交換しても、「今度何かやりましょう」で終われば実質的には何も生まれていません。接点だけでは0です。
+              名刺交換を重ねるよりも、まず実際の企画やイベントを1つやってみる。
             </p>
             <p>
-              主婦向けにAIセミナーを開きたい人。地域の子供向けにAI教室をやりたい人。受託開発のチームを組みたい人。深夜にLT会を開きたい人。
-            </p>
-            <p>
-              ジャンルは一切問いません。AIに関わる人たちがそれぞれの「好きな企画」を実際に立ち上げ、
-              <strong>「こういうのやるんですけど、一緒にどうですか？」</strong>
-              と仲間を募り、形にする場所。それが草AIチーム「AI League AIueo」です。
+              主婦向けセミナー、子ども向けAI教室、受託開発、LT会。
+              ジャンルを問わず、AIに関わる人たちがそれぞれの「やってみたい」を持ち寄り、
+              具体的な活動として形にする草AIチームです。
             </p>
           </div>
 
           <div className="mt-10 flex flex-wrap gap-4">
-            <a href="#events" className="btn-solid">
-              企画一覧・参加する
+            <a href="#philosophy" className="btn-ghost">
+              3つのフェーズ ↓
             </a>
-            <a href="#join" className="btn-ghost">
-              企画を持ち込む →
+            <a href="#events" className="btn-solid">
+              企画・イベントを見る →
             </a>
           </div>
         </div>
