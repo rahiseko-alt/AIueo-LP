@@ -41,13 +41,30 @@
 .hero-split {
   min-height: min(88vh, 840px);
   display: grid;
+  grid-template-areas: "copy media";
   grid-template-columns: 1.15fr 1.85fr;
+}
+
+.hero-copy {
+  grid-area: copy;
+}
+
+.hero-media {
+  grid-area: media;
+  min-height: min(88vh, 840px);
 }
 
 @media (max-width: 1024px) {
   .hero-split {
+    grid-template-areas:
+      "media"
+      "copy";
     grid-template-columns: 1fr;
     min-height: auto;
+  }
+
+  .hero-media {
+    min-height: clamp(300px, 78vw, 460px);
   }
 }
 
