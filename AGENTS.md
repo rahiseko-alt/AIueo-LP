@@ -27,3 +27,8 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - **`web-designer`**:
   - Webデザイン、UI/UX設計、ブレイクポイント最適化、フルードタイポグラフィの専門エージェント。
   - レスポンシブ設計を行う際は `define_subagent` / `invoke_subagent` で本役割を割り当てて実行すること。
+
+## 4. Session Handoff
+- 作業を始める前に、必ずリポジトリ直下の `HANDOFF.md` を読むこと。
+- 作業を終える前に、`HANDOFF.md` の「現在の状態」「今回の作業」「次にやること」を更新すること。
+- 引継ぎ内容には、公開URL・直近のコミット・未解決事項・ユーザー確認待ちの判断を残すこと。
