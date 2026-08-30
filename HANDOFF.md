@@ -10,9 +10,9 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 直近のコミット: `714f0a0 docs: record hero redesign direction`
+- 最新の機能コミット: `568814e refactor: simplify hero and consolidate activity content`
 - ビルド: `npm run build` が成功
-- 最新デプロイ: 本番URLで表示確認済み
+- 最新デプロイ: `dpl_2P7yPBEGdVUHnoqddLw58fgQxVD4`。本番URLで表示確認済み
 
 ## 今回の作業（2026-08-31）
 
