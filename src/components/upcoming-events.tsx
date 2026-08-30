@@ -55,12 +55,12 @@ export function UpcomingEvents({ activities }: UpcomingEventsProps) {
           ))}
         </div>
 
-        {/* 4-column Responsive Grid */}
-        <div className="mt-8 sm:mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+        <div className="-mx-4 mt-8 overflow-x-auto px-4 pb-5 sm:-mx-6 sm:mt-10 sm:px-6 md:-mx-10 md:px-10 no-scrollbar">
+          <div className="flex w-max snap-x snap-mandatory gap-4 sm:gap-5">
           {filteredActivities.map((act) => (
             <div
               key={act.id}
-              className="group flex flex-col justify-between overflow-hidden rounded-xl border border-[rgba(240,237,232,0.08)] bg-[#0e0e0e] transition-all duration-300 hover:-translate-y-1.5 hover:border-[rgba(200,164,90,0.4)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.6)]"
+              className="group flex w-[82vw] max-w-[22rem] snap-start flex-col justify-between overflow-hidden rounded-xl border border-[rgba(240,237,232,0.08)] bg-[#0e0e0e] transition-all duration-300 hover:-translate-y-1.5 hover:border-[rgba(200,164,90,0.4)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.6)] sm:w-[22rem] lg:w-[24rem]"
             >
               {/* Thumbnail with Date Badge */}
               <div className="relative aspect-[16/10] sm:aspect-[4/3] w-full overflow-hidden bg-[#141414]">
@@ -68,7 +68,7 @@ export function UpcomingEvents({ activities }: UpcomingEventsProps) {
                   src={act.imageUrl}
                   alt={act.title}
                   fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
+                  sizes="(max-width: 640px) 82vw, (max-width: 1024px) 22rem, 24rem"
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e0e] via-transparent to-transparent opacity-80" />
@@ -129,6 +129,7 @@ export function UpcomingEvents({ activities }: UpcomingEventsProps) {
               </div>
             </div>
           ))}
+          </div>
         </div>
       </div>
     </section>

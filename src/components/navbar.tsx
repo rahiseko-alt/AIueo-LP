@@ -31,20 +31,18 @@ export function Navbar() {
     { label: 'About', href: '#about' },
     { label: 'Philosophy', href: '#philosophy' },
     { label: 'Events & Projects', href: '#events' },
-    { label: 'Formats', href: '#series' },
     { label: 'Recent Logs', href: '#recent' },
     { label: 'Community', href: '#team' },
-    { label: 'Archive', href: '#archive' },
     { label: 'Guidelines', href: '#guidelines' },
   ];
 
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 flex h-16 md:h-[68px] items-center justify-between border-b transition-all duration-300 px-4 sm:px-6 md:px-8 lg:px-10 ${
+        className={`fixed top-0 left-0 right-0 z-50 flex h-16 md:h-[68px] items-center justify-between border-b px-4 transition-all duration-300 sm:px-6 md:px-8 lg:px-10 ${
           isScrolled
             ? 'border-[rgba(240,237,232,0.12)] bg-[#080808]/90 backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)]'
-            : 'border-[rgba(240,237,232,0.06)] bg-[#080808]/75 backdrop-blur-xl'
+            : 'pointer-events-none -translate-y-full border-transparent bg-transparent opacity-0'
         }`}
       >
         {/* Brand Logo */}

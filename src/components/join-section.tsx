@@ -39,7 +39,7 @@ export function JoinSection() {
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 md:px-10">
         <div className="max-w-2xl">
-          <div className="sec-eyebrow">07 / CO-CREATION & ALLIANCE</div>
+          <div className="sec-eyebrow">06 / CO-CREATION & ALLIANCE</div>
           <h2 className="sec-title text-[#f0ede8]">
             「こういうのやるんですけど、一緒にどうですか？」
           </h2>

@@ -3,18 +3,15 @@ import { Hero } from '@/components/hero';
 import { WhoWeAre } from '@/components/who-we-are';
 import { PhilosophySteps } from '@/components/philosophy-steps';
 import { UpcomingEvents } from '@/components/upcoming-events';
-import { ProjectsSpotlight } from '@/components/projects-spotlight';
 import { RecentLog } from '@/components/recent-log';
 import { TeamMembers } from '@/components/team-members';
 import { Testimonials } from '@/components/testimonials';
 import { JoinSection } from '@/components/join-section';
-import { ArchiveTimeline } from '@/components/archive-timeline';
 import { OperatingGuidelines } from '@/components/operating-guidelines';
 import { Footer } from '@/components/footer';
 import {
   mockHeroActivity,
   mockUpcomingActivities,
-  mockInitiativeFormats,
   mockRecentActivities,
   mockPeople,
 } from '@/data/mock';
@@ -28,12 +25,10 @@ export default function Home() {
         <WhoWeAre />
         <PhilosophySteps />
         <UpcomingEvents activities={mockUpcomingActivities} />
-        <ProjectsSpotlight series={mockInitiativeFormats} />
         <RecentLog activities={mockRecentActivities} people={mockPeople} />
         <TeamMembers people={mockPeople} activities={mockRecentActivities} />
         <Testimonials />
         <JoinSection />
-        <ArchiveTimeline />
         <OperatingGuidelines />
       </main>
       <Footer />

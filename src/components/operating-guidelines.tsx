@@ -34,7 +34,7 @@ export function OperatingGuidelines() {
     <section id="guidelines" className="section-padding border-b border-[rgba(240,237,232,0.08)] bg-[#0b0b0b]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-10">
         <div className="max-w-3xl border-b border-[rgba(240,237,232,0.08)] pb-6 sm:pb-8">
-          <div className="sec-eyebrow">09 / OPERATING GUIDELINES</div>
+          <div className="sec-eyebrow">07 / OPERATING GUIDELINES</div>
           <h2 className="sec-title text-[#f0ede8]">運営のかかわり方</h2>
           <p className="mt-4 max-w-2xl font-sans text-sm font-light leading-relaxed text-[rgba(240,237,232,0.72)] sm:text-base">
             AIueoは、やりたいことを持つ人と参加したい人が出会う「呼びかけの場」です。場を乱さず、決められた入口から使ってください。
