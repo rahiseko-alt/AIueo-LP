@@ -52,8 +52,8 @@ export function Hero({ activity }: HeroProps) {
             className="object-cover object-center brightness-90 transition-transform duration-700 hover:scale-105"
             priority
           />
-          <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#080808]/75 via-[#080808]/10 to-transparent lg:bg-gradient-to-r lg:from-transparent lg:via-transparent lg:to-[#080808]/20" />
-          <div className="pointer-events-none absolute inset-x-4 bottom-4 sm:inset-x-6 sm:bottom-6 lg:inset-x-8 lg:bottom-8">
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-[#080808]/40 via-transparent to-[#080808]/65 lg:bg-gradient-to-r lg:from-transparent lg:via-transparent lg:to-[#080808]/20" />
+          <div className="pointer-events-none absolute inset-x-4 top-[26%] text-center sm:inset-x-6 sm:top-[28%] lg:inset-x-8 lg:top-auto lg:bottom-8 lg:text-left">
             <p className="font-mono text-[clamp(1.45rem,5vw,4.25rem)] font-medium leading-[0.9] tracking-[-0.05em] text-[#f0ede8] drop-shadow-[0_3px_18px_rgba(0,0,0,0.72)]">
               THIS WAY.
               <br />

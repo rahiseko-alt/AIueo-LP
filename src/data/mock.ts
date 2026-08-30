@@ -47,7 +47,7 @@ export const mockHeroActivity: Activity = {
   status: 'UPCOMING',
   date: '2026-09-20',
   displayDate: 'FEATURED INITIATIVE',
-  imageUrl: '/images/japanese/hero.png',
+    imageUrl: '/images/japanese/workshop.png',
   location: 'Tokyo / Regional / Online',
   spots: '誰でも企画・参加歓迎',
   actionUrl: '#events',
