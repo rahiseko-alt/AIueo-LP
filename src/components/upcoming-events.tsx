@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Image from 'next/image';
 import { Activity } from '@/types';
-import { MapPin, Users, Sparkles } from 'lucide-react';
+import { MapPin, Users } from 'lucide-react';
 
 interface UpcomingEventsProps {
   activities: Activity[];
@@ -25,28 +25,28 @@ export function UpcomingEvents({ activities }: UpcomingEventsProps) {
     : activities.filter((act) => act.tags.includes(filter as any));
 
   return (
-    <section id="events" className="border-b border-[rgba(240,237,232,0.08)] bg-[#080808] py-20">
-      <div className="mx-auto max-w-7xl px-6 md:px-10">
+    <section id="events" className="section-padding border-b border-[rgba(240,237,232,0.08)] bg-[#080808]">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-10">
         {/* Header */}
-        <div className="flex flex-wrap items-baseline justify-between gap-4 border-b border-[rgba(240,237,232,0.08)] pb-6">
+        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-3 border-b border-[rgba(240,237,232,0.08)] pb-6">
           <div>
             <div className="sec-eyebrow">02 / ACTIVE INITIATIVES & EVENTS</div>
             <h2 className="sec-title text-[#f0ede8]">「こういうのやります」進行中の企画</h2>
           </div>
-          <span className="font-mono text-xs text-[#c8a45a]">
+          <span className="font-mono text-xs text-[#c8a45a] tracking-wider">
             {filteredActivities.length} ACTIVE PROJECTS / SESSIONS
           </span>
         </div>
 
-        {/* Activity Filter Bar */}
-        <div className="mt-8 flex flex-wrap gap-2">
+        {/* Activity Filter Bar (Touch horizontal scroll on mobile, wrap on tablet/desktop) */}
+        <div className="mt-6 sm:mt-8 flex gap-2 overflow-x-auto pb-2 sm:pb-0 sm:flex-wrap no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
           {filterButtons.map((btn) => (
             <button
               key={btn.val}
               onClick={() => setFilter(btn.val)}
-              className={`rounded-full px-4 py-1.5 font-mono text-xs font-medium tracking-wider uppercase transition-all ${
+              className={`flex min-h-[44px] flex-shrink-0 items-center justify-center rounded-full px-4 py-2 font-mono text-xs font-medium tracking-wider uppercase transition-all select-none ${
                 filter === btn.val
-                  ? 'border border-[#c8a45a] bg-[#c8a45a] text-[#080808]'
+                  ? 'border border-[#c8a45a] bg-[#c8a45a] text-[#080808] shadow-[0_0_16px_rgba(200,164,90,0.3)]'
                   : 'border border-[rgba(240,237,232,0.15)] bg-transparent text-[rgba(240,237,232,0.7)] hover:border-[#c8a45a] hover:text-[#c8a45a]'
               }`}
             >
@@ -55,19 +55,20 @@ export function UpcomingEvents({ activities }: UpcomingEventsProps) {
           ))}
         </div>
 
-        {/* 4-column Grid */}
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        {/* 4-column Responsive Grid */}
+        <div className="mt-8 sm:mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
           {filteredActivities.map((act) => (
             <div
               key={act.id}
-              className="group flex flex-col justify-between overflow-hidden rounded-xl border border-[rgba(240,237,232,0.08)] bg-[#0e0e0e] transition-all duration-300 hover:-translate-y-2 hover:border-[rgba(200,164,90,0.4)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.6)]"
+              className="group flex flex-col justify-between overflow-hidden rounded-xl border border-[rgba(240,237,232,0.08)] bg-[#0e0e0e] transition-all duration-300 hover:-translate-y-1.5 hover:border-[rgba(200,164,90,0.4)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.6)]"
             >
               {/* Thumbnail with Date Badge */}
-              <div className="relative aspect-[4/3] w-full overflow-hidden bg-[#141414]">
+              <div className="relative aspect-[16/10] sm:aspect-[4/3] w-full overflow-hidden bg-[#141414]">
                 <Image
                   src={act.imageUrl}
                   alt={act.title}
                   fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 25vw"
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e0e] via-transparent to-transparent opacity-80" />
@@ -94,7 +95,7 @@ export function UpcomingEvents({ activities }: UpcomingEventsProps) {
                     ))}
                   </div>
 
-                  <h3 className="mt-2.5 font-sans text-base font-medium text-[#f0ede8] transition-colors group-hover:text-white">
+                  <h3 className="mt-2.5 font-sans text-base font-medium text-[#f0ede8] transition-colors group-hover:text-white line-clamp-2">
                     {act.title}
                   </h3>
 
@@ -120,7 +121,7 @@ export function UpcomingEvents({ activities }: UpcomingEventsProps) {
 
                   <a
                     href={act.actionUrl || '#join'}
-                    className="mt-3 block w-full rounded border border-[rgba(240,237,232,0.15)] bg-transparent py-2 text-center font-mono text-[11px] font-medium tracking-wider text-[#f0ede8] uppercase transition-all duration-200 hover:border-[#c8a45a] hover:bg-[#c8a45a] hover:text-[#080808]"
+                    className="mt-3 flex min-h-[44px] w-full items-center justify-center rounded border border-[rgba(240,237,232,0.15)] bg-transparent py-2.5 text-center font-mono text-[11px] font-medium tracking-wider text-[#f0ede8] uppercase transition-all duration-200 hover:border-[#c8a45a] hover:bg-[#c8a45a] hover:text-[#080808]"
                   >
                     {act.actionLabel || '参加・合流する'}
                   </a>

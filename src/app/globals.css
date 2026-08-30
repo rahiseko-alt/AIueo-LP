@@ -14,6 +14,12 @@
     --gold3: rgba(200, 164, 90, 0.35);
   }
 
+  html {
+    scroll-behavior: smooth;
+    text-size-adjust: 100%;
+    -webkit-text-size-adjust: 100%;
+  }
+
   body {
     background-color: var(--bg);
     color: var(--fg);
@@ -21,6 +27,8 @@
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     overflow-x: hidden;
+    width: 100%;
+    position: relative;
   }
 
   ::selection {
@@ -29,14 +37,14 @@
   }
 }
 
-/* Kinetic Collective Style Utilities */
+/* Kinetic Collective Responsive Layout Utilities */
 .hero-split {
-  min-height: min(88vh, 800px);
+  min-height: min(88vh, 840px);
   display: grid;
-  grid-template-columns: 1.1fr 1.9fr;
+  grid-template-columns: 1.15fr 1.85fr;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .hero-split {
     grid-template-columns: 1fr;
     min-height: auto;
@@ -45,77 +53,134 @@
 
 .who-grid {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: 1.1fr 1fr;
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .who-grid {
     grid-template-columns: 1fr;
   }
 }
 
+/* Touch-optimized, accessible interactive buttons (min 44px height) */
 .btn-ghost {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  font-size: 0.85rem;
+  min-height: 44px;
+  font-size: 0.825rem;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  background: rgba(240, 237, 232, 0.03);
+  background: rgba(240, 237, 232, 0.04);
   color: var(--fg);
-  border: 1px solid rgba(240, 237, 232, 0.15);
+  border: 1px solid rgba(240, 237, 232, 0.18);
   backdrop-filter: blur(8px);
-  padding: 0.85rem 1.75rem;
+  padding: 0.75rem 1.5rem;
   cursor: pointer;
   font-family: var(--font-geist-mono), monospace;
-  font-weight: 400;
+  font-weight: 500;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  user-select: none;
+  touch-action: manipulation;
 }
 
-.btn-ghost:hover {
+.btn-ghost:hover,
+.btn-ghost:focus-visible {
   border-color: var(--gold);
   color: var(--gold);
-  background: rgba(200, 164, 90, 0.08);
+  background: rgba(200, 164, 90, 0.1);
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(200, 164, 90, 0.15);
+  outline: none;
+}
+
+.btn-ghost:active {
+  transform: translateY(0);
 }
 
 .btn-solid {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
   gap: 0.5rem;
-  font-size: 0.85rem;
-  letter-spacing: 0.16em;
+  min-height: 44px;
+  font-size: 0.825rem;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   background: var(--fg);
   color: var(--bg);
-  border: none;
-  padding: 0.9rem 2rem;
+  border: 1px solid transparent;
+  padding: 0.75rem 1.75rem;
   cursor: pointer;
   font-family: var(--font-geist-mono), monospace;
   font-weight: 600;
   transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  text-decoration: none;
+  user-select: none;
+  touch-action: manipulation;
 }
 
-.btn-solid:hover {
+.btn-solid:hover,
+.btn-solid:focus-visible {
   background: var(--gold);
   color: #080808;
+  border-color: var(--gold);
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(200, 164, 90, 0.25);
+  outline: none;
 }
 
+.btn-solid:active {
+  transform: translateY(0);
+}
+
+/* Fluid Typography Utilities */
 .sec-eyebrow {
   font-family: var(--font-geist-mono), monospace;
-  font-size: 0.65rem;
-  letter-spacing: 0.32em;
+  font-size: clamp(0.65rem, 1.5vw, 0.75rem);
+  letter-spacing: 0.28em;
   text-transform: uppercase;
   color: var(--gold);
-  margin-bottom: 0.75rem;
+  margin-bottom: 0.65rem;
 }
 
 .sec-title {
-  font-size: clamp(2.2rem, 4vw, 3.5rem);
+  font-size: clamp(1.85rem, 4vw + 0.5rem, 3.25rem);
   font-weight: 300;
   letter-spacing: -0.02em;
-  line-height: 1.1;
+  line-height: 1.15;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+/* Responsive Section Spacing */
+.section-padding {
+  padding-top: clamp(3.5rem, 7vw, 6rem);
+  padding-bottom: clamp(3.5rem, 7vw, 6rem);
+}
+
+/* Hide scrollbar utility for smooth mobile pill navigation */
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }

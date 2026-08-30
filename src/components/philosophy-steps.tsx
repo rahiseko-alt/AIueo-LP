@@ -33,8 +33,8 @@ export function PhilosophySteps() {
   ];
 
   return (
-    <section id="philosophy" className="border-b border-[rgba(240,237,232,0.08)] bg-[#070707] py-24">
-      <div className="mx-auto max-w-7xl px-6 md:px-10">
+    <section id="philosophy" className="section-padding border-b border-[rgba(240,237,232,0.08)] bg-[#070707]">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-10">
         <div className="max-w-xl">
           <div className="sec-eyebrow">THE 3 PHASES</div>
           <h2 className="sec-title text-[#f0ede8]">
@@ -42,29 +42,31 @@ export function PhilosophySteps() {
           </h2>
         </div>
 
-        <div className="mt-16 grid gap-6 md:grid-cols-3">
-          {phases.map((phase) => (
+        <div className="mt-10 sm:mt-14 md:mt-16 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          {phases.map((phase, idx) => (
             <div
               key={phase.num}
-              className="group relative flex flex-col justify-between rounded-2xl border border-[rgba(240,237,232,0.08)] bg-[#0e0e0e] p-8 transition-all duration-300 hover:-translate-y-2 hover:border-[#c8a45a] hover:bg-[#121212] hover:shadow-[0_20px_40px_rgba(0,0,0,0.6)]"
+              className={`group relative flex flex-col justify-between rounded-2xl border border-[rgba(240,237,232,0.08)] bg-[#0e0e0e] p-6 sm:p-7 md:p-8 transition-all duration-300 hover:-translate-y-1.5 hover:border-[#c8a45a] hover:bg-[#121212] hover:shadow-[0_20px_40px_rgba(0,0,0,0.6)] ${
+                idx === 2 ? 'sm:col-span-2 lg:col-span-1' : ''
+              }`}
             >
               <div>
                 <div className="flex items-center justify-between border-b border-[rgba(240,237,232,0.08)] pb-4">
-                  <span className="font-mono text-3xl font-light tracking-tight text-[#c8a45a] sm:text-4xl">
+                  <span className="font-mono text-2xl sm:text-3xl lg:text-4xl font-light tracking-tight text-[#c8a45a]">
                     {phase.num}
                   </span>
-                  <span className="font-mono text-xs font-semibold tracking-[0.2em] text-[rgba(240,237,232,0.5)] group-hover:text-[#c8a45a]">
+                  <span className="rounded bg-[rgba(200,164,90,0.08)] px-2 py-0.5 font-mono text-[10px] sm:text-xs font-semibold tracking-[0.18em] text-[#c8a45a] group-hover:bg-[#c8a45a] group-hover:text-[#080808] transition-colors">
                     {phase.keyword}
                   </span>
                 </div>
 
-                <h3 className="mt-6 font-sans text-lg font-medium text-[#f0ede8]">
+                <h3 className="mt-5 sm:mt-6 font-sans text-base sm:text-lg font-medium text-[#f0ede8]">
                   {phase.subtitle}
                 </h3>
 
-                <div className="mt-4 space-y-1 font-sans text-xs font-light leading-relaxed text-[rgba(240,237,232,0.7)] sm:text-sm">
-                  {phase.lines.map((line, idx) => (
-                    <p key={idx}>{line}</p>
+                <div className="mt-3 sm:mt-4 space-y-1.5 font-sans text-xs sm:text-sm font-light leading-relaxed text-[rgba(240,237,232,0.7)]">
+                  {phase.lines.map((line, lIdx) => (
+                    <p key={lIdx}>{line}</p>
                   ))}
                 </div>
               </div>

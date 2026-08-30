@@ -8,14 +8,14 @@ export function ArchiveTimeline() {
   ];
 
   return (
-    <section id="archive" className="border-b border-[rgba(240,237,232,0.08)] bg-[#080808] py-20">
-      <div className="mx-auto max-w-7xl px-6 md:px-10">
-        <div className="flex flex-wrap items-baseline justify-between gap-4 border-b border-[rgba(240,237,232,0.08)] pb-6">
+    <section id="archive" className="section-padding border-b border-[rgba(240,237,232,0.08)] bg-[#080808]">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-10">
+        <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-3 border-b border-[rgba(240,237,232,0.08)] pb-6">
           <div>
             <div className="sec-eyebrow">08 / TIMELINE DATABASE</div>
             <h2 className="sec-title text-[#f0ede8]">Archive</h2>
           </div>
-          <span className="font-mono text-xs text-[rgba(240,237,232,0.5)]">
+          <span className="font-mono text-xs text-[rgba(240,237,232,0.5)] tracking-wider">
             RECORD LOG
           </span>
         </div>
@@ -24,18 +24,18 @@ export function ArchiveTimeline() {
           {archives.map((item, idx) => (
             <div
               key={idx}
-              className="flex flex-col py-4 transition hover:bg-[#0e0e0e]/50 sm:flex-row sm:items-center sm:justify-between sm:px-4"
+              className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-4 py-4 sm:py-5 px-2 sm:px-4 rounded-lg transition-colors hover:bg-[#0e0e0e]/50"
             >
-              <div className="flex items-center gap-6">
-                <span className="font-mono text-sm font-semibold tracking-wider text-[#c8a45a]">
+              <div className="flex flex-col xs:flex-row xs:items-center gap-2 sm:gap-6">
+                <span className="font-mono text-xs sm:text-sm font-semibold tracking-wider text-[#c8a45a] flex-shrink-0">
                   {item.date}
                 </span>
-                <span className="font-sans text-base font-normal text-[#f0ede8]">
+                <span className="font-sans text-sm sm:text-base font-normal text-[#f0ede8]">
                   {item.title}
                 </span>
               </div>
-              <div className="mt-2 sm:mt-0">
-                <span className="rounded border border-[rgba(240,237,232,0.1)] bg-[#141414] px-2.5 py-0.5 font-mono text-[10px] tracking-wider text-[rgba(240,237,232,0.6)]">
+              <div className="self-start sm:self-auto">
+                <span className="inline-block rounded border border-[rgba(240,237,232,0.12)] bg-[#141414] px-2.5 py-1 font-mono text-[10px] sm:text-[11px] tracking-wider text-[rgba(240,237,232,0.65)]">
                   {item.tag}
                 </span>
               </div>

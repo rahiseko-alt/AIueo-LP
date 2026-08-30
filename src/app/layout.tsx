@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -11,6 +11,13 @@ const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
 });
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 5,
+  themeColor: "#080808",
+};
 
 export const metadata: Metadata = {
   title: "AI League AIueo · Grassroots AI Alliance",
@@ -27,7 +34,7 @@ export default function RootLayout({
       lang="ja"
       className={`${geistSans.variable} ${geistMono.variable} scroll-smooth antialiased bg-[#080808] text-[#f0ede8]`}
     >
-      <body className="min-h-full flex flex-col bg-[#080808]">{children}</body>
+      <body className="min-h-full flex flex-col bg-[#080808] overflow-x-hidden">{children}</body>
     </html>
   );
 }
