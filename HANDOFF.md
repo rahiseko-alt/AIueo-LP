@@ -10,7 +10,7 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 直近のコミット: `e567061 docs: clarify platform boundaries and enforcement`
+- 直近のコミット: `9df53bd docs: add mandatory session handoff workflow`
 - ビルド: `npm run build` が成功
 - 最新デプロイ: 本番URLで表示確認済み
 
@@ -24,6 +24,8 @@
 
 ## 次にやること
 
+- トップ写真を、写真家の作例を分解したアートディレクションに基づき作り直す。現行の教室写真は差し替え予定で、新しい屋外生成案はユーザー却下のため採用しない。
+- トップを画像と `THIS WAY. TOGETHER.` だけの全画面構成にする。企画紹介系は重複を整理し、進行中の企画を横スクロールへ集約する。
 - 企画の掲載期限・再掲載・自動非公開の仕様を、実機能化するかルール文に留めるかユーザー確認待ち。
 - 問題のある掲載を連絡する導線（通報フォームまたは連絡先）の最終仕様を決める。
 
