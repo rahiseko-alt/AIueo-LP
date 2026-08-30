@@ -19,6 +19,7 @@ export function Footer() {
                 { label: 'Recent Activities', href: '#recent' },
                 { label: 'League Members', href: '#team' },
                 { label: 'Archive', href: '#archive' },
+                { label: 'Operating Guidelines', href: '#guidelines' },
                 { label: 'Join Us', href: '#join' },
               ].map((link) => (
                 <Link

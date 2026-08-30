@@ -35,6 +35,7 @@ export function Navbar() {
     { label: 'Recent Logs', href: '#recent' },
     { label: 'Community', href: '#team' },
     { label: 'Archive', href: '#archive' },
+    { label: 'Guidelines', href: '#guidelines' },
   ];
 
   return (

@@ -9,6 +9,7 @@ import { TeamMembers } from '@/components/team-members';
 import { Testimonials } from '@/components/testimonials';
 import { JoinSection } from '@/components/join-section';
 import { ArchiveTimeline } from '@/components/archive-timeline';
+import { OperatingGuidelines } from '@/components/operating-guidelines';
 import { Footer } from '@/components/footer';
 import {
   mockHeroActivity,
@@ -33,6 +34,7 @@ export default function Home() {
         <Testimonials />
         <JoinSection />
         <ArchiveTimeline />
+        <OperatingGuidelines />
       </main>
       <Footer />
     </div>
