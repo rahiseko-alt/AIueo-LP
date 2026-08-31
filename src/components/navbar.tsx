@@ -29,11 +29,9 @@ export function Navbar() {
 
   const navItems = [
     { label: 'About', href: '#about' },
-    { label: 'Philosophy', href: '#philosophy' },
-    { label: 'Events & Projects', href: '#events' },
-    { label: 'Recent Logs', href: '#recent' },
-    { label: 'Community', href: '#team' },
-    { label: 'Guidelines', href: '#guidelines' },
+    { label: 'How It Works', href: '#philosophy' },
+    { label: 'Events', href: '#events' },
+    { label: 'Activity Log', href: '#recent' },
   ];
 
   return (

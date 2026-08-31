@@ -4,8 +4,6 @@ import { WhoWeAre } from '@/components/who-we-are';
 import { PhilosophySteps } from '@/components/philosophy-steps';
 import { UpcomingEvents } from '@/components/upcoming-events';
 import { RecentLog } from '@/components/recent-log';
-import { TeamMembers } from '@/components/team-members';
-import { Testimonials } from '@/components/testimonials';
 import { JoinSection } from '@/components/join-section';
 import { OperatingGuidelines } from '@/components/operating-guidelines';
 import { Footer } from '@/components/footer';
@@ -26,8 +24,6 @@ export default function Home() {
         <PhilosophySteps />
         <UpcomingEvents activities={mockUpcomingActivities} />
         <RecentLog activities={mockRecentActivities} people={mockPeople} />
-        <TeamMembers people={mockPeople} activities={mockRecentActivities} />
-        <Testimonials />
         <JoinSection />
         <OperatingGuidelines />
       </main>

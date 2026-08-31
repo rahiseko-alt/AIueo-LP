@@ -13,14 +13,12 @@ export function Footer() {
             <div className="mt-4 flex flex-col gap-1 font-sans text-sm font-light text-[rgba(240,237,232,0.75)]">
               {[
                 { label: 'Home', href: '#home' },
-                { label: 'About League', href: '#about' },
-                { label: 'Events & Projects', href: '#events' },
-                { label: 'Initiative Formats', href: '#series' },
-                { label: 'Recent Activities', href: '#recent' },
-                { label: 'League Members', href: '#team' },
-                { label: 'Archive', href: '#archive' },
+                { label: 'About', href: '#about' },
+                { label: 'How It Works', href: '#philosophy' },
+                { label: 'Events', href: '#events' },
+                { label: 'Activity Log', href: '#recent' },
+                { label: 'Join / Propose', href: '#join' },
                 { label: 'Operating Guidelines', href: '#guidelines' },
-                { label: 'Join Us', href: '#join' },
               ].map((link) => (
                 <Link
                   key={link.label}
