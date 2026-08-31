@@ -12,7 +12,7 @@ export const mockPeople: Person[] = [
     id: 'person-1',
     name: 'Kouhei Kosehira',
     role: 'Alliance Founder / Organizer',
-    avatarUrl: '/images/japanese/avatar-1.png',
+    avatarUrl: '/images/japanese/kosehirakouhei-profile.png',
     activityIds: ['act-hero', 'act-next-1', 'act-1'],
   },
   {
