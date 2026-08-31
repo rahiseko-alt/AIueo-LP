@@ -12,7 +12,7 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新のコミット: `322cd43 docs: record membership foundation deployment`（P3実装はこのセッションで未コミット）
+- 最新のコミット: `f207270 feat: add atomic member activation flow`（P4/P5実装はこのセッションで未コミット）
 - ビルド: `npm run build` が成功（P1/P2初期実装）
 - 最新デプロイ: `https://aiueo-9jdw9ju8c-rahisekos-projects.vercel.app`。`https://aiueo-lp.vercel.app`および`https://aiueo.kouheikosehira.com`へエイリアス設定済み
 
@@ -65,6 +65,9 @@
 - Supabase AuthのGoogle OAuth/Magic Link、Vercelの`NEXT_PUBLIC_SUPABASE_*`、認証済み送信ドメイン/SMTPは実アカウント設定が必要。PreviewとProductionは必ず別設定にする。
 - 規約・免責事項・プライバシーポリシーの保存期間を最終化し、必要に応じて専門家の確認を受ける。
 - P3の権限・運用/法務敵対レビューは利用上限で再試行できず未完了。UXレビューの指摘は反映済みだが、P3完了・本番認証有効化・E2E合格とは扱わない。
+- P4として、企画者向けの必須項目フォーム、金銭条件・公開前確認、下書き/公開、開催決定・満席・終了・中止、公開一覧・詳細・通報導線を追加。`save_proposal`、`publish_proposal`、`set_proposal_event_status`はactorとownerをDB側で導出する。
+- P5として、`/admin`、`/admin/proposals`、`/admin/members`、`/admin/moderation`、企画別メッセージ画面と管理RPCを追加。管理者の状態変更・全項目編集・会員停止/取消・通報処理は理由、版履歴、措置記録、通知、監査を同一transactionで作成する。
+- P4/P5のSQLは未接続のためPostgres直結テスト未実施。公開前にmigration適用、RLS allow/deny、有限状態遷移、管理者MFA、通知失敗、通報の匿名/認証両経路をテストする。
 
 ## 注意点
 

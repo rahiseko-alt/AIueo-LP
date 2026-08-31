@@ -7,7 +7,7 @@ export function JoinSection() {
       title: '「こういうのやりたい！」企画を持ち込む',
       description: '主婦向け講座、子ども向け教室、勉強会、開発企画など、自分のやりたい企画を同盟に提案・募集。',
       action: '企画を提案する',
-      href: '/contact',
+      href: '/register',
     },
     {
       icon: <Users className="h-5 w-5 text-[#c8a45a]" />,
@@ -21,7 +21,7 @@ export function JoinSection() {
       title: '企画の壁打ち・仲間集めを相談する',
       description: '「こんな企画を考えている」を、まずAIueoへ気軽に相談できます。',
       action: '相談する',
-      href: '/contact',
+      href: '/register',
     },
     {
       icon: <Sparkles className="h-5 w-5 text-[#c8a45a]" />,
