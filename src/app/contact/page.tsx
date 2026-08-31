@@ -1,5 +1,4 @@
 import Link from 'next/link';
-import { ContactActions } from '@/components/contact-actions';
 
 export default function ContactPage() {
   return (
@@ -25,11 +24,6 @@ export default function ContactPage() {
           >
             info@kouheikosehira.com
           </a>
-          <ContactActions />
-
-          <p className="mt-7 font-sans text-xs font-light leading-relaxed text-[rgba(240,237,232,0.5)]">
-            メールアプリが開かない場合は、「メールアドレスをコピー」を押して、普段お使いのメールアプリへ貼り付けてください。
-          </p>
         </section>
       </div>
     </main>
