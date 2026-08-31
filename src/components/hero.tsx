@@ -10,10 +10,10 @@ export function Hero({ activity }: HeroProps) {
     <section id="home" className="relative h-[100svh] min-h-[36rem] overflow-hidden bg-[#080808]">
       <Image
         src={activity.imageUrl}
-        alt="手を挙げて参加を呼びかける教室"
+        alt="AI導入セミナーで実演する講師と参加者"
         fill
         sizes="100vw"
-        className="object-cover object-[39%_center] brightness-[0.76] sm:object-[44%_center] sm:brightness-[0.82] lg:object-center"
+        className="object-cover object-[56%_center] brightness-[0.76] sm:object-[54%_center] sm:brightness-[0.82] lg:object-center"
         priority
       />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/65 via-black/15 to-black/60 sm:from-black/45 sm:via-black/5 sm:to-black/55" />
