@@ -2,14 +2,14 @@ export function WhoWeAre() {
   return (
     <section id="about" className="section-padding border-b border-[rgba(240,237,232,0.08)] bg-[#080808]">
       <div className="mx-auto grid max-w-7xl gap-8 px-4 sm:px-6 md:grid-cols-[0.65fr_1.35fr] md:gap-14 md:px-10">
-        <div className="border-l-2 border-[#c8a45a] pl-5 sm:pl-7">
+        <div className="min-w-0 border-l-2 border-[#c8a45a] pl-5 sm:pl-7">
           <div className="sec-eyebrow">01 / WHO WE ARE</div>
           <p className="mt-4 font-mono text-xs leading-relaxed tracking-[0.08em] text-[#c8a45a] uppercase">
             A place to call people in.
           </p>
         </div>
 
-        <div>
+        <div className="min-w-0">
           <h2 className="sec-title leading-tight text-[#f0ede8]">
             「今度何かやりましょう」を、<br className="hidden sm:inline" />
             「こういうのやるので、一緒にどうですか？」に変える。
