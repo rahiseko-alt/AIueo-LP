@@ -18,8 +18,10 @@ export function Hero({ activity }: HeroProps) {
       />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/65 via-black/15 to-black/60 sm:from-black/45 sm:via-black/5 sm:to-black/55" />
       <div className="pointer-events-none absolute left-5 top-[max(2rem,env(safe-area-inset-top))] text-left sm:left-8 sm:top-8 lg:left-[8%] lg:top-[10%]">
-        <h1 className="font-mono text-[clamp(1.45rem,6.2vw,3.6rem)] font-medium leading-none tracking-[-0.04em] text-[#c8a45a] drop-shadow-[0_4px_22px_rgba(0,0,0,0.8)] lg:text-[clamp(2.8rem,4.2vw,4.2rem)]">
-          この指とまれ、
+        <h1 className="font-mono text-[clamp(1.45rem,6.2vw,3.6rem)] font-medium leading-none tracking-[-0.04em] text-[#f0ede8] drop-shadow-[0_4px_22px_rgba(0,0,0,0.8)] lg:text-[clamp(2.8rem,4.2vw,4.2rem)]">
+          THIS WAY.
+          <br />
+          <span className="text-[#c8a45a]">TOGETHER.</span>
         </h1>
       </div>
 
