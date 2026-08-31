@@ -154,6 +154,31 @@
   transform: translateY(0);
 }
 
+.form-label {
+  display: block;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  min-height: 2.75rem;
+  margin-top: 0.5rem;
+  border: 1px solid rgba(240, 237, 232, 0.2);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.65rem 0.75rem;
+  color: var(--fg);
+  font: inherit;
+  outline: none;
+}
+
+.form-control:focus {
+  border-color: var(--gold);
+}
+
 /* Fluid Typography Utilities */
 .sec-eyebrow {
   font-family: var(--font-geist-mono), monospace;

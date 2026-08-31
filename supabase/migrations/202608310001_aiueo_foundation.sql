@@ -108,6 +108,10 @@ create table public.proposals (
   constraint proposals_format_length check (char_length(trim(format)) between 1 and 120),
   constraint proposals_organizer_length check (char_length(trim(organizer_name)) between 1 and 120),
   constraint proposals_participation_method_length check (char_length(trim(participation_method)) between 1 and 2000)
+  ,constraint proposals_money_details_shape check (
+    jsonb_typeof(money_details) = 'object'
+    and money_details <@ '{"label":null,"amount":null,"currency":null,"recipient":null,"collection_method":null,"settlement":null,"refunds":null,"change_terms":null}'::jsonb
+  )
 );
 
 create index proposals_owner_status_idx on public.proposals (owner_id, status);
@@ -289,6 +293,7 @@ grant select on public.consents to authenticated;
 grant select on public.proposals, public.proposal_versions, public.proposal_messages, public.notifications, public.moderation_actions, public.audit_log to authenticated;
 grant select (
   id,
+  status,
   slug,
   title,
   summary,
@@ -299,6 +304,7 @@ grant select (
   participation_method,
   visibility,
   money_type,
+  money_details,
   published_at,
   updated_at
 ) on public.proposals to anon;
