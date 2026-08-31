@@ -12,7 +12,7 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新のコミット: `7ea1c35 feat: add admin moderation and messaging`（P6実装はこのセッションで未コミット）
+- 最新のコミット: `aaa240e fix: separate edge function type checking`
 - ビルド: `npm run build` が成功（P1/P2初期実装）
 - 最新デプロイ: `https://aiueo-9jdw9ju8c-rahisekos-projects.vercel.app`。`https://aiueo-lp.vercel.app`および`https://aiueo.kouheikosehira.com`へエイリアス設定済み
 
@@ -72,6 +72,7 @@
 - P6のEdge FunctionはSupabaseへ未デプロイ。旧SupabaseホストがDNS解決できないため、正しいプロジェクト確定、バックアップ、Secrets登録、Cron作成が必要。
 - Supabase Edge FunctionはDeno型のためNext.jsの`tsconfig`検査対象から除外。Vercel本体の型検査とEdge Functionの実行環境を分離した。
 - 公開企画ページの通報フォーム、管理者の通報処理、企画者/管理者メッセージ、公開企画へのヘッダー・フッター導線、RLS受入マトリクスを追加。`npm run build`成功。
+- 最新Vercel本番デプロイ`https://aiueo-91l44wley-rahisekos-projects.vercel.app`（本番エイリアス`https://aiueo-lp.vercel.app`）で、`/`、`/events`、`/register`、`/terms`が200、未認証の`/admin`と`/member/proposals/new`が307拒否になることを確認。
 
 ## 注意点
 
