@@ -41,12 +41,12 @@ export function Footer() {
               <p className="mt-1 font-sans text-sm font-light leading-relaxed text-[rgba(240,237,232,0.65)]">
                 AIueoについてのご連絡はこちらへ。
               </p>
-              <Link
-                href="/contact"
+              <a
+                href="mailto:info@kouheikosehira.com"
                 className="mt-3 inline-flex min-h-[44px] items-center break-all border-b border-[#c8a45a] font-mono text-sm font-semibold text-[#f0ede8] transition-colors hover:text-[#c8a45a]"
               >
-                お問い合わせページを開く →
-              </Link>
+                info@kouheikosehira.com
+              </a>
             </div>
             <div className="mt-5 flex flex-col gap-1 border-t border-[rgba(240,237,232,0.08)] pt-4 font-sans text-sm font-light text-[rgba(240,237,232,0.55)]">
               <a
