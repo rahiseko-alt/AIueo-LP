@@ -84,14 +84,15 @@ export function OperatingGuidelines() {
               掲載内容やAIueoについてのご連絡はこちらへ。
             </p>
           </div>
-          <a
-            href="mailto:info@kouheikosehira.com"
+          <Link
+            href="/contact"
             className="inline-flex min-h-[44px] w-fit items-center border-b border-[#c8a45a] py-2 font-mono text-sm font-semibold tracking-wide text-[#f0ede8] transition-colors hover:text-[#c8a45a]"
           >
-            info@kouheikosehira.com
-          </a>
+            お問い合わせページを開く →
+          </Link>
         </div>
       </div>
     </section>
   );
 }
+import Link from 'next/link';

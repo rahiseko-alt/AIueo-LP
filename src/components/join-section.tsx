@@ -7,7 +7,7 @@ export function JoinSection() {
       title: '「こういうのやりたい！」企画を持ち込む',
       description: '主婦向け講座、子ども向け教室、勉強会、開発企画など、自分のやりたい企画を同盟に提案・募集。',
       action: '企画を提案する',
-      href: 'mailto:info@kouheikosehira.com?subject=【AIueo】新しい企画・イベントの持ち込み',
+      href: '/contact',
     },
     {
       icon: <Users className="h-5 w-5 text-[#c8a45a]" />,
@@ -18,17 +18,17 @@ export function JoinSection() {
     },
     {
       icon: <MessageSquare className="h-5 w-5 text-[#c8a45a]" />,
-      title: 'Discordで企画の壁打ち・仲間集め',
-      description: '「こんな企画考えてるんだけど誰か興味ある？」を気軽に投げて相談できるオンライン同盟。',
-      action: 'Discordに参加',
-      href: 'https://discord.com',
+      title: '企画の壁打ち・仲間集めを相談する',
+      description: '「こんな企画を考えている」を、まずAIueoへ気軽に相談できます。',
+      action: '相談する',
+      href: '/contact',
     },
     {
       icon: <Sparkles className="h-5 w-5 text-[#c8a45a]" />,
       title: '会場・機材・案件を提供する',
       description: '公民館、コワーキング、店舗の会場提供や、AI開発の相談・依頼はこちらから。',
       action: '連携・相談する',
-      href: 'mailto:info@kouheikosehira.com?subject=【AIueo】会場・リソース提供のご相談',
+      href: '/contact',
     },
   ];
 
