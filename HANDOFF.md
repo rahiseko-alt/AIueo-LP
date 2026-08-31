@@ -10,9 +10,9 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新の機能コミット: `1e349ac fix: open mail client from contact address`
+- 最新の機能コミット: `0c6fd8c refactor: simplify contact page mail action`
 - ビルド: `npm run build` が成功
-- 最新デプロイ: `https://aiueo-31hok80qe-rahisekos-projects.vercel.app`。本番URLへエイリアス設定済み
+- 最新デプロイ: `https://aiueo-47k7ql6ws-rahisekos-projects.vercel.app`。本番URLへエイリアス設定済み
 
 ## 今回の作業（2026-08-31）
 
@@ -35,6 +35,7 @@
 - 問い合わせ先を`info@kouheikosehira.com`へ統一。
 - 問い合わせは、メールアプリ未設定のスマホでも使える`/contact`ページに統一。アドレスコピーとメールアプリ起動の両方を用意し、運営方針・フッター・ナビゲーションから到達できるようにした。実体のないX・Discordへのリンクは削除。
 - 運営方針・フッターに表示する`info@kouheikosehira.com`は`mailto:`へ変更。アドレスをタップすると直接メール作成画面を開く。本番HTMLで2箇所の`mailto:`を確認済み。
+- `/contact`も、メールアドレス本体をタップして直接メール作成画面を開く構成に整理。コピー・メールアプリ起動の別ボタンと補足文は削除した。
 - 会員・企画登録・管理画面の決定仕様を`MEMBERSHIP_FEATURE_SPEC.md`に記録。参加は登録不要、企画登録だけ承認済み会員に限定し、外部認証・DBはSupabase Auth + Postgresを採用する。
 - 会員登録は管理者承認なしで即時`active`化へ変更。企画者が下書き・公開・中止・開催決定・満席・終了を自己完結し、管理者は全企画の編集・状態変更・非公開・削除権限だけを持つ。
 - 開催候補日の7日前に未確定企画へ注意メール、3日前にも未確定なら`auto_hidden`として公開から自動除外する仕様を追加。管理者・企画者の企画別メッセージも追加。
