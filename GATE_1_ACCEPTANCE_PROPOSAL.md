@@ -77,6 +77,13 @@
 7. G1-07: 開催候補日時を公開時に必須としてよいか。候補日時なしで公開したい場合は、7日前/3日前判定の起点を指定してほしい。
 8. G1-08: データ保持期間・退会後の読取専用期間は、規約の最終確認と同時に確定する。暫定値をこちらで提案してよいか。
 
+## 既存インフラの確認結果
+
+- Vercel Productionには、177日前に設定された`VITE_SUPABASE_URL`と`VITE_SUPABASE_ANON_KEY`がある。一方、Next.js用の`NEXT_PUBLIC_SUPABASE_URL`、`NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`、サーバー専用Secretは未設定であり、Preview/DevelopmentにもSupabase変数はない。
+- 既存のSupabaseプロジェクト・データがある可能性がある。接続先と既存テーブルを確認する前に、上書き・削除・migration適用を行わない。
+- `GMAIL_USER`、`GMAIL_APP_PASSWORD`、`STRIPE_SECRET_KEY`も既存設定として検出した。AIueoは金銭を扱わない方針のためStripe鍵は本機能では使用しない。メールは既存Gmailを使うか、専用送信者・送信基盤を新設するかをG1-02で確定する。
+- P1開始時には、Supabaseプロジェクトへの管理アクセス、Google OAuthのClient ID/Secret、送信ドメインまたはSMTP/メール送信サービスの設定権限が必要になる。秘密値そのものは会話やGitへ出さず、Vercel/SupabaseのSecretとして設定する。
+
 ## P1 基盤の受け入れ条件
 
 1. `@supabase/ssr`でcookieベースのSSR認証を実装し、`auth-helpers`は導入しない。
