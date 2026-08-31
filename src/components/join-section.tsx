@@ -14,7 +14,7 @@ export function JoinSection() {
       title: '進行中の企画に助っ人・参加する',
       description: '受託案件の開発チーム、セミナーのアシスタント、LT登壇など、具体的な活動に合流。',
       action: '企画一覧を見る',
-      href: '#events',
+      href: '/events',
     },
     {
       icon: <MessageSquare className="h-5 w-5 text-[#c8a45a]" />,

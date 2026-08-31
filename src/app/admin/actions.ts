@@ -7,6 +7,7 @@ import { isSupabaseConfigured } from '@/lib/supabase/env';
 
 const statusSchema = z.enum(['draft', 'submitted', 'published', 'needs_revision', 'auto_hidden', 'hidden', 'ended', 'cancelled', 'expired']);
 const memberStatusSchema = z.enum(['active', 'suspended', 'withdrawn']);
+const moneyTypeSchema = z.enum(['none', 'fixed_fee', 'range_or_upper_limit', 'reimbursement', 'reward', 'donation', 'undecided']);
 const reasonSchema = z.object({ reasonCode: z.string().trim().min(1).max(80), reasonText: z.string().trim().min(1).max(2000) });
 
 export async function adminSetProposalStateAction(formData: FormData) {
@@ -45,7 +46,7 @@ export async function sendAdminMessageAction(formData: FormData) {
   redirect(`/admin/proposals/${proposalId}/messages`);
 }
 
-const editSchema = z.object({ proposalId: z.string().uuid(), title: z.string().trim().min(1).max(140), summary: z.string().trim().min(1).max(5000), format: z.string().trim().min(1).max(120), tentativeStartsAt: z.string().min(1), recruitmentDeadlineAt: z.string(), publicExpiresAt: z.string().min(1), organizerName: z.string().trim().min(1).max(120), participationMethod: z.string().trim().min(1).max(2000), visibility: z.enum(['public', 'unlisted']), moneyType: z.string().min(1), moneyDetails: z.string(), reasonCode: z.string().trim().min(1).max(80), reasonText: z.string().trim().min(1).max(2000) });
+const editSchema = z.object({ proposalId: z.string().uuid(), title: z.string().trim().min(1).max(140), summary: z.string().trim().min(1).max(5000), format: z.string().trim().min(1).max(120), tentativeStartsAt: z.string().min(1), recruitmentDeadlineAt: z.string(), publicExpiresAt: z.string().min(1), organizerName: z.string().trim().min(1).max(120), participationMethod: z.string().trim().min(1).max(2000), visibility: z.enum(['public', 'unlisted']), moneyType: moneyTypeSchema, moneyDetails: z.string(), reasonCode: z.string().trim().min(1).max(80), reasonText: z.string().trim().min(1).max(2000) });
 function toIso(value: string) { const date = new Date(value.includes('T') && !/[zZ]|[+-]\d\d:?\d\d$/.test(value) ? `${value}:00+09:00` : value); return Number.isNaN(date.valueOf()) ? null : date.toISOString(); }
 
 export async function adminUpdateProposalAction(formData: FormData) {

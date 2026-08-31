@@ -73,6 +73,12 @@ export function Footer() {
               <p className="mt-4 font-mono text-xs text-[#c8a45a]">
                 0はいくら集めても0。まずは1つの草活動から。
               </p>
+              <div className="mt-5 flex flex-wrap gap-x-4 gap-y-2 font-mono text-[11px] text-[rgba(240,237,232,0.55)]">
+                <Link href="/events" className="min-h-9 content-center hover:text-white">公開企画</Link>
+                <Link href="/terms" className="min-h-9 content-center hover:text-white">会員規約</Link>
+                <Link href="/disclaimer" className="min-h-9 content-center hover:text-white">免責事項</Link>
+                <Link href="/privacy" className="min-h-9 content-center hover:text-white">プライバシー</Link>
+              </div>
             </div>
           </div>
         </div>

@@ -30,7 +30,7 @@ export function Navbar() {
   const navItems = [
     { label: 'About', href: '#about' },
     { label: 'How It Works', href: '#philosophy' },
-    { label: 'Events', href: '#events' },
+    { label: 'Events', href: '/events' },
     { label: 'Activity Log', href: '#recent' },
   ];
 
