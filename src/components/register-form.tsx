@@ -1,11 +1,10 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
-import { createSupabaseBrowserClient } from '@/lib/supabase/browser';
-import { isSupabaseConfigured } from '@/lib/supabase/env';
+import { createAuthClient } from '@neondatabase/auth/next';
 
 export function RegisterForm() {
-  const configured = isSupabaseConfigured();
+  const configured = Boolean(process.env.NEXT_PUBLIC_NEON_AUTH_ENABLED === 'true');
   const [email, setEmail] = useState('');
   const [notice, setNotice] = useState<string | null>(null);
   const [isWorking, setIsWorking] = useState(false);
@@ -14,10 +13,10 @@ export function RegisterForm() {
     if (!configured) return;
     setIsWorking(true);
     setNotice(null);
-    const supabase = createSupabaseBrowserClient();
-    const { error } = await supabase.auth.signInWithOAuth({
+    const auth = createAuthClient();
+    const { error } = await auth.signIn.social({
       provider: 'google',
-      options: { redirectTo: `${window.location.origin}/auth/callback?next=/member/profile` },
+      callbackURL: '/member/profile',
     });
     if (error) {
       setNotice(`認証を開始できませんでした: ${error.message}`);
@@ -30,11 +29,8 @@ export function RegisterForm() {
     if (!configured || !email) return;
     setIsWorking(true);
     setNotice(null);
-    const supabase = createSupabaseBrowserClient();
-    const { error } = await supabase.auth.signInWithOtp({
-      email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback?next=/member/profile` },
-    });
+    const auth = createAuthClient();
+    const { error } = await auth.signIn.magicLink({ email, callbackURL: '/member/profile' });
     setNotice(error ? `メールを送信できませんでした: ${error.message}` : 'ログイン用リンクを送信しました。メールを開いて登録を続けてください。');
     setIsWorking(false);
   }

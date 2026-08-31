@@ -12,11 +12,16 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新のコミット: `cdcc92e docs: switch backend plan to Neon`
+- 最新のコミット: `536421c docs: record Neon integration handoff`
 - ビルド: `npm run build` が成功（P1/P2初期実装）
 - 最新デプロイ: `https://aiueo-9jdw9ju8c-rahisekos-projects.vercel.app`。`https://aiueo-lp.vercel.app`および`https://aiueo.kouheikosehira.com`へエイリアス設定済み
 
 ## 今回の作業（2026-08-31）
+
+- Supabaseの空き枠不足を受け、Vercel Native Neonの利用規約へ同意し、`neon-pink-bucket`を`aiueo-lp`へ接続。PostgresとNeon Authの環境値はDevelopment/Preview/Productionへ自動設定された。
+- Neon Authのサーバー用Cookie署名鍵を各環境にSecretとして設定。値はGit・画面・チャットへ出していない。
+- `@neondatabase/auth`、`pg`、Drizzle、Vercel DB接続ライブラリを追加し、`/api/auth/[...path]`とNeon Authのサーバー設定を追加。認可の正本をDAL/Server Action/Route Handlerへ置く方針を維持した。
+- Proxyは公開ページを認証依存にせず、保護操作ごとにセッションとロールを検証する構成へ整理。`npm run build`成功。
 
 - 下部の「運営のかかわり方」を更新。
 - AIueoは企画・参加・金銭の当事者ではないことを明記。
@@ -60,7 +65,8 @@
 ## 次にやること
 
 - Supabaseに空き枠がないため、新規Supabaseプロジェクトの作成は中止。Vercel Native Neon Postgres + Neon Auth + Vercel Cronへの切替受け入れ条件を3視点で確認し、VercelからNeonを接続する。既存のSupabase秘密値・消失ホストは再利用しない。
-- `npx vercel@latest integration add neon`を起動済み。VercelのNeon利用規約同意待ちのため、`https://vercel.com/rahisekos-projects/~/integrations/accept-terms/neon?source=cli`で所有者がAcceptした後、同一ターミナル処理を再開してDBをプロジェクトへ接続する。
+- Neon接続は完了。新規DBのpublic schemaは空であることを安全なread-only queryで確認済み。次にDrizzle schema/migrationを作成し、開発ブランチで検証後、会員・企画・管理・期限処理をSupabase RPCからサーバーDAL transactionへ移す。
+- Google OAuthのprovider設定、メールリンクの送信サービス/DNS認証、Neon Authの本番ドメイン許可は未設定。利用者向けの登録開始フラグは有効化しない。
 
 - P1 migrationを適用する前に、旧ホストが消失していることを確認し、既存Supabaseプロジェクトの正しい接続先・テーブル・バックアップを確定する。現状はmigration未適用。
 - P1のwrite RPC、管理者権限変更、監査原子性、RLS allow/deny DB直結テストを実装・検証する。service roleは期限Cronなどの限定用途に留める。

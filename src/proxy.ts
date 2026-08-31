@@ -1,15 +1,9 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { refreshSupabaseSession } from '@/lib/supabase/proxy';
 
-export async function proxy(request: NextRequest) {
-  // This only refreshes Supabase cookies. Every protected page, action, and
-  // route handler must independently verify claims and the database profile.
-  try {
-    return await refreshSupabaseSession(request);
-  } catch {
-    // Public pages remain available while infrastructure is being configured.
-    return NextResponse.next({ request });
-  }
+export function proxy(request: NextRequest) {
+  // Public routes must never depend on the auth provider. Protected pages,
+  // Server Actions and Route Handlers perform their own session/role checks.
+  return NextResponse.next({ request });
 }
 
 export const config = {

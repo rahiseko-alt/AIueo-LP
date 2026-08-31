@@ -1,8 +1,7 @@
 import 'server-only';
 
 import { redirect } from 'next/navigation';
-import { isSupabaseConfigured } from '@/lib/supabase/env';
-import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { neonAuth, isNeonAuthConfigured } from '@/lib/neon/auth';
 
 export type MemberProfile = {
   id: string;
@@ -19,36 +18,27 @@ export type AuthContext =
   | { kind: 'member'; userId: string; profile: MemberProfile };
 
 export async function getAuthContext(): Promise<AuthContext> {
-  if (!isSupabaseConfigured()) {
+  if (!isNeonAuthConfigured || !neonAuth) {
     return { kind: 'unconfigured' };
   }
 
-  const supabase = await createSupabaseServerClient();
-  const { data: claimData, error: claimsError } = await supabase.auth.getClaims();
-  const userId = typeof claimData?.claims?.sub === 'string' ? claimData.claims.sub : null;
+  const { data: session } = await neonAuth.getSession();
+  const userId = session?.user?.id;
 
-  if (claimsError || !userId) {
+  if (!userId) {
     return { kind: 'signed_out' };
   }
 
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id, role, status, public_name, collaboration_interest')
-    .eq('id', userId)
-    .maybeSingle();
-
-  if (error || !data) {
-    return { kind: 'profile_missing', userId };
-  }
-
-  return { kind: 'member', userId, profile: data as MemberProfile };
+  // The profile lookup is introduced with the Neon migration. Until that
+  // migration is applied, a signed-in user is intentionally kept out of writes.
+  return { kind: 'profile_missing', userId };
 }
 
 export async function requireActiveMember() {
   const context = await getAuthContext();
 
   if (context.kind !== 'member' || context.profile.status !== 'active') {
-    redirect('/register?next=/member');
+    redirect('/member/profile');
   }
 
   return context;
