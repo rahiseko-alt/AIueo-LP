@@ -70,6 +70,12 @@ export function Navbar() {
 
         {/* Right Action / Mobile Toggle */}
         <div className="flex items-center gap-2 sm:gap-4">
+          <a
+            href="mailto:info@kouheikosehira.com"
+            className="hidden min-h-[44px] items-center px-2 font-mono text-[11px] font-semibold tracking-[0.12em] text-[rgba(240,237,232,0.75)] uppercase transition-colors hover:text-[#c8a45a] xl:inline-flex"
+          >
+            Contact
+          </a>
           <Link
             href="#join"
             className="hidden sm:inline-flex min-h-[44px] items-center rounded border border-[rgba(200,164,90,0.3)] bg-[rgba(200,164,90,0.06)] px-4 py-2 font-mono text-[11px] font-semibold tracking-[0.16em] text-[#f0ede8] uppercase transition-all duration-200 hover:border-[#c8a45a] hover:bg-[#c8a45a] hover:text-[#080808]"
@@ -112,6 +118,7 @@ export function Navbar() {
               { label: 'Home', href: '#home' },
               ...navItems,
               { label: 'Join / Propose', href: '#join' },
+              { label: 'お問い合わせ', href: 'mailto:info@kouheikosehira.com' },
             ].map((item) => (
               <Link
                 key={item.label}

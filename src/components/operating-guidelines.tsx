@@ -75,6 +75,22 @@ export function OperatingGuidelines() {
         <p className="mt-10 border-t border-[rgba(240,237,232,0.08)] pt-5 font-mono text-[10px] leading-relaxed tracking-wide text-[rgba(240,237,232,0.4)] sm:text-xs">
           AIueoは、必要に応じて掲載内容・メンバー登録・企画の公開を見直し、非公開・削除・登録取消の措置を行うことがあります。利用前に、主催者が提示する個別の条件も必ず確認してください。
         </p>
+
+        <div className="mt-8 flex flex-col gap-4 border border-[rgba(200,164,90,0.35)] bg-[rgba(200,164,90,0.06)] p-5 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+          <div>
+            <p className="font-mono text-xs font-semibold tracking-[0.18em] text-[#c8a45a] uppercase">Contact</p>
+            <h3 className="mt-2 font-sans text-lg font-medium text-[#f0ede8]">お問い合わせ</h3>
+            <p className="mt-1 font-sans text-sm font-light text-[rgba(240,237,232,0.68)]">
+              掲載内容やAIueoについてのご連絡はこちらへ。
+            </p>
+          </div>
+          <a
+            href="mailto:info@kouheikosehira.com"
+            className="inline-flex min-h-[44px] w-fit items-center border-b border-[#c8a45a] py-2 font-mono text-sm font-semibold tracking-wide text-[#f0ede8] transition-colors hover:text-[#c8a45a]"
+          >
+            info@kouheikosehira.com
+          </a>
+        </div>
       </div>
     </section>
   );
