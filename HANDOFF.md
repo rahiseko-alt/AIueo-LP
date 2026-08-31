@@ -10,9 +10,9 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新の機能コミット: `a8cabca feat: add Kouhei Kosehira profile photo`
+- 最新の機能コミット: `fd092f4 fix: use only Japanese hero callout`
 - ビルド: `npm run build` が成功
-- 最新デプロイ: `dpl_D5Ps3oifaC7WuAGbDYwrCh5yaRBR`。本番URLで表示確認済み
+- 最新デプロイ: `dpl_4m2q2KFzi3M6wa23DiidtwRTSp6X`。本番URLで表示確認済み
 
 ## 今回の作業（2026-08-31）
 
@@ -29,6 +29,7 @@
 - トップ写真を女性講師のAI研修風景へ差し替え。`THIS WAY. TOGETHER.`を左上、AIueoロゴを中央に配置し、360px幅で顔・文字・ロゴが収まることを確認済み。
 - メンバー紹介のKouhei Kosehiraに、ユーザー提供のモノクロプロフィール写真を設定。
 - ヒーローの`TOGETHER.`を「この指とまれ、」へ変更し、中央ロゴを「仲間を集めるサービス / Aiueo」に変更。小さい説明文と大きいワードマークの2段構成にした。
+- ヒーローの英語`THIS WAY.`も削除し、呼びかけを「この指とまれ、」だけに整理。
 - 重複していた「企画フォーマット」と「アーカイブ」セクションを外し、進行中企画を横スクロールの1レールへ集約。
 - 並行監査を実施し、Aboutの写真カルーセル、メンバー紹介、匿名の声をホームから外した。ホームは「場の説明 → 使い方 → 進行中企画 → 実施ログ → 参加入口 → 運用」の順に整理。
 - ヘッダーとフッターから未表示セクションへのリンクを除去し、実在する導線だけに同期。
