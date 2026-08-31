@@ -12,7 +12,7 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新のコミット: `0cf0c39 feat: add membership foundation and registration docs`
+- 最新のコミット: `322cd43 docs: record membership foundation deployment`（P3実装はこのセッションで未コミット）
 - ビルド: `npm run build` が成功（P1/P2初期実装）
 - 最新デプロイ: `https://aiueo-9jdw9ju8c-rahisekos-projects.vercel.app`。`https://aiueo-lp.vercel.app`および`https://aiueo.kouheikosehira.com`へエイリアス設定済み
 
@@ -49,6 +49,8 @@
 - P1敵対レビューを実施し、公開企画ビューを`security_invoker`へ変更してRLS迂回を撤廃、匿名者は公開列だけを読めるよう最小列grantを設定。`audit_log`を更新・削除不能な追記専用トリガーにし、初期管理者付与はアプリ外の監査付きrunbookに限定した。
 - P2の初期実装として`/terms`、`/disclaimer`、`/privacy`、`/register`、`/auth/callback`、`/member`、`/member/profile`を追加。認証未接続時は会員登録の開始を明示的に止める。公開文書は保存期間の最終確定前であることを表示する。
 - 本番で`/register`と`/terms`を360px幅で確認。横スクロールはなく、認証未接続時はGoogleボタンが無効になり「準備中」と表示されることを確認済み。
+- 既存Vercel Productionの旧Supabase設定を秘密値非表示で照合したが、ホスト`uirqaycaainrzvubxiub.supabase.co`はDNS解決に失敗。取得した一時環境ファイルは直ちに削除し、旧設定の上書きやmigration適用は行っていない。
+- P3として、`complete_member_profile` RPC（確認済みメール、18歳確認、現行3文書のID、公開名・協力内容を同一transactionで検証しconsents保存・active化・audit追記）、プロフィール完了フォーム、停止/退会の読取専用状態ページを追加。`npm run build`成功。
 - Vercel Productionには旧Vite形式のSupabase変数のみを検出。既存Supabaseデータの有無を確認するまで、環境変数・DBの上書きやmigration適用はしない。開発・Preview用Supabase変数は未設定。
 - 重複していた「企画フォーマット」と「アーカイブ」セクションを外し、進行中企画を横スクロールの1レールへ集約。
 - 並行監査を実施し、Aboutの写真カルーセル、メンバー紹介、匿名の声をホームから外した。ホームは「場の説明 → 使い方 → 進行中企画 → 実施ログ → 参加入口 → 運用」の順に整理。
@@ -57,11 +59,12 @@
 
 ## 次にやること
 
-- P1 migrationを適用する前に、既存Supabaseプロジェクト・テーブルを確認し、バックアップを取り、接続先が本番で正しいことを確認する。
+- P1 migrationを適用する前に、旧ホストが消失していることを確認し、既存Supabaseプロジェクトの正しい接続先・テーブル・バックアップを確定する。現状はmigration未適用。
 - P1のwrite RPC、管理者権限変更、監査原子性、RLS allow/deny DB直結テストを実装・検証する。service roleは期限Cronなどの限定用途に留める。
 - P3でプロフィール完了、3文書の版・本文ハッシュ・同意日時の記録、確認済みメールだけの`active`化を実装する。
 - Supabase AuthのGoogle OAuth/Magic Link、Vercelの`NEXT_PUBLIC_SUPABASE_*`、認証済み送信ドメイン/SMTPは実アカウント設定が必要。PreviewとProductionは必ず別設定にする。
 - 規約・免責事項・プライバシーポリシーの保存期間を最終化し、必要に応じて専門家の確認を受ける。
+- P3の権限・運用/法務敵対レビューは利用上限で再試行できず未完了。UXレビューの指摘は反映済みだが、P3完了・本番認証有効化・E2E合格とは扱わない。
 
 ## 注意点
 

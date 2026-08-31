@@ -311,10 +311,10 @@ create policy "members read their own profile"
 on public.profiles for select to authenticated
 using (id = auth.uid() or public.is_current_admin());
 
-create policy "members update their safe profile fields"
+create policy "active members update their safe profile fields"
 on public.profiles for update to authenticated
-using (id = auth.uid() or public.is_current_admin())
-with check (id = auth.uid() or public.is_current_admin());
+using ((id = auth.uid() and status in ('pending_profile', 'active')) or public.is_current_admin())
+with check ((id = auth.uid() and status in ('pending_profile', 'active')) or public.is_current_admin());
 
 create policy "members read their own consent history"
 on public.consents for select to authenticated
