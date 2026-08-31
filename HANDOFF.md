@@ -12,7 +12,7 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新のコミット: `2bca2e7 docs: record external Supabase reconnection gate`
+- 最新のコミット: `cdcc92e docs: switch backend plan to Neon`
 - ビルド: `npm run build` が成功（P1/P2初期実装）
 - 最新デプロイ: `https://aiueo-9jdw9ju8c-rahisekos-projects.vercel.app`。`https://aiueo-lp.vercel.app`および`https://aiueo.kouheikosehira.com`へエイリアス設定済み
 
