@@ -19,8 +19,6 @@ export function Hero({ activity }: HeroProps) {
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/65 via-black/15 to-black/60 sm:from-black/45 sm:via-black/5 sm:to-black/55" />
       <div className="pointer-events-none absolute left-5 top-[max(2rem,env(safe-area-inset-top))] text-left sm:left-8 sm:top-8 lg:left-[8%] lg:top-[10%]">
         <h1 className="font-mono text-[clamp(2.1rem,9vw,4.5rem)] font-medium leading-[0.88] tracking-[-0.06em] text-[#f0ede8] drop-shadow-[0_4px_22px_rgba(0,0,0,0.8)] lg:text-[clamp(4rem,6.7vw,6rem)]">
-          THIS WAY.
-          <br />
           <span className="text-[#c8a45a]">この指とまれ、</span>
         </h1>
       </div>
