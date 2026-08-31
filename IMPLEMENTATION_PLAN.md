@@ -1,7 +1,7 @@
 # AIueo 会員・企画・管理機能 実装計画
 
 最終更新: 2026-08-31  
-計画状態: **Gate 1（受け入れ条件の提案・敵対検証完了、ユーザー承認待ち）**
+計画状態: **Gate 1実行承認済み。P1（認証・権限基盤）とP2（公開文書・登録導線）を並行実装中**
 
 この計画は、実装のたびに読む常設の進捗台帳である。仕様の正本は`MEMBERSHIP_FEATURE_SPEC.md`、セッションの正本は`HANDOFF.md`とする。3ファイルは作業開始時にこの順で確認し、終了時にすべて更新する。
 
@@ -68,8 +68,8 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | ID | フェーズ | 依存 | 受け入れ条件（要約） | 状態 |
 | --- | --- | --- | --- | --- |
 | P0 | 運用プロトコル | なし | 開始時必読、終了時の計画/引継ぎ更新、実装ゲートを`AGENTS.md`へ固定 | 完了 |
-| P1 | Supabase基盤 | G1 | 開発/本番環境分離、Auth SSR、DB migration、RLS/grant、監査ログ、権限テスト | 未着手 |
-| P2 | 公開文書・登録導線 | G1 | `/terms`、`/disclaimer`、`/privacy`、`/register`に同意と用途表示を実装 | 未着手 |
+| P1 | Supabase基盤 | G1 | 開発/本番環境分離、Auth SSR、DB migration、RLS/grant、監査ログ、権限テスト | 実装中（既存DBの確認・バックアップ前のため未適用） |
+| P2 | 公開文書・登録導線 | G1 | `/terms`、`/disclaimer`、`/privacy`、`/register`に同意と用途表示を実装 | 実装中 |
 | P3 | 会員機能 | P1 + P2 | 外部認証、即時`active`化、同意履歴、自己プロフィール、停止時の読取専用アクセス | 未着手 |
 | P4 | 企画機能 | P1 + P3 | 必須入力、金銭条件、状態遷移、公開/再掲載、公開企画ページ | 未着手 |
 | P5 | 管理・連絡・通報 | P1 + P4 | 全企画の管理権限、企画別メッセージ、通報、理由/差分/監査ログ | 未着手 |
@@ -101,6 +101,9 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | 2026-08-31 | 常設計画・セッション運用・実装ゲートを作成 | P0完了、G1待ち | 本ファイル、`AGENTS.md` |
 | 2026-08-31 | G1の受け入れ条件を作成し、権限・利用者体験・運用/法務の3視点で敵対検証 | ユーザー承認待ち | `GATE_1_ACCEPTANCE_PROPOSAL.md` |
 | 2026-08-31 | Vercel環境変数を読取確認。旧Vite形式のSupabase本番変数のみを検出 | 接続先確認待ち。既存DBに変更なし | `GATE_1_ACCEPTANCE_PROPOSAL.md` |
+| 2026-08-31 | ユーザーの「始めろ。計画の達成まで行え」をGate 1の実行承認として記録 | P1/P2開始 | 会話記録、`GATE_1_ACCEPTANCE_PROPOSAL.md` |
+| 2026-08-31 | P1敵対レビューを反映。公開ビューのRLS迂回を撤廃、監査ログを追記専用、管理者bootstrap runbook、Next専用環境変数を追加 | migration未適用・P1継続 | `supabase/migrations/202608310001_aiueo_foundation.sql`、`docs/ADMIN_BOOTSTRAP_RUNBOOK.md` |
+| 2026-08-31 | P2の公開文書・登録画面・OAuth callback・サーバー認可DALの初期実装 | P2継続 | `src/app/{terms,disclaimer,privacy,register,auth,member}` |
 
 ## セッション終了チェック
 

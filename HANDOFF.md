@@ -12,7 +12,7 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新の機能コミット: `0c6fd8c refactor: simplify contact page mail action`
+- 最新のコミット: `00d323d docs: record Supabase setup prerequisites`（このセッションのP1/P2実装は未コミット）
 - ビルド: `npm run build` が成功
 - 最新デプロイ: `https://aiueo-47k7ql6ws-rahisekos-projects.vercel.app`。本番URLへエイリアス設定済み
 
@@ -44,7 +44,10 @@
 - 会員規約・免責事項は3視点で敵対検証を実施。安全通報、措置の通知・監査ログ、版履歴、異議導線、金銭表示、権限分離、通知・保存方針を公開前の必須設計として`MEMBERSHIP_FEATURE_SPEC.md`へ追加した。
 - `IMPLEMENTATION_PLAN.md`を新設。公式のNext.js/Supabase情報に基づき、受け入れ条件→3視点の敵対検証→ユーザー承認→依存関係を満たす並列実装→横断受入の順に固定した。
 - `AGENTS.md`と本ファイルに、セッション開始時の計画必読、終了時の計画進捗更新、実装前のPlan mode（または`update_plan`）・敵対検証・ユーザー承認を必須化した。
-- Gate 1の受け入れ条件を`GATE_1_ACCEPTANCE_PROPOSAL.md`に作成し、権限・利用者体験・運用/法務の3視点で敵対検証を完了。現在はユーザー承認待ちであり、会員・企画・管理機能の実装は未着手。
+- Gate 1の受け入れ条件を`GATE_1_ACCEPTANCE_PROPOSAL.md`に作成し、権限・利用者体験・運用/法務の3視点で敵対検証を完了。ユーザーの「始めろ。計画の達成まで行え」を実行承認として記録し、P1/P2を開始。
+- P1の初期実装として、`@supabase/ssr`のcookie SSRクライアント、session refresh専用Proxy、サーバー側認可DAL、未適用のSupabase migrationを追加。既存のVite環境変数へのfallbackは廃止し、Next.js用の値だけを許容する`.env.example`を追加。
+- P1敵対レビューを実施し、公開企画ビューを`security_invoker`へ変更してRLS迂回を撤廃、匿名者は公開列だけを読めるよう最小列grantを設定。`audit_log`を更新・削除不能な追記専用トリガーにし、初期管理者付与はアプリ外の監査付きrunbookに限定した。
+- P2の初期実装として`/terms`、`/disclaimer`、`/privacy`、`/register`、`/auth/callback`、`/member`、`/member/profile`を追加。認証未接続時は会員登録の開始を明示的に止める。公開文書は保存期間の最終確定前であることを表示する。
 - Vercel Productionには旧Vite形式のSupabase変数のみを検出。既存Supabaseデータの有無を確認するまで、環境変数・DBの上書きやmigration適用はしない。開発・Preview用Supabase変数は未設定。
 - 重複していた「企画フォーマット」と「アーカイブ」セクションを外し、進行中企画を横スクロールの1レールへ集約。
 - 並行監査を実施し、Aboutの写真カルーセル、メンバー紹介、匿名の声をホームから外した。ホームは「場の説明 → 使い方 → 進行中企画 → 実施ログ → 参加入口 → 運用」の順に整理。
@@ -53,9 +56,11 @@
 
 ## 次にやること
 
-- `GATE_1_ACCEPTANCE_PROPOSAL.md`のG1-01〜G1-08（認証、送信者、著作権、年齢、自動除外、管理者編集、開催候補日時、保存期間）をユーザーと確定する。確定前に会員・企画・管理機能の実装を始めない。
-- Gate 1確定後、受け入れ条件の敵対検証を実施し、ユーザー承認を受けてから依存関係に沿ってP1以降を並列実装する。
-- 規約・免責事項・プライバシーポリシーの最終本文を弁護士確認後に公開する。
+- P1 migrationを適用する前に、既存Supabaseプロジェクト・テーブルを確認し、バックアップを取り、接続先が本番で正しいことを確認する。
+- P1のwrite RPC、管理者権限変更、監査原子性、RLS allow/deny DB直結テストを実装・検証する。service roleは期限Cronなどの限定用途に留める。
+- P3でプロフィール完了、3文書の版・本文ハッシュ・同意日時の記録、確認済みメールだけの`active`化を実装する。
+- Supabase AuthのGoogle OAuth/Magic Link、Vercelの`NEXT_PUBLIC_SUPABASE_*`、認証済み送信ドメイン/SMTPは実アカウント設定が必要。PreviewとProductionは必ず別設定にする。
+- 規約・免責事項・プライバシーポリシーの保存期間を最終化し、必要に応じて専門家の確認を受ける。
 
 ## 注意点
 
