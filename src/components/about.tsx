@@ -43,10 +43,10 @@ export function About() {
                 X (Twitter)
               </a>
               <a
-                href="mailto:rahiseko@gmail.com"
+                href="mailto:info@kouheikosehira.com"
                 className="underline hover:text-zinc-950 dark:hover:text-white"
               >
-                rahiseko@gmail.com
+                info@kouheikosehira.com
               </a>
             </div>
           </div>

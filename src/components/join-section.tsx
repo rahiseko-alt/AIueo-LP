@@ -7,7 +7,7 @@ export function JoinSection() {
       title: '「こういうのやりたい！」企画を持ち込む',
       description: '主婦向け講座、子ども向け教室、勉強会、開発企画など、自分のやりたい企画を同盟に提案・募集。',
       action: '企画を提案する',
-      href: 'mailto:rahiseko@gmail.com?subject=【AIueo】新しい企画・イベントの持ち込み',
+      href: 'mailto:info@kouheikosehira.com?subject=【AIueo】新しい企画・イベントの持ち込み',
     },
     {
       icon: <Users className="h-5 w-5 text-[#c8a45a]" />,
@@ -28,7 +28,7 @@ export function JoinSection() {
       title: '会場・機材・案件を提供する',
       description: '公民館、コワーキング、店舗の会場提供や、AI開発の相談・依頼はこちらから。',
       action: '連携・相談する',
-      href: 'mailto:rahiseko@gmail.com?subject=【AIueo】会場・リソース提供のご相談',
+      href: 'mailto:info@kouheikosehira.com?subject=【AIueo】会場・リソース提供のご相談',
     },
   ];
 

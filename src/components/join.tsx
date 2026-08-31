@@ -12,7 +12,7 @@ export function Join() {
       title: '一緒に企画・共催する',
       description: 'テーマを持ち寄り、新しい実験やワークショップを共催する。',
       action: '企画を相談する',
-      href: 'mailto:contact@example.com?subject=企画・共催のご相談',
+      href: 'mailto:info@kouheikosehira.com?subject=企画・共催のご相談',
     },
     {
       title: 'プロジェクトに参加する',
@@ -24,7 +24,7 @@ export function Join() {
       title: '会場・リソースを提供する',
       description: '開催スペースやツール・環境などの提供・スポンサー連携。',
       action: '連携を問い合わせる',
-      href: 'mailto:contact@example.com?subject=会場・リソース提供について',
+      href: 'mailto:info@kouheikosehira.com?subject=会場・リソース提供について',
     },
   ];
 

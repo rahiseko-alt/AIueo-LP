@@ -62,10 +62,10 @@ export function Footer() {
                 Discord Server
               </a>
               <a
-                href="mailto:rahiseko@gmail.com"
+                href="mailto:info@kouheikosehira.com"
                 className="flex min-h-[36px] items-center py-1 break-all transition-colors hover:text-white"
               >
-                rahiseko@gmail.com
+                info@kouheikosehira.com
               </a>
             </div>
           </div>
