@@ -70,6 +70,7 @@
 - P4/P5のSQLは未接続のためPostgres直結テスト未実施。公開前にmigration適用、RLS allow/deny、有限状態遷移、管理者MFA、通知失敗、通報の匿名/認証両経路をテストする。
 - P6として、公開期限切れ・候補日時3日前の自動`auto_hidden`・7日前通知をJSTで処理する`process_proposal_deadlines`、通知outbox、sending状態と15分後再試行、Resend互換Edge Function、Cron設定runbookを追加。秘密値はコードに含めていない。
 - P6のEdge FunctionはSupabaseへ未デプロイ。旧SupabaseホストがDNS解決できないため、正しいプロジェクト確定、バックアップ、Secrets登録、Cron作成が必要。
+- Supabase Edge FunctionはDeno型のためNext.jsの`tsconfig`検査対象から除外。Vercel本体の型検査とEdge Functionの実行環境を分離した。
 
 ## 注意点
 
