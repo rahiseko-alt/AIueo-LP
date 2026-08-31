@@ -112,6 +112,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | 2026-09-01 | VercelのNext.jsビルドがDeno用Edge Functionを型検査しないよう`tsconfig`の対象を分離 | ローカルビルド通過。Vercel再デプロイ待ち | `tsconfig.json` |
 | 2026-09-01 | P6のoutbox再試行・RLS受入マトリクスを追加し、ヘッダー/フッター/参加導線を公開企画ページへ同期 | ローカルビルド通過。SQL/Edge未接続 | `docs/RLS_TEST_MATRIX.md` |
 | 2026-09-01 | 管理/通報/メッセージを含む最新UIをVercel本番へ反映。公開ページは200、未認証の管理・企画登録は307拒否を確認 | Vercel本体は反映済み。Supabase/Edge/Cronは未接続 | `https://aiueo-91l44wley-rahisekos-projects.vercel.app`、`https://aiueo-lp.vercel.app` |
+| 2026-09-01 | 旧SupabaseホストがDNS解決不能であることを確認し、DB適用・Edge/Cron・認証有効化の外部再接続条件を明文化 | P7未完了。正しいプロジェクトと安全なSecrets設定が必要 | `HANDOFF.md`、`docs/ADMIN_BOOTSTRAP_RUNBOOK.md`、`docs/NOTIFICATION_CRON_RUNBOOK.md` |
 
 ## セッション終了チェック
 
