@@ -72,8 +72,8 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | P2 | 公開文書・登録導線 | G1 | `/terms`、`/disclaimer`、`/privacy`、`/register`に同意と用途表示を実装 | 完了（外部認証接続待ち） |
 | P3 | 会員機能 | P1 + P2 | 外部認証、即時`active`化、同意履歴、自己プロフィール、停止時の読取専用アクセス | 完了（DB未適用・E2E未実施） |
 | P4 | 企画機能 | P1 + P3 | 必須入力、金銭条件、状態遷移、公開/再掲載、公開企画ページ | 完了（DB未適用・E2E未実施） |
-| P5 | 管理・連絡・通報 | P1 + P4 | 全企画の管理権限、企画別メッセージ、通報、理由/差分/監査ログ | 実装中（DB未適用・本番未反映） |
-| P6 | 通知・期限処理 | P1 + P4 + C | 7日前通知、3日前`auto_hidden`、JST判定、重複送信防止、配信失敗記録 | 未着手 |
+| P5 | 管理・連絡・通報 | P1 + P4 | 全企画の管理権限、企画別メッセージ、通報、理由/差分/監査ログ | 完了（DB未適用・E2E未実施） |
+| P6 | 通知・期限処理 | P1 + P4 + C | 7日前通知、3日前`auto_hidden`、JST判定、重複送信防止、配信失敗記録 | 実装中（Edge Function未デプロイ） |
 | P7 | 横断受入・本番 | P2–P6 | 3視点の敵対検証、RLS許可/拒否、E2E、360px/768px/1280px確認、Vercel本番確認 | 未着手 |
 
 ## データ・権限の実装境界
@@ -108,6 +108,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | 2026-09-01 | P3のプロフィール完了RPC、現行規約3文書の同意、確認済みメール/18歳確認、停止・退会の読取専用導線を実装 | ビルド通過。migration未適用、P3敵対レビューはUXのみ完了 | `supabase/migrations/202608310002_member_activation.sql`、`src/app/member/profile` |
 | 2026-09-01 | 既存ProductionのSupabase接続先を値非表示で照合。旧ホストDNS解決失敗を確認し、秘密ファイルを削除 | 接続先の再設定または新規プロジェクト確定待ち | `HANDOFF.md`、Vercel env read-only check |
 | 2026-09-01 | P4の企画ワークフローとP5の管理・通報・メッセージRPC/UIを実装。全書込はactorをDB側で導出し、理由・版履歴・監査・通知を同一処理に束ねた | ローカルビルド通過。SQLは接続不能なためDB直結未検証 | `supabase/migrations/202608310003_proposal_workflows.sql`、`202608310004_admin_and_messages.sql`、`src/app/admin` |
+| 2026-09-01 | P6のJST期限判定RPC、冪等outbox、sending/failed再試行状態、Secret認証Edge Function、Cron runbookを実装 | ローカルソース確認済み。Supabase接続先消失のためデプロイ・実時刻テスト未実施 | `supabase/migrations/202608310005_deadline_notifications.sql`、`supabase/functions/notify-deadlines`、`docs/NOTIFICATION_CRON_RUNBOOK.md` |
 
 ## セッション終了チェック
 

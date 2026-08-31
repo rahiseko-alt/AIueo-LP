@@ -12,7 +12,7 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新のコミット: `f207270 feat: add atomic member activation flow`（P4/P5実装はこのセッションで未コミット）
+- 最新のコミット: `7ea1c35 feat: add admin moderation and messaging`（P6実装はこのセッションで未コミット）
 - ビルド: `npm run build` が成功（P1/P2初期実装）
 - 最新デプロイ: `https://aiueo-9jdw9ju8c-rahisekos-projects.vercel.app`。`https://aiueo-lp.vercel.app`および`https://aiueo.kouheikosehira.com`へエイリアス設定済み
 
@@ -68,6 +68,8 @@
 - P4として、企画者向けの必須項目フォーム、金銭条件・公開前確認、下書き/公開、開催決定・満席・終了・中止、公開一覧・詳細・通報導線を追加。`save_proposal`、`publish_proposal`、`set_proposal_event_status`はactorとownerをDB側で導出する。
 - P5として、`/admin`、`/admin/proposals`、`/admin/members`、`/admin/moderation`、企画別メッセージ画面と管理RPCを追加。管理者の状態変更・全項目編集・会員停止/取消・通報処理は理由、版履歴、措置記録、通知、監査を同一transactionで作成する。
 - P4/P5のSQLは未接続のためPostgres直結テスト未実施。公開前にmigration適用、RLS allow/deny、有限状態遷移、管理者MFA、通知失敗、通報の匿名/認証両経路をテストする。
+- P6として、公開期限切れ・候補日時3日前の自動`auto_hidden`・7日前通知をJSTで処理する`process_proposal_deadlines`、通知outbox、sending状態と15分後再試行、Resend互換Edge Function、Cron設定runbookを追加。秘密値はコードに含めていない。
+- P6のEdge FunctionはSupabaseへ未デプロイ。旧SupabaseホストがDNS解決できないため、正しいプロジェクト確定、バックアップ、Secrets登録、Cron作成が必要。
 
 ## 注意点
 
