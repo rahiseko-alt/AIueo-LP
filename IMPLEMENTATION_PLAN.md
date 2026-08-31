@@ -104,6 +104,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | 2026-08-31 | ユーザーの「始めろ。計画の達成まで行え」をGate 1の実行承認として記録 | P1/P2開始 | 会話記録、`GATE_1_ACCEPTANCE_PROPOSAL.md` |
 | 2026-08-31 | P1敵対レビューを反映。公開ビューのRLS迂回を撤廃、監査ログを追記専用、管理者bootstrap runbook、Next専用環境変数を追加 | migration未適用・P1継続 | `supabase/migrations/202608310001_aiueo_foundation.sql`、`docs/ADMIN_BOOTSTRAP_RUNBOOK.md` |
 | 2026-08-31 | P2の公開文書・登録画面・OAuth callback・サーバー認可DALの初期実装 | P2継続 | `src/app/{terms,disclaimer,privacy,register,auth,member}` |
+| 2026-08-31 | P1/P2初期実装をVercel Productionへデプロイし、360px幅の`/register`と`/terms`を実機相当表示で確認 | 本番反映済み。認証接続・DB適用は未実施 | `https://aiueo-9jdw9ju8c-rahisekos-projects.vercel.app` |
 
 ## セッション終了チェック
 

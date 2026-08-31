@@ -13,8 +13,8 @@
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
 - 最新のコミット: `0cf0c39 feat: add membership foundation and registration docs`
-- ビルド: `npm run build` が成功
-- 最新デプロイ: `https://aiueo-47k7ql6ws-rahisekos-projects.vercel.app`。本番URLへエイリアス設定済み
+- ビルド: `npm run build` が成功（P1/P2初期実装）
+- 最新デプロイ: `https://aiueo-9jdw9ju8c-rahisekos-projects.vercel.app`。`https://aiueo-lp.vercel.app`および`https://aiueo.kouheikosehira.com`へエイリアス設定済み
 
 ## 今回の作業（2026-08-31）
 
@@ -48,6 +48,7 @@
 - P1の初期実装として、`@supabase/ssr`のcookie SSRクライアント、session refresh専用Proxy、サーバー側認可DAL、未適用のSupabase migrationを追加。既存のVite環境変数へのfallbackは廃止し、Next.js用の値だけを許容する`.env.example`を追加。
 - P1敵対レビューを実施し、公開企画ビューを`security_invoker`へ変更してRLS迂回を撤廃、匿名者は公開列だけを読めるよう最小列grantを設定。`audit_log`を更新・削除不能な追記専用トリガーにし、初期管理者付与はアプリ外の監査付きrunbookに限定した。
 - P2の初期実装として`/terms`、`/disclaimer`、`/privacy`、`/register`、`/auth/callback`、`/member`、`/member/profile`を追加。認証未接続時は会員登録の開始を明示的に止める。公開文書は保存期間の最終確定前であることを表示する。
+- 本番で`/register`と`/terms`を360px幅で確認。横スクロールはなく、認証未接続時はGoogleボタンが無効になり「準備中」と表示されることを確認済み。
 - Vercel Productionには旧Vite形式のSupabase変数のみを検出。既存Supabaseデータの有無を確認するまで、環境変数・DBの上書きやmigration適用はしない。開発・Preview用Supabase変数は未設定。
 - 重複していた「企画フォーマット」と「アーカイブ」セクションを外し、進行中企画を横スクロールの1レールへ集約。
 - 並行監査を実施し、Aboutの写真カルーセル、メンバー紹介、匿名の声をホームから外した。ホームは「場の説明 → 使い方 → 進行中企画 → 実施ログ → 参加入口 → 運用」の順に整理。
