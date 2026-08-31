@@ -12,7 +12,7 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新のコミット: `dada62b docs: record admin and deadline deployment`
+- 最新のコミット: `2bca2e7 docs: record external Supabase reconnection gate`
 - ビルド: `npm run build` が成功（P1/P2初期実装）
 - 最新デプロイ: `https://aiueo-9jdw9ju8c-rahisekos-projects.vercel.app`。`https://aiueo-lp.vercel.app`および`https://aiueo.kouheikosehira.com`へエイリアス設定済み
 
@@ -58,6 +58,9 @@
 - ユーザー指示によりメンバー紹介をホームへ復帰（4名表示を本番確認済み）。
 
 ## 次にやること
+
+- Supabaseに空き枠がないため、新規Supabaseプロジェクトの作成は中止。Vercel Native Neon Postgres + Neon Auth + Vercel Cronへの切替受け入れ条件を3視点で確認し、VercelからNeonを接続する。既存のSupabase秘密値・消失ホストは再利用しない。
+- `npx vercel@latest integration add neon`を起動済み。VercelのNeon利用規約同意待ちのため、`https://vercel.com/rahisekos-projects/~/integrations/accept-terms/neon?source=cli`で所有者がAcceptした後、同一ターミナル処理を再開してDBをプロジェクトへ接続する。
 
 - P1 migrationを適用する前に、旧ホストが消失していることを確認し、既存Supabaseプロジェクトの正しい接続先・テーブル・バックアップを確定する。現状はmigration未適用。
 - P1のwrite RPC、管理者権限変更、監査原子性、RLS allow/deny DB直結テストを実装・検証する。service roleは期限Cronなどの限定用途に留める。

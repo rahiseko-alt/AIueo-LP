@@ -1,7 +1,7 @@
 # AIueo 会員・企画・管理機能 実装計画
 
 最終更新: 2026-09-01  
-計画状態: **Gate 1実行承認済み。P1（認証・権限基盤）とP2（公開文書・登録導線）を並行実装中**
+計画状態: **Supabaseの利用枠不足により、P1の実基盤をVercel Native Neon Postgres + Neon Authへ切替評価中。公開UIは稼働中。**
 
 この計画は、実装のたびに読む常設の進捗台帳である。仕様の正本は`MEMBERSHIP_FEATURE_SPEC.md`、セッションの正本は`HANDOFF.md`とする。3ファイルは作業開始時にこの順で確認し、終了時にすべて更新する。
 
@@ -21,15 +21,16 @@
 - 企画者は下書き、公開、中止、開催決定、満席、終了を自走する。管理者は全企画への編集・状態変更・非公開・削除権限を持つ。
 - 期限の7日前に未確定企画へ注意メール、3日前に未確定なら公開から自動除外する。
 - AIueoは決済・参加申込の当事者にならない。参加方法・金銭条件は企画者が明示する。
-- 基盤はNext.js App Router、Vercel、Supabase Auth + Postgresを採用する。
+- 基盤はNext.js App Router、Vercel、Vercel Native Neon Postgres + Neon Authへ切り替える。Supabaseへの新規接続・既存秘密値の再利用は行わない。
 
 ## 公式情報に基づく技術方針
 
 - Next.jsの認可はUIの表示制御だけに依存せず、データアクセス層、Route Handler、Server Actionで毎回検証する。[Next.js Authentication](https://nextjs.org/docs/app/guides/authentication)
-- Next.jsのcookieベースSSR認証には`@supabase/ssr`を使う。旧`auth-helpers`は採用しない。[Supabase SSR client](https://supabase.com/docs/guides/auth/server-side/creating-a-client?framework=nextjs&queryGroups=framework)
-- 公開スキーマの各テーブル/ビューでRLSと最小権限のgrantを設定し、操作別の許可・拒否テストを作成する。[Supabase RLS](https://supabase.com/docs/guides/database/postgres/row-level-security)
-- 期限判定はSupabase CronからEdge Functionを定期実行し、秘密情報はVault/Secretsで扱う。[Supabase scheduling](https://supabase.com/docs/guides/functions/schedule-functions)
-- 認証メールは本番用SMTPが必須。通知メールはEdge Function＋送信サービスで送り、ドメイン認証と送信ログを持つ。[Supabase custom SMTP](https://supabase.com/docs/guides/auth/auth-smtp) / [Edge Functions email](https://supabase.com/docs/guides/functions/examples/send-emails)
+- NeonはVercel Marketplaceから接続でき、DB接続値をVercelプロジェクトへ注入できる。[Vercel Postgres](https://vercel.com/docs/postgres) / [Neon for Vercel](https://vercel.com/marketplace/neon)
+- 認証はNeon Authを使い、Next.jsサーバー側でセッションを取得・検証する。利用者・セッション情報はNeon Postgresに保持される。[Neon Auth](https://neon.com/docs/auth/migrate/from-auth-v0.1)
+- DBアクセスはサーバー側DALのみとし、ロール・所有者・状態遷移をtransactionで検証する。Postgresのテーブル権限を最小化し、アプリ用DB接続文字列をクライアントへ送らない。
+- 期限判定はVercel CronからRoute Handlerを日次実行する。Hobbyの実行は日1回かつ最大約59分の揺れがあるため、期限処理は「JST日付で一度だけ」の冪等処理にする。[Vercel Cronの制限](https://vercel.com/docs/cron-jobs/usage-and-pricing)
+- 認証/通知メールは認証済み送信ドメインを使い、送信ログと失敗再試行を持つ。
 - 非同期Server Componentを含む主要フローはE2E中心で検証する。[Next.js Testing](https://nextjs.org/docs/app/guides/testing)
 
 ## Gate 1: 実装前にユーザー承認が必要な項目
@@ -49,7 +50,7 @@
 
 ```text
 Gate 1（受け入れ条件・敵対検証・ユーザー承認）
- ├─ A. 基盤: Supabase/Auth/DB/RLS/監査ログ
+ ├─ A. 基盤: Neon Auth/Postgres/サーバーDAL/監査ログ
  ├─ B. 公開文書: 規約・免責・プライバシー・問い合わせ
  └─ C. 送信基盤: 送信ドメイン・SMTP/メールサービス
       │
@@ -68,7 +69,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | ID | フェーズ | 依存 | 受け入れ条件（要約） | 状態 |
 | --- | --- | --- | --- | --- |
 | P0 | 運用プロトコル | なし | 開始時必読、終了時の計画/引継ぎ更新、実装ゲートを`AGENTS.md`へ固定 | 完了 |
-| P1 | Supabase基盤 | G1 | 開発/本番環境分離、Auth SSR、DB migration、RLS/grant、監査ログ、権限テスト | 実装中（既存DBの確認・バックアップ前のため未適用） |
+| P1 | Neon基盤への移行 | G1 | 開発/本番環境分離、Auth SSR、DB migration、サーバーDAL、監査ログ、権限テスト | 切替評価中（Vercel Native Neonの接続待ち） |
 | P2 | 公開文書・登録導線 | G1 | `/terms`、`/disclaimer`、`/privacy`、`/register`に同意と用途表示を実装 | 完了（外部認証接続待ち） |
 | P3 | 会員機能 | P1 + P2 | 外部認証、即時`active`化、同意履歴、自己プロフィール、停止時の読取専用アクセス | 完了（DB未適用・E2E未実施） |
 | P4 | 企画機能 | P1 + P3 | 必須入力、金銭条件、状態遷移、公開/再掲載、公開企画ページ | 完了（DB未適用・E2E未実施） |
@@ -113,6 +114,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | 2026-09-01 | P6のoutbox再試行・RLS受入マトリクスを追加し、ヘッダー/フッター/参加導線を公開企画ページへ同期 | ローカルビルド通過。SQL/Edge未接続 | `docs/RLS_TEST_MATRIX.md` |
 | 2026-09-01 | 管理/通報/メッセージを含む最新UIをVercel本番へ反映。公開ページは200、未認証の管理・企画登録は307拒否を確認 | Vercel本体は反映済み。Supabase/Edge/Cronは未接続 | `https://aiueo-91l44wley-rahisekos-projects.vercel.app`、`https://aiueo-lp.vercel.app` |
 | 2026-09-01 | 旧SupabaseホストがDNS解決不能であることを確認し、DB適用・Edge/Cron・認証有効化の外部再接続条件を明文化 | P7未完了。正しいプロジェクトと安全なSecrets設定が必要 | `HANDOFF.md`、`docs/ADMIN_BOOTSTRAP_RUNBOOK.md`、`docs/NOTIFICATION_CRON_RUNBOOK.md` |
+| 2026-09-01 | Supabaseの空き枠不足を受け、Vercel Native Neon Postgres + Neon Auth + Vercel Cronへ切替。CLIでNeon連携を開始 | 利用規約同意待ち。DB・認証・通知の移行は同意後に開始 | `HANDOFF.md`、Vercel Neon Integration |
 
 ## セッション終了チェック
 
