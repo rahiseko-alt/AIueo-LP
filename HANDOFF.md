@@ -12,7 +12,7 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新のコミット: `00d323d docs: record Supabase setup prerequisites`（このセッションのP1/P2実装は未コミット）
+- 最新のコミット: `0cf0c39 feat: add membership foundation and registration docs`
 - ビルド: `npm run build` が成功
 - 最新デプロイ: `https://aiueo-47k7ql6ws-rahisekos-projects.vercel.app`。本番URLへエイリアス設定済み
 
