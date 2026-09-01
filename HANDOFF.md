@@ -28,6 +28,7 @@
 - `/api/cron/proposal-deadlines`を追加し、公開期限切れ、候補日時3日前の未確定企画の自動非公開、7日前注意の通知outbox作成を実装。Vercel Cronは日次JST 09:00相当（UTC 00:00）で設定した。メール送信サービス未設定のため、現時点では送信待ち通知を残すまでとする。
 - `npm run build`成功、Neon接続確認で`table_count: 10`を確認。
 - 未参照のSupabaseクライアント・依存パッケージを削除し、`npm run build`を再実行して成功。現在のアプリ実行経路にSupabase依存はない。
+- 本番へ`175f22c`/`195ba86`を反映。デプロイURLは`https://aiueo-44tpdo0ex-rahisekos-projects.vercel.app`で、`https://aiueo-lp.vercel.app`と独自ドメインへ反映済み。Productionで`/events`が200、未認証Cronが401、空一覧表示を確認した。
 
 - 下部の「運営のかかわり方」を更新。
 - AIueoは企画・参加・金銭の当事者ではないことを明記。

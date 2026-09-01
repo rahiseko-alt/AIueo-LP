@@ -121,6 +121,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | 2026-09-01 | 公開企画、主催者操作、通報、管理、企画別メッセージをNeonのサーバーtransactionへ移植。状態変更・管理編集は版履歴、理由、監査、内部通知を同時記録 | `npm run build`通過。認証プロバイダー有効化前のため実ユーザーE2Eは未実施 | `src/app/{events,member/proposals,admin}` |
 | 2026-09-01 | Vercel Cronで公開期限切れ、3日前自動非公開、7日前注意の通知outbox生成を実装 | `npm run build`通過。送信サービス未設定のためメール実送信は未実施 | `src/app/api/cron/proposal-deadlines/route.ts`、`vercel.json` |
 | 2026-09-01 | 未参照のSupabaseクライアント/依存を撤去し、アプリ実行経路をNeonへ統一 | `npm run build`通過 | `195ba86` |
+| 2026-09-01 | Neon移行をProductionへ反映し、公開企画一覧とCron拒否を本番確認 | `/events` 200、未認証Cron 401。認証プロバイダー/送信基盤は未有効化 | `https://aiueo-44tpdo0ex-rahisekos-projects.vercel.app` |
 
 ## セッション終了チェック
 
