@@ -69,7 +69,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | ID | フェーズ | 依存 | 受け入れ条件（要約） | 状態 |
 | --- | --- | --- | --- | --- |
 | P0 | 運用プロトコル | なし | 開始時必読、終了時の計画/引継ぎ更新、実装ゲートを`AGENTS.md`へ固定 | 完了 |
-| P1 | Neon基盤への移行 | G1 | 開発/本番環境分離、Auth SSR、DB migration、サーバーDAL、監査ログ、権限テスト | 実装中（Neon接続/Auth route完了、schema migration未適用） |
+| P1 | Neon基盤への移行 | G1 | 開発/本番環境分離、Auth SSR、DB migration、サーバーDAL、監査ログ、権限テスト | 実装中（初期schema適用・会員プロフィール移行完了、権限テスト継続） |
 | P2 | 公開文書・登録導線 | G1 | `/terms`、`/disclaimer`、`/privacy`、`/register`に同意と用途表示を実装 | 完了（外部認証接続待ち） |
 | P3 | 会員機能 | P1 + P2 | 外部認証、即時`active`化、同意履歴、自己プロフィール、停止時の読取専用アクセス | 完了（DB未適用・E2E未実施） |
 | P4 | 企画機能 | P1 + P3 | 必須入力、金銭条件、状態遷移、公開/再掲載、公開企画ページ | 完了（DB未適用・E2E未実施） |
@@ -117,6 +117,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | 2026-09-01 | Supabaseの空き枠不足を受け、Vercel Native Neon Postgres + Neon Auth + Vercel Cronへ切替。CLIでNeon連携を開始 | 利用規約同意待ち。DB・認証・通知の移行は同意後に開始 | `HANDOFF.md`、Vercel Neon Integration |
 | 2026-09-01 | NeonをVercelプロジェクトへ接続。開発・Preview・ProductionのPostgres/Auth環境変数が自動設定された | Gate 2の受け入れ条件を作成。Supabaseコードの移植とDB migrationは未実施 | `GATE_2_NEON_MIGRATION_PROPOSAL.md`、Vercel Neon Resource |
 | 2026-09-01 | Neon AuthのCookie SecretをSecret環境変数として設定し、認証Route/DALの移植を開始 | `npm run build`通過。DB schemaとGoogle/メール認証設定は未完 | `src/lib/neon/auth.ts`、`src/app/api/auth/[...path]` |
+| 2026-09-01 | Neon初期migrationを適用し、10テーブル・監査ログの追記専用化・現行3文書を作成。会員プロフィール同意をNeon transactionへ移植 | DB接続確認・`npm run build`通過。企画/管理/期限処理の移植は継続 | `drizzle/0000_neon_foundation.sql`、`src/app/member/profile/actions.ts` |
 
 ## セッション終了チェック
 

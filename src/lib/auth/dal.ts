@@ -2,6 +2,7 @@ import 'server-only';
 
 import { redirect } from 'next/navigation';
 import { neonAuth, isNeonAuthConfigured } from '@/lib/neon/auth';
+import { db } from '@/lib/neon/db';
 
 export type MemberProfile = {
   id: string;
@@ -29,9 +30,13 @@ export async function getAuthContext(): Promise<AuthContext> {
     return { kind: 'signed_out' };
   }
 
-  // The profile lookup is introduced with the Neon migration. Until that
-  // migration is applied, a signed-in user is intentionally kept out of writes.
-  return { kind: 'profile_missing', userId };
+  if (!db) return { kind: 'unconfigured' };
+  const result = await db.$client.query(
+    'select id, role, status, public_name, collaboration_interest from profiles where id = $1 limit 1',
+    [userId],
+  );
+  if (result.rowCount !== 1) return { kind: 'profile_missing', userId };
+  return { kind: 'member', userId, profile: result.rows[0] as MemberProfile };
 }
 
 export async function requireActiveMember() {

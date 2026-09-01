@@ -22,6 +22,8 @@
 - Neon Authのサーバー用Cookie署名鍵を各環境にSecretとして設定。値はGit・画面・チャットへ出していない。
 - `@neondatabase/auth`、`pg`、Drizzle、Vercel DB接続ライブラリを追加し、`/api/auth/[...path]`とNeon Authのサーバー設定を追加。認可の正本をDAL/Server Action/Route Handlerへ置く方針を維持した。
 - Proxyは公開ページを認証依存にせず、保護操作ごとにセッションとロールを検証する構成へ整理。`npm run build`成功。
+- Neonの空DBへ`drizzle/0000_neon_foundation.sql`を適用し、10テーブルと監査ログ追記専用トリガーを作成。接続確認で`table_count: 10`を確認した。
+- `/member/profile`と同意保存をNeon Auth/Neon Postgresへ接続。確認済みメール、現行3文書、公開名、協力内容を単一transactionで保存・active化・監査記録する。`npm run build`成功。
 
 - 下部の「運営のかかわり方」を更新。
 - AIueoは企画・参加・金銭の当事者ではないことを明記。
@@ -65,7 +67,7 @@
 ## 次にやること
 
 - Supabaseに空き枠がないため、新規Supabaseプロジェクトの作成は中止。Vercel Native Neon Postgres + Neon Auth + Vercel Cronへの切替受け入れ条件を3視点で確認し、VercelからNeonを接続する。既存のSupabase秘密値・消失ホストは再利用しない。
-- Neon接続は完了。新規DBのpublic schemaは空であることを安全なread-only queryで確認済み。次にDrizzle schema/migrationを作成し、開発ブランチで検証後、会員・企画・管理・期限処理をSupabase RPCからサーバーDAL transactionへ移す。
+- Neon接続・初期schema適用・会員プロフィール移行は完了。次に企画・管理・通報・期限処理をSupabase RPCからサーバーDAL transactionへ移す。
 - Google OAuthのprovider設定、メールリンクの送信サービス/DNS認証、Neon Authの本番ドメイン許可は未設定。利用者向けの登録開始フラグは有効化しない。
 
 - P1 migrationを適用する前に、旧ホストが消失していることを確認し、既存Supabaseプロジェクトの正しい接続先・テーブル・バックアップを確定する。現状はmigration未適用。

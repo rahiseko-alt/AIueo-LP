@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { getAuthContext } from '@/lib/auth/dal';
-import { isSupabaseConfigured } from '@/lib/supabase/env';
-import { createSupabaseServerClient } from '@/lib/supabase/server';
+import { db } from '@/lib/neon/db';
 import { ProfileCompletionForm } from '@/components/profile-completion-form';
 
 export const dynamic = 'force-dynamic';
@@ -25,10 +24,9 @@ export default async function MemberProfilePage() {
   }
 
   let versions: TermVersion[] = [];
-  if (isSupabaseConfigured()) {
-    const supabase = await createSupabaseServerClient();
-    const { data } = await supabase.from('terms_versions').select('id, document_type, version, effective_at').eq('is_current', true);
-    versions = (data ?? []) as TermVersion[];
+  if (db) {
+    const result = await db.$client.query('select id, document_type, version, effective_at from terms_versions where is_current = true');
+    versions = result.rows as TermVersion[];
   }
 
   if (context.kind === 'member' && context.profile.status === 'active') {
