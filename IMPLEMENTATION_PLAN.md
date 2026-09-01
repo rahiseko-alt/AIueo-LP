@@ -1,7 +1,7 @@
 # AIueo 会員・企画・管理機能 実装計画
 
 最終更新: 2026-09-01  
-計画状態: **Supabaseの利用枠不足により、P1の実基盤をVercel Native Neon Postgres + Neon Authへ切替評価中。公開UIは稼働中。**
+計画状態: **Vercel Native Neon Postgres + Neon Authへのアプリ移行を完了。認証プロバイダー、メール送信、初期管理者、権限E2Eを残している。公開UIは稼働中。**
 
 この計画は、実装のたびに読む常設の進捗台帳である。仕様の正本は`MEMBERSHIP_FEATURE_SPEC.md`、セッションの正本は`HANDOFF.md`とする。3ファイルは作業開始時にこの順で確認し、終了時にすべて更新する。
 
@@ -118,6 +118,8 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | 2026-09-01 | NeonをVercelプロジェクトへ接続。開発・Preview・ProductionのPostgres/Auth環境変数が自動設定された | Gate 2の受け入れ条件を作成。Supabaseコードの移植とDB migrationは未実施 | `GATE_2_NEON_MIGRATION_PROPOSAL.md`、Vercel Neon Resource |
 | 2026-09-01 | Neon AuthのCookie SecretをSecret環境変数として設定し、認証Route/DALの移植を開始 | `npm run build`通過。DB schemaとGoogle/メール認証設定は未完 | `src/lib/neon/auth.ts`、`src/app/api/auth/[...path]` |
 | 2026-09-01 | Neon初期migrationを適用し、10テーブル・監査ログの追記専用化・現行3文書を作成。会員プロフィール同意をNeon transactionへ移植 | DB接続確認・`npm run build`通過。企画/管理/期限処理の移植は継続 | `drizzle/0000_neon_foundation.sql`、`src/app/member/profile/actions.ts` |
+| 2026-09-01 | 公開企画、主催者操作、通報、管理、企画別メッセージをNeonのサーバーtransactionへ移植。状態変更・管理編集は版履歴、理由、監査、内部通知を同時記録 | `npm run build`通過。認証プロバイダー有効化前のため実ユーザーE2Eは未実施 | `src/app/{events,member/proposals,admin}` |
+| 2026-09-01 | Vercel Cronで公開期限切れ、3日前自動非公開、7日前注意の通知outbox生成を実装 | `npm run build`通過。送信サービス未設定のためメール実送信は未実施 | `src/app/api/cron/proposal-deadlines/route.ts`、`vercel.json` |
 
 ## セッション終了チェック
 

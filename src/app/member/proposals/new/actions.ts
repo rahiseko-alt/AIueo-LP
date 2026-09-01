@@ -2,8 +2,8 @@
 
 import { redirect } from 'next/navigation';
 import { z } from 'zod';
-import { createSupabaseServerClient } from '@/lib/supabase/server';
-import { isSupabaseConfigured } from '@/lib/supabase/env';
+import { requireActiveMember } from '@/lib/auth/dal';
+import { db } from '@/lib/neon/db';
 
 const moneyTypes = ['none', 'fixed_fee', 'range_or_upper_limit', 'reimbursement', 'reward', 'donation', 'undecided'] as const;
 const eventFormats = ['offline', 'online', 'hybrid'] as const;
@@ -56,7 +56,7 @@ function collectMoneyDetails(input: z.infer<typeof proposalSchema>) {
 }
 
 export async function saveProposalAction(_previousState: ProposalActionState, formData: FormData): Promise<ProposalActionState> {
-  if (!isSupabaseConfigured()) return { error: '会員・企画基盤が未接続です。管理者設定後に再度お試しください。' };
+  if (!db) return { error: '会員・企画基盤が未接続です。時間をおいて再度お試しください。' };
   const raw = Object.fromEntries(formData.entries());
   const parsed = proposalSchema.safeParse(raw);
   if (!parsed.success) return { error: '必須項目、日付、金銭条件、3つの掲載確認を確認してください。' };
@@ -71,7 +71,6 @@ export async function saveProposalAction(_previousState: ProposalActionState, fo
     return { error: '金銭が発生する場合は、金額、支払先、精算方法を入力してください。' };
   }
 
-  const supabase = await createSupabaseServerClient();
   const payload = {
     slug: `proposal-${crypto.randomUUID()}`,
     title: input.title,
@@ -87,11 +86,56 @@ export async function saveProposalAction(_previousState: ProposalActionState, fo
     money_details: collectMoneyDetails(input),
     publishing_declarations: { prohibited_confirmed: true, rights_confirmed: true, money_confirmed: true },
   };
-  const { data: proposalId, error: saveError } = await supabase.rpc('save_proposal', { p_proposal_id: null, p_payload: payload });
-  if (saveError || typeof proposalId !== 'string') return { error: '企画を保存できませんでした。ログイン状態と入力内容を確認してください。' };
-  if (input.intent === 'publish') {
-    const { error: publishError } = await supabase.rpc('publish_proposal', { p_proposal_id: proposalId });
-    if (publishError) return { error: '下書きは保存しましたが、公開できませんでした。必須項目と公開期限を確認してください。' };
+  const member = await requireActiveMember();
+  const client = await db.$client.connect();
+  let proposalId: string | null = null;
+  try {
+    await client.query('begin');
+    const currentTerms = await client.query(
+      `select count(*)::integer as count
+       from terms_versions tv
+       join consents c on c.terms_version_id = tv.id and c.user_id = $1
+       where tv.is_current = true`,
+      [member.userId],
+    );
+    if (Number(currentTerms.rows[0]?.count) !== 3) {
+      await client.query('rollback');
+      return { error: '最新の会員規約・免責事項・プライバシーポリシーへの同意を確認できません。会員情報ページで再同意してください。' };
+    }
+    const status = input.intent === 'publish' ? 'published' : 'draft';
+    const inserted = await client.query(
+      `insert into proposals (
+        owner_id, slug, title, summary, format, tentative_starts_at, recruitment_deadline_at,
+        public_expires_at, organizer_name, participation_method, visibility, money_type,
+        money_details, publishing_declarations, status, published_at
+      ) values (
+        $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,
+        $13::jsonb, $14::jsonb, $15, case when $15 = 'published' then now() else null end
+      ) returning id`,
+      [
+        member.userId, payload.slug, payload.title, payload.summary, payload.format,
+        payload.tentative_starts_at, payload.recruitment_deadline_at, payload.public_expires_at,
+        payload.organizer_name, payload.participation_method, payload.visibility, payload.money_type,
+        JSON.stringify(payload.money_details), JSON.stringify(payload.publishing_declarations), status,
+      ],
+    );
+    proposalId = inserted.rows[0]?.id ?? null;
+    if (!proposalId) throw new Error('proposal creation failed');
+    const snapshot = { ...payload, id: proposalId, owner_id: member.userId, status, event_status: 'planning' };
+    await client.query(
+      'insert into proposal_versions (proposal_id, actor_id, reason_code, snapshot) values ($1, $2, $3, $4::jsonb)',
+      [proposalId, member.userId, input.intent === 'publish' ? 'initial_publish' : 'initial_draft', JSON.stringify(snapshot)],
+    );
+    await client.query(
+      'insert into audit_log (actor_id, entity_type, entity_id, action, after_state) values ($1, $2, $3, $4, $5::jsonb)',
+      [member.userId, 'proposal', proposalId, input.intent === 'publish' ? 'proposal_published' : 'proposal_drafted', JSON.stringify(snapshot)],
+    );
+    await client.query('commit');
+  } catch {
+    await client.query('rollback');
+    return { error: '企画を保存できませんでした。ログイン状態と入力内容を確認してください。' };
+  } finally {
+    client.release();
   }
   redirect(`/member/proposals/${proposalId}`);
 }

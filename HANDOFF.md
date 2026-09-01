@@ -12,8 +12,8 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新のコミット: `a419e9d feat: connect Neon Auth foundation`
-- ビルド: `npm run build` が成功（P1/P2初期実装）
+- 最新のコミット: `4c9aa14 feat: add Neon membership foundation`（次の企画・管理移行コミットは作成中）
+- ビルド: `npm run build` が成功（Neonの企画・管理・期限処理移行を含む）
 - 最新デプロイ: `https://aiueo-9jdw9ju8c-rahisekos-projects.vercel.app`。`https://aiueo-lp.vercel.app`および`https://aiueo.kouheikosehira.com`へエイリアス設定済み
 
 ## 今回の作業（2026-08-31）
@@ -24,6 +24,9 @@
 - Proxyは公開ページを認証依存にせず、保護操作ごとにセッションとロールを検証する構成へ整理。`npm run build`成功。
 - Neonの空DBへ`drizzle/0000_neon_foundation.sql`を適用し、10テーブルと監査ログ追記専用トリガーを作成。接続確認で`table_count: 10`を確認した。
 - `/member/profile`と同意保存をNeon Auth/Neon Postgresへ接続。確認済みメール、現行3文書、公開名、協力内容を単一transactionで保存・active化・監査記録する。`npm run build`成功。
+- 公開企画一覧・詳細、主催者の企画作成/一覧/開催状態変更、匿名通報、管理者の企画・会員・通報管理、企画者と管理者のメッセージをNeon Postgresへ移植した。サーバー側で会員ID・管理者ロール・所有者を検証し、書込みは版履歴と監査ログを同一transactionへ記録する。
+- `/api/cron/proposal-deadlines`を追加し、公開期限切れ、候補日時3日前の未確定企画の自動非公開、7日前注意の通知outbox作成を実装。Vercel Cronは日次JST 09:00相当（UTC 00:00）で設定した。メール送信サービス未設定のため、現時点では送信待ち通知を残すまでとする。
+- `npm run build`成功、Neon接続確認で`table_count: 10`を確認。
 
 - 下部の「運営のかかわり方」を更新。
 - AIueoは企画・参加・金銭の当事者ではないことを明記。
@@ -67,8 +70,8 @@
 ## 次にやること
 
 - Supabaseに空き枠がないため、新規Supabaseプロジェクトの作成は中止。Vercel Native Neon Postgres + Neon Auth + Vercel Cronへの切替受け入れ条件を3視点で確認し、VercelからNeonを接続する。既存のSupabase秘密値・消失ホストは再利用しない。
-- Neon接続・初期schema適用・会員プロフィール移行は完了。次に企画・管理・通報・期限処理をSupabase RPCからサーバーDAL transactionへ移す。
-- Google OAuthのprovider設定、メールリンクの送信サービス/DNS認証、Neon Authの本番ドメイン許可は未設定。利用者向けの登録開始フラグは有効化しない。
+- Neon接続・初期schema適用・会員プロフィール・企画・管理・通報・期限処理の移行は完了。旧Supabaseのアプリ側依存は除去済み。
+- Google OAuthのprovider設定、メールリンクの送信サービス/DNS認証、Neon Authの本番ドメイン許可、初期管理者の監査付き付与、通知メール実送信は未設定。利用者向けの登録開始フラグは有効化しない。
 
 - P1 migrationを適用する前に、旧ホストが消失していることを確認し、既存Supabaseプロジェクトの正しい接続先・テーブル・バックアップを確定する。現状はmigration未適用。
 - P1のwrite RPC、管理者権限変更、監査原子性、RLS allow/deny DB直結テストを実装・検証する。service roleは期限Cronなどの限定用途に留める。
