@@ -12,7 +12,7 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新のコミット: `4c9aa14 feat: add Neon membership foundation`（次の企画・管理移行コミットは作成中）
+- 最新の実装コミット: `195ba86 chore: remove unused Supabase client`（企画・管理のNeon移行は`175f22c`）
 - ビルド: `npm run build` が成功（Neonの企画・管理・期限処理移行を含む）
 - 最新デプロイ: `https://aiueo-9jdw9ju8c-rahisekos-projects.vercel.app`。`https://aiueo-lp.vercel.app`および`https://aiueo.kouheikosehira.com`へエイリアス設定済み
 
@@ -27,6 +27,7 @@
 - 公開企画一覧・詳細、主催者の企画作成/一覧/開催状態変更、匿名通報、管理者の企画・会員・通報管理、企画者と管理者のメッセージをNeon Postgresへ移植した。サーバー側で会員ID・管理者ロール・所有者を検証し、書込みは版履歴と監査ログを同一transactionへ記録する。
 - `/api/cron/proposal-deadlines`を追加し、公開期限切れ、候補日時3日前の未確定企画の自動非公開、7日前注意の通知outbox作成を実装。Vercel Cronは日次JST 09:00相当（UTC 00:00）で設定した。メール送信サービス未設定のため、現時点では送信待ち通知を残すまでとする。
 - `npm run build`成功、Neon接続確認で`table_count: 10`を確認。
+- 未参照のSupabaseクライアント・依存パッケージを削除し、`npm run build`を再実行して成功。現在のアプリ実行経路にSupabase依存はない。
 
 - 下部の「運営のかかわり方」を更新。
 - AIueoは企画・参加・金銭の当事者ではないことを明記。
