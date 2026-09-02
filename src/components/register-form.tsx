@@ -15,13 +15,6 @@ export function RegisterForm() {
   const [notice, setNotice] = useState<string | null>(null);
   const [isWorking, setIsWorking] = useState(false);
 
-  async function signInWithGoogle() {
-    if (!configured) return;
-    setIsWorking(true); setNotice(null);
-    const { error } = await createAuthClient().signIn.social({ provider: 'google', callbackURL: '/member/profile' });
-    if (error) { setNotice(`Google認証を開始できませんでした: ${error.message}`); setIsWorking(false); }
-  }
-
   async function sendVerificationCode() {
     if (!configured || !email) return false;
     const response = await fetch('/api/membership/registration', {
@@ -84,8 +77,6 @@ export function RegisterForm() {
   return <div className="mt-8 space-y-5">
     {!configured && <p className="border border-[#c8a45a]/45 bg-[#c8a45a]/10 p-4 text-sm leading-7 text-[rgba(240,237,232,0.8)]">会員認証の接続を準備中です。公開前のため、現在は登録を開始できません。</p>}
     {screen === 'credentials' ? <>
-      <button type="button" disabled={!configured || isWorking} onClick={signInWithGoogle} className="btn-solid w-full disabled:cursor-not-allowed disabled:opacity-45">Googleで登録・ログイン</button>
-      <div className="flex items-center gap-3 text-xs text-[rgba(240,237,232,0.45)]"><span className="h-px flex-1 bg-white/10" />または<span className="h-px flex-1 bg-white/10" /></div>
       <form onSubmit={submitCredentials} className="space-y-4">
         <label className="block font-mono text-xs tracking-[0.1em] text-[rgba(240,237,232,0.72)]" htmlFor="register-email">メールアドレス</label>
         <input id="register-email" type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" className="min-h-11 w-full border border-white/20 bg-black/20 px-3 text-base outline-none transition-colors placeholder:text-white/35 focus:border-[#c8a45a]" />
