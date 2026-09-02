@@ -29,6 +29,8 @@
 - `npm run build`成功、Neon接続確認で`table_count: 10`を確認。
 - 未参照のSupabaseクライアント・依存パッケージを削除し、`npm run build`を再実行して成功。現在のアプリ実行経路にSupabase依存はない。
 - 本番へ`175f22c`/`195ba86`を反映。デプロイURLは`https://aiueo-44tpdo0ex-rahisekos-projects.vercel.app`で、`https://aiueo-lp.vercel.app`と独自ドメインへ反映済み。Productionで`/events`が200、未認証Cronが401、空一覧表示を確認した。
+- Neon Authの本番許可ドメインに`https://aiueo-lp.vercel.app`と`https://aiueo.kouheikosehira.com`を追加し、登録時のメール確認コードを有効化した。Neonの共有送信元は`auth@mail.myneon.app`。会員登録UIをメールアドレス・パスワード・確認コード方式へ移し、`NEXT_PUBLIC_NEON_AUTH_ENABLED=true`をProductionへ設定した。
+- 本番へ`4ac53df`を反映。`https://aiueo-1zyvunpiv-rahisekos-projects.vercel.app`で`/register`が200、メール登録導線が有効・準備中バナーが非表示であることを確認した。
 
 - 下部の「運営のかかわり方」を更新。
 - AIueoは企画・参加・金銭の当事者ではないことを明記。
@@ -73,7 +75,7 @@
 
 - Supabaseに空き枠がないため、新規Supabaseプロジェクトの作成は中止。Vercel Native Neon Postgres + Neon Auth + Vercel Cronへの切替受け入れ条件を3視点で確認し、VercelからNeonを接続する。既存のSupabase秘密値・消失ホストは再利用しない。
 - Neon接続・初期schema適用・会員プロフィール・企画・管理・通報・期限処理の移行は完了。旧Supabaseのアプリ側依存は除去済み。
-- Google OAuthのprovider設定、メールリンクの送信サービス/DNS認証、Neon Authの本番ドメイン許可、初期管理者の監査付き付与、通知メール実送信は未設定。利用者向けの登録開始フラグは有効化しない。
+- Google OAuthのprovider設定、独自ドメイン送信元/DNS認証、期限通知メールの実送信、初期管理者の監査付き付与は未設定。メールアドレス・パスワード・確認コードによる会員登録は有効化済み。
 
 - P1 migrationを適用する前に、旧ホストが消失していることを確認し、既存Supabaseプロジェクトの正しい接続先・テーブル・バックアップを確定する。現状はmigration未適用。
 - P1のwrite RPC、管理者権限変更、監査原子性、RLS allow/deny DB直結テストを実装・検証する。service roleは期限Cronなどの限定用途に留める。
