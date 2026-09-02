@@ -1,7 +1,7 @@
 # AIueo 会員・企画・管理機能 実装計画
 
-最終更新: 2026-09-01  
-計画状態: **Vercel Native Neon Postgres + Neon Authへのアプリ移行を完了。メールアドレス登録と確認コードは本番有効化済み。実メール受入、初期管理者、期限通知メール、権限E2Eを残している。**
+最終更新: 2026-09-02  
+計画状態: **Vercel Native Neon Postgres + Neon Authへのアプリ移行を完了。確認コード送信・再送を本番反映済み。実メール受入、初期管理者、期限通知メール、権限E2Eを残している。**
 
 この計画は、実装のたびに読む常設の進捗台帳である。仕様の正本は`MEMBERSHIP_FEATURE_SPEC.md`、セッションの正本は`HANDOFF.md`とする。3ファイルは作業開始時にこの順で確認し、終了時にすべて更新する。
 
@@ -123,6 +123,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | 2026-09-01 | 未参照のSupabaseクライアント/依存を撤去し、アプリ実行経路をNeonへ統一 | `npm run build`通過 | `195ba86` |
 | 2026-09-01 | Neon移行をProductionへ反映し、公開企画一覧とCron拒否を本番確認 | `/events` 200、未認証Cron 401。認証プロバイダー/送信基盤は未有効化 | `https://aiueo-44tpdo0ex-rahisekos-projects.vercel.app` |
 | 2026-09-02 | Neon Authで本番許可ドメイン2件と登録時確認コードを有効化し、共有送信元を確認。会員登録UIをメールアドレス・パスワード・確認コード方式へ変更しProductionへ反映 | `/register` 200、メール登録導線が有効、準備中表示なし。実メール受入は次に実施 | `4ac53df`、`https://aiueo-1zyvunpiv-rahisekos-projects.vercel.app` |
+| 2026-09-02 | 確認コード未着を修正。登録成功後に確認コード送信APIを明示実行し、既存の未確認アカウント用に再送導線を追加して本番へ反映 | ビルド成功、Productionクライアントバンドルに再送UIを確認。利用者による実メール到達確認待ち | `d177428`、`https://aiueo-1j21evr86-rahisekos-projects.vercel.app` |
 
 ## セッション終了チェック
 
