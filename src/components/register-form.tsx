@@ -22,6 +22,20 @@ export function RegisterForm() {
     if (error) { setNotice(`Google認証を開始できませんでした: ${error.message}`); setIsWorking(false); }
   }
 
+  async function sendVerificationCode() {
+    if (!configured || !email) return false;
+    const { error } = await createAuthClient().emailOtp.sendVerificationOtp({
+      email,
+      type: 'email-verification',
+    });
+    if (error) {
+      setNotice(`確認コードを送信できませんでした: ${error.message}`);
+      return false;
+    }
+    setNotice('確認コードを送信しました。メールの受信トレイと迷惑メールを確認してください。');
+    return true;
+  }
+
   async function submitCredentials(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!configured || !email || password.length < 8) return;
@@ -33,8 +47,15 @@ export function RegisterForm() {
       window.location.assign('/member/profile'); return;
     }
     const { error } = await auth.signUp.email({ email, password, name: 'AIueo member' });
-    if (error) { setNotice(`登録を開始できませんでした: ${error.message}`); setIsWorking(false); return; }
-    setScreen('verify'); setNotice('確認コードをメールで送信しました。届いたコードを入力してください。'); setIsWorking(false);
+    if (error) {
+      setScreen('verify');
+      setNotice(`登録を開始できませんでした: ${error.message}。すでに登録済みの場合は、下の「確認コードを再送する」を押してください。`);
+      setIsWorking(false);
+      return;
+    }
+    setScreen('verify');
+    await sendVerificationCode();
+    setIsWorking(false);
   }
 
   async function verifyEmail(event: FormEvent<HTMLFormElement>) {
@@ -44,6 +65,13 @@ export function RegisterForm() {
     const { error } = await createAuthClient().emailOtp.verifyEmail({ email, otp: code });
     if (error) { setNotice(`確認できませんでした: ${error.message}`); setIsWorking(false); return; }
     window.location.assign('/member/profile');
+  }
+
+  async function resendVerificationCode() {
+    setIsWorking(true);
+    setNotice(null);
+    await sendVerificationCode();
+    setIsWorking(false);
   }
 
   return <div className="mt-8 space-y-5">
@@ -64,6 +92,7 @@ export function RegisterForm() {
       <label className="block font-mono text-xs tracking-[0.1em] text-[rgba(240,237,232,0.72)]" htmlFor="register-code">確認コード</label>
       <input id="register-code" type="text" inputMode="numeric" autoComplete="one-time-code" required value={code} onChange={(event) => setCode(event.target.value)} className="min-h-11 w-full border border-white/20 bg-black/20 px-3 font-mono text-lg tracking-[0.2em] outline-none transition-colors focus:border-[#c8a45a]" />
       <button type="submit" disabled={!configured || isWorking} className="btn-solid w-full disabled:cursor-not-allowed disabled:opacity-45">メールアドレスを確認する</button>
+      <button type="button" disabled={!configured || isWorking} onClick={resendVerificationCode} className="min-h-11 text-sm text-[#d7bd82] underline disabled:opacity-45">確認コードを再送する</button>
       <button type="button" disabled={isWorking} onClick={() => { setScreen('credentials'); setCode(''); setNotice(null); }} className="min-h-11 text-sm text-[#d7bd82] underline">戻る</button>
     </form>}
     {notice && <p role="status" className="text-sm leading-7 text-[#d7bd82]">{notice}</p>}
