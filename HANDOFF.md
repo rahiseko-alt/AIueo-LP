@@ -12,7 +12,7 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新の実装コミット: `d177428 fix: explicitly send email verification codes`
+- 最新の実装コミット: `203b541 fix: handle registration through Neon Auth server`
 - ビルド: `npm run build` が成功（Neonの企画・管理・期限処理移行を含む）
 - 最新デプロイ: `https://aiueo-9jdw9ju8c-rahisekos-projects.vercel.app`。`https://aiueo-lp.vercel.app`および`https://aiueo.kouheikosehira.com`へエイリアス設定済み
 
@@ -32,6 +32,7 @@
 - Neon Authの本番許可ドメインに`https://aiueo-lp.vercel.app`と`https://aiueo.kouheikosehira.com`を追加し、登録時のメール確認コードを有効化した。Neonの共有送信元は`auth@mail.myneon.app`。会員登録UIをメールアドレス・パスワード・確認コード方式へ移し、`NEXT_PUBLIC_NEON_AUTH_ENABLED=true`をProductionへ設定した。
 - 本番へ`4ac53df`を反映。`https://aiueo-1zyvunpiv-rahisekos-projects.vercel.app`で`/register`が200、メール登録導線が有効・準備中バナーが非表示であることを確認した。
 - 確認コード未着の報告を受け、登録成功後に`emailOtp.sendVerificationOtp`を明示実行するよう修正した。既存の未確認アカウントにも確認コードを再送できる導線を追加し、本番へ`d177428`を反映した。最新デプロイは`https://aiueo-1j21evr86-rahisekos-projects.vercel.app`で、Productionのクライアントバンドルに再送UIが含まれることを確認済み。実メールの到達確認は利用者による再送操作待ち。
+- Neon AuthのUsers画面が空であることを確認し、メール未着の前にブラウザSDKからの登録開始が完了していないと判明。登録と確認コード再送を、公式のNeon AuthサーバーAPIを呼ぶ同一オリジンのRoute Handlerへ集約した。送信元検証、メールアドレス/パスワードの入力検証、個人情報を残さないエラーログ、画面への送信失敗表示を追加。`npm run build`成功。`203b541`を本番へ反映し、最新デプロイ`https://aiueo-373vjc9yg-rahisekos-projects.vercel.app`で認証Proxy 200と登録Routeの外部POST拒否403を確認。実メール到達はユーザーの再試行待ち。
 
 - 下部の「運営のかかわり方」を更新。
 - AIueoは企画・参加・金銭の当事者ではないことを明記。
