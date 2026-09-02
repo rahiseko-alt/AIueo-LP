@@ -24,12 +24,14 @@ export function RegisterForm() {
 
   async function sendVerificationCode() {
     if (!configured || !email) return false;
-    const { error } = await createAuthClient().emailOtp.sendVerificationOtp({
-      email,
-      type: 'email-verification',
+    const response = await fetch('/api/membership/registration', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'resend', email }),
     });
-    if (error) {
-      setNotice(`確認コードを送信できませんでした: ${error.message}`);
+    const result = await response.json().catch(() => null) as { ok?: boolean; message?: string } | null;
+    if (!response.ok || !result?.ok) {
+      setNotice(result?.message ?? '確認コードを送信できませんでした。時間をおいて再送してください。');
       return false;
     }
     setNotice('確認コードを送信しました。メールの受信トレイと迷惑メールを確認してください。');
@@ -40,21 +42,26 @@ export function RegisterForm() {
     event.preventDefault();
     if (!configured || !email || password.length < 8) return;
     setIsWorking(true); setNotice(null);
-    const auth = createAuthClient();
     if (intent === 'signin') {
-      const { error } = await auth.signIn.email({ email, password });
+      const { error } = await createAuthClient().signIn.email({ email, password });
       if (error) { setNotice(`ログインできませんでした: ${error.message}`); setIsWorking(false); return; }
       window.location.assign('/member/profile'); return;
     }
-    const { error } = await auth.signUp.email({ email, password, name: 'AIueo member' });
-    if (error) {
-      setScreen('verify');
-      setNotice(`登録を開始できませんでした: ${error.message}。すでに登録済みの場合は、下の「確認コードを再送する」を押してください。`);
+    const response = await fetch('/api/membership/registration', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'signup', email, password }),
+    });
+    const result = await response.json().catch(() => null) as { ok?: boolean; message?: string; alreadyRegistered?: boolean } | null;
+    if (!response.ok || !result?.ok) {
+      setNotice(result?.message ?? '登録を開始できませんでした。時間をおいて再度お試しください。');
       setIsWorking(false);
       return;
     }
     setScreen('verify');
-    await sendVerificationCode();
+    setNotice(result.alreadyRegistered
+      ? 'すでに登録済みのメールアドレスです。確認コードを再送しました。'
+      : '確認コードを送信しました。メールの受信トレイと迷惑メールを確認してください。');
     setIsWorking(false);
   }
 
