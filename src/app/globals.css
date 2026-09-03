@@ -16,6 +16,8 @@
 
   html {
     scroll-behavior: smooth;
+    /* 固定ナビ (h-16 / md:h-[68px]) の高さぶんアンカー位置をずらす */
+    scroll-padding-top: 68px;
     text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
   }
@@ -39,26 +41,24 @@
 
 /* Kinetic Collective Responsive Layout Utilities */
 .hero-split {
-  min-height: min(88vh, 840px);
   display: grid;
-  grid-template-columns: 1.15fr 1.85fr;
-}
-
-@media (max-width: 1024px) {
-  .hero-split {
-    grid-template-columns: 1fr;
-    min-height: auto;
-  }
+  grid-template-columns: minmax(0, 1fr);
+  min-height: auto;
 }
 
 .who-grid {
   display: grid;
-  grid-template-columns: 1.1fr 1fr;
+  grid-template-columns: minmax(0, 1fr);
 }
 
-@media (max-width: 1024px) {
+@media (min-width: 1024px) {
+  .hero-split {
+    min-height: min(88vh, 840px);
+    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.85fr);
+  }
+
   .who-grid {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
   }
 }
 
@@ -152,7 +152,7 @@
   letter-spacing: -0.02em;
   line-height: 1.15;
   word-break: keep-all;
-  overflow-wrap: break-word;
+  overflow-wrap: anywhere;
 }
 
 /* Responsive Section Spacing */
