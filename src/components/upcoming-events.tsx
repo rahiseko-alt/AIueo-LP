@@ -2,17 +2,17 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Activity } from '@/types';
-import { MapPin, Users } from 'lucide-react';
+import { Activity, Tag } from '@/types';
+import { MapPin } from 'lucide-react';
 
 interface UpcomingEventsProps {
   activities: Activity[];
 }
 
 export function UpcomingEvents({ activities }: UpcomingEventsProps) {
-  const [filter, setFilter] = useState('ALL');
+  const [filter, setFilter] = useState<'ALL' | Tag>('ALL');
 
-  const filterButtons = [
+  const filterButtons: { label: string; val: 'ALL' | Tag }[] = [
     { label: 'ALL (すべて)', val: 'ALL' },
     { label: 'EDUCATION (主婦・教育)', val: 'EDUCATION' },
     { label: 'COMMUNITY (地域・子ども)', val: 'COMMUNITY' },
@@ -22,7 +22,7 @@ export function UpcomingEvents({ activities }: UpcomingEventsProps) {
 
   const filteredActivities = filter === 'ALL'
     ? activities
-    : activities.filter((act) => act.tags.includes(filter as any));
+    : activities.filter((act) => act.tags.includes(filter));
 
   return (
     <section id="events" className="section-padding border-b border-[rgba(240,237,232,0.08)] bg-[#080808]">

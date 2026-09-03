@@ -95,4 +95,3 @@ export function OperatingGuidelines() {
     </section>
   );
 }
-import Link from 'next/link';

@@ -16,6 +16,8 @@
 
   html {
     scroll-behavior: smooth;
+    /* 固定ナビの高さぶんアンカー位置をずらす */
+    scroll-padding-top: 68px;
     text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
     overflow-x: clip;
@@ -35,48 +37,6 @@
   ::selection {
     background: var(--gold);
     color: #080808;
-  }
-}
-
-/* Kinetic Collective Responsive Layout Utilities */
-.hero-split {
-  min-height: min(88vh, 840px);
-  display: grid;
-  grid-template-areas: "copy media";
-  grid-template-columns: 1.15fr 1.85fr;
-}
-
-.hero-copy {
-  grid-area: copy;
-}
-
-.hero-media {
-  grid-area: media;
-  min-height: min(88vh, 840px);
-}
-
-@media (max-width: 1024px) {
-  .hero-split {
-    grid-template-areas:
-      "media"
-      "copy";
-    grid-template-columns: 1fr;
-    min-height: auto;
-  }
-
-  .hero-media {
-    min-height: clamp(300px, 78vw, 460px);
-  }
-}
-
-.who-grid {
-  display: grid;
-  grid-template-columns: 1.1fr 1fr;
-}
-
-@media (max-width: 1024px) {
-  .who-grid {
-    grid-template-columns: 1fr;
   }
 }
 

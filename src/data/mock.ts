@@ -235,3 +235,14 @@ export const mockTestimonials: Testimonial[] = [
     activityName: '小学生向けAIお絵描き教室',
   },
 ];
+
+/**
+ * Person.activityIds から活動を引くための全件インデックス。
+ * ここに載っていない活動を参照すると人物カードの実績行が消えるため、
+ * 活動を追加したらこの配列にも必ず含めること。
+ */
+export const mockAllActivities: Activity[] = [
+  mockHeroActivity,
+  ...mockUpcomingActivities,
+  ...mockRecentActivities,
+];
