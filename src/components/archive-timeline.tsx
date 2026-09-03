@@ -26,7 +26,7 @@ export function ArchiveTimeline() {
               key={idx}
               className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2.5 sm:gap-4 py-4 sm:py-5 px-2 sm:px-4 rounded-lg transition-colors hover:bg-[#0e0e0e]/50"
             >
-              <div className="flex flex-col xs:flex-row xs:items-center gap-2 sm:gap-6">
+              <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-6">
                 <span className="font-mono text-xs sm:text-sm font-semibold tracking-wider text-[#c8a45a] flex-shrink-0">
                   {item.date}
                 </span>

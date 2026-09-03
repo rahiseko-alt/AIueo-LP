@@ -12,6 +12,7 @@ import {
   mockHeroActivity,
   mockUpcomingActivities,
   mockRecentActivities,
+  mockAllActivities,
   mockPeople,
 } from '@/data/mock';
 
@@ -25,7 +26,7 @@ export default function Home() {
         <PhilosophySteps />
         <UpcomingEvents activities={mockUpcomingActivities} />
         <RecentLog activities={mockRecentActivities} people={mockPeople} />
-        <TeamMembers people={mockPeople} activities={mockRecentActivities} />
+        <TeamMembers people={mockPeople} activities={mockAllActivities} />
         <JoinSection />
         <OperatingGuidelines />
       </main>
