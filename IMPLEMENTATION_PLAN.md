@@ -125,6 +125,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | 2026-09-02 | Neon Authで本番許可ドメイン2件と登録時確認コードを有効化し、共有送信元を確認。会員登録UIをメールアドレス・パスワード・確認コード方式へ変更しProductionへ反映 | `/register` 200、メール登録導線が有効、準備中表示なし。実メール受入は次に実施 | `4ac53df`、`https://aiueo-1zyvunpiv-rahisekos-projects.vercel.app` |
 | 2026-09-02 | 確認コード未着を修正。登録成功後に確認コード送信APIを明示実行し、既存の未確認アカウント用に再送導線を追加して本番へ反映 | ビルド成功、Productionクライアントバンドルに再送UIを確認。利用者による実メール到達確認待ち | `d177428`、`https://aiueo-1j21evr86-rahisekos-projects.vercel.app` |
 | 2026-09-03 | Neonのユーザー一覧が空であることから登録開始の未完了を診断。登録と再送をNeon AuthサーバーAPI経由へ集約し、同一オリジン検証と失敗表示を追加 | ビルド成功、本番Auth Proxy 200、登録Routeの外部POST拒否403。実メール到達確認待ち | `203b541`、`https://aiueo-373vjc9yg-rahisekos-projects.vercel.app` |
+| 2026-09-03 | 本番ローカル版をbundle化し、GitHubの`local/deployed-203b541`へ退避 | `main`は未変更。共通祖先`4eee02a`を確認し、統合判断待ち | `C:\Users\user\aiueo-backup-20260903.bundle`、`origin/local/deployed-203b541` |
 
 ## セッション終了チェック
 
