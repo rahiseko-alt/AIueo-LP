@@ -4,7 +4,7 @@ export function Testimonials() {
   return (
     <section className="section-padding border-b border-[rgba(240,237,232,0.08)] bg-[#080808]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-10">
-        <div className="sec-eyebrow">06 / MEMBER VOICES</div>
+        <div className="sec-eyebrow">05 / MEMBER VOICES</div>
         <h2 className="sec-title text-[#f0ede8]">What Our Players Say</h2>
 
         <div className="mt-10 sm:mt-12 md:mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

@@ -14,7 +14,7 @@ export function TeamMembers({ people, activities }: TeamMembersProps) {
   return (
     <section id="team" className="section-padding border-b border-[rgba(240,237,232,0.08)] bg-[#080808]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-10">
-        <div className="sec-eyebrow">05 / LEAGUE PLAYERS</div>
+        <div className="sec-eyebrow">04 / LEAGUE PLAYERS</div>
         <h2 className="sec-title text-[#f0ede8]">Who Joins Us</h2>
         <p className="mt-3 sm:mt-4 max-w-2xl font-sans text-xs sm:text-sm md:text-base font-light leading-relaxed text-[rgba(240,237,232,0.75)]">
           肩書ではなく、一緒に何を作ったかでつながる草AIチームのメンバーとコラボレーター。

@@ -1,0 +1,2 @@
+[functions.notify-deadlines]
+verify_jwt = false

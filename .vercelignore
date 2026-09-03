@@ -1,0 +1,4 @@
+.vinext/
+.wrangler/
+dist/
+node_modules/

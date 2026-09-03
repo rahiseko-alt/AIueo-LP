@@ -7,28 +7,28 @@ export function JoinSection() {
       title: '「こういうのやりたい！」企画を持ち込む',
       description: '主婦向け講座、子ども向け教室、勉強会、開発企画など、自分のやりたい企画を同盟に提案・募集。',
       action: '企画を提案する',
-      href: 'mailto:rahiseko@gmail.com?subject=【AIueo】新しい企画・イベントの持ち込み',
+      href: '/register',
     },
     {
       icon: <Users className="h-5 w-5 text-[#c8a45a]" />,
       title: '進行中の企画に助っ人・参加する',
       description: '受託案件の開発チーム、セミナーのアシスタント、LT登壇など、具体的な活動に合流。',
       action: '企画一覧を見る',
-      href: '#events',
+      href: '/events',
     },
     {
       icon: <MessageSquare className="h-5 w-5 text-[#c8a45a]" />,
-      title: 'Discordで企画の壁打ち・仲間集め',
-      description: '「こんな企画考えてるんだけど誰か興味ある？」を気軽に投げて相談できるオンライン同盟。',
-      action: 'Discordに参加',
-      href: 'https://discord.com',
+      title: '企画の壁打ち・仲間集めを相談する',
+      description: '「こんな企画を考えている」を、まずAIueoへ気軽に相談できます。',
+      action: '相談する',
+      href: '/register',
     },
     {
       icon: <Sparkles className="h-5 w-5 text-[#c8a45a]" />,
       title: '会場・機材・案件を提供する',
       description: '公民館、コワーキング、店舗の会場提供や、AI開発の相談・依頼はこちらから。',
       action: '連携・相談する',
-      href: 'mailto:rahiseko@gmail.com?subject=【AIueo】会場・リソース提供のご相談',
+      href: '/contact',
     },
   ];
 
@@ -39,7 +39,7 @@ export function JoinSection() {
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6 md:px-10">
         <div className="max-w-2xl">
-          <div className="sec-eyebrow">07 / CO-CREATION & ALLIANCE</div>
+          <div className="sec-eyebrow">06 / CO-CREATION & ALLIANCE</div>
           <h2 className="sec-title text-[#f0ede8]">
             「こういうのやるんですけど、一緒にどうですか？」
           </h2>

@@ -1,0 +1,25 @@
+'use client';
+
+import { useActionState } from 'react';
+import { saveProposalAction, type ProposalActionState } from '@/app/member/proposals/new/actions';
+
+export function ProposalForm() {
+  const [state, formAction, isPending] = useActionState<ProposalActionState, FormData>(saveProposalAction, { error: null });
+  return <form action={formAction} className="mt-8 space-y-8">
+    <div className="grid gap-6 sm:grid-cols-2">
+      <label className="sm:col-span-2"><span className="form-label">企画名 *</span><input name="title" required maxLength={140} className="form-control" /></label>
+      <label className="sm:col-span-2"><span className="form-label">概要 *</span><textarea name="summary" required maxLength={5000} rows={6} className="form-control" /></label>
+      <label><span className="form-label">開催形式 *</span><select name="format" required defaultValue="offline" className="form-control"><option value="offline">オフライン</option><option value="online">オンライン</option><option value="hybrid">ハイブリッド</option></select></label>
+      <label><span className="form-label">公開範囲 *</span><select name="visibility" required defaultValue="public" className="form-control"><option value="public">公開</option><option value="unlisted">限定公開</option></select></label>
+      <label><span className="form-label">開催候補日時（JST） *</span><input name="tentativeStartsAt" required type="datetime-local" className="form-control" /></label>
+      <label><span className="form-label">募集期限（任意）</span><input name="recruitmentDeadlineAt" type="datetime-local" className="form-control" /></label>
+      <label><span className="form-label">公開期限 *</span><input name="publicExpiresAt" required type="datetime-local" className="form-control" /></label>
+      <label><span className="form-label">主催者表示名 *</span><input name="organizerName" required maxLength={120} className="form-control" /></label>
+      <label className="sm:col-span-2"><span className="form-label">参加方法 *</span><textarea name="participationMethod" required maxLength={2000} rows={3} className="form-control" placeholder="外部フォームURL、連絡方法、定員など" /></label>
+    </div>
+    <fieldset className="space-y-4 border-t border-white/10 pt-7"><legend className="font-mono text-xs tracking-[0.15em] text-[#c8a45a]">金銭条件（公開前に必ず明記）</legend><label><span className="form-label">金銭の種類 *</span><select name="moneyType" required defaultValue="none" className="form-control"><option value="none">なし</option><option value="fixed_fee">固定参加費</option><option value="range_or_upper_limit">幅・上限あり</option><option value="reimbursement">実費精算</option><option value="reward">報酬</option><option value="donation">寄付・カンパ</option><option value="undecided">未定（公開不可）</option></select></label><div className="grid gap-4 sm:grid-cols-2"><label><span className="form-label">金銭条件の説明 *</span><input name="moneyLabel" required placeholder="なし / 参加費1,000円 など" className="form-control" /></label><label><span className="form-label">金額・上限</span><input name="moneyAmount" className="form-control" /></label><label><span className="form-label">通貨</span><input name="moneyCurrency" defaultValue="JPY" className="form-control" /></label><label><span className="form-label">支払先</span><input name="moneyRecipient" className="form-control" /></label><label><span className="form-label">徴収方法</span><input name="moneyCollection" className="form-control" /></label><label><span className="form-label">精算方法 *</span><input name="moneySettlement" required placeholder="なし / 当日現金 / 振込 など" className="form-control" /></label><label><span className="form-label">返金・中止時の扱い</span><input name="moneyRefunds" className="form-control" /></label><label><span className="form-label">変更条件</span><input name="moneyChangeTerms" className="form-control" /></label></div></fieldset>
+    <fieldset className="space-y-4 border-t border-white/10 pt-7"><legend className="font-mono text-xs tracking-[0.15em] text-[#c8a45a]">公開前の確認 *</legend><label className="flex gap-3 text-sm leading-7"><input name="prohibitedConfirmed" type="checkbox" required className="mt-2 h-4 w-4 accent-[#c8a45a]" />禁止事項（マルチ等の勧誘、アダルト系、違法行為、場を乱す行為）に該当しないことを確認しました。</label><label className="flex gap-3 text-sm leading-7"><input name="rightsConfirmed" type="checkbox" required className="mt-2 h-4 w-4 accent-[#c8a45a]" />掲載する文章・画像・会場情報を掲載する権利と必要な同意があります。</label><label className="flex gap-3 text-sm leading-7"><input name="moneyConfirmed" type="checkbox" required className="mt-2 h-4 w-4 accent-[#c8a45a]" />AIueoは金銭を受け取らず、主催者と参加者が直接確認することを理解しました。</label></fieldset>
+    {state.error && <p role="alert" className="border border-red-300/35 bg-red-950/30 p-4 text-sm leading-7 text-red-100">{state.error}</p>}
+    <div className="flex flex-col gap-3 sm:flex-row"><button name="intent" value="draft" type="submit" disabled={isPending} className="btn-ghost flex-1 disabled:opacity-45">{isPending ? '保存中…' : '下書き保存'}</button><button name="intent" value="publish" type="submit" disabled={isPending} className="btn-solid flex-1 disabled:opacity-45">公開する</button></div>
+  </form>;
+}

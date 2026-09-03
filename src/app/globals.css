@@ -16,10 +16,11 @@
 
   html {
     scroll-behavior: smooth;
-    /* 固定ナビ (h-16 / md:h-[68px]) の高さぶんアンカー位置をずらす */
+    /* 固定ナビの高さぶんアンカー位置をずらす */
     scroll-padding-top: 68px;
     text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
+    overflow-x: clip;
   }
 
   body {
@@ -28,7 +29,7 @@
     font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    overflow-x: hidden;
+    overflow-x: clip;
     width: 100%;
     position: relative;
   }
@@ -36,29 +37,6 @@
   ::selection {
     background: var(--gold);
     color: #080808;
-  }
-}
-
-/* Kinetic Collective Responsive Layout Utilities */
-.hero-split {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  min-height: auto;
-}
-
-.who-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-}
-
-@media (min-width: 1024px) {
-  .hero-split {
-    min-height: min(88vh, 840px);
-    grid-template-columns: minmax(0, 1.15fr) minmax(0, 1.85fr);
-  }
-
-  .who-grid {
-    grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr);
   }
 }
 
@@ -136,6 +114,31 @@
   transform: translateY(0);
 }
 
+.form-label {
+  display: block;
+  font-family: var(--font-geist-mono), monospace;
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--gold);
+}
+
+.form-control {
+  display: block;
+  width: 100%;
+  min-height: 2.75rem;
+  margin-top: 0.5rem;
+  border: 1px solid rgba(240, 237, 232, 0.2);
+  background: rgba(0, 0, 0, 0.2);
+  padding: 0.65rem 0.75rem;
+  color: var(--fg);
+  font: inherit;
+  outline: none;
+}
+
+.form-control:focus {
+  border-color: var(--gold);
+}
+
 /* Fluid Typography Utilities */
 .sec-eyebrow {
   font-family: var(--font-geist-mono), monospace;
@@ -151,7 +154,8 @@
   font-weight: 300;
   letter-spacing: -0.02em;
   line-height: 1.15;
-  word-break: keep-all;
+  min-width: 0;
+  word-break: normal;
   overflow-wrap: anywhere;
 }
 

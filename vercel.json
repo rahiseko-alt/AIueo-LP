@@ -1,0 +1,10 @@
+{
+  "framework": "nextjs",
+  "outputDirectory": ".next",
+  "crons": [
+    {
+      "path": "/api/cron/proposal-deadlines",
+      "schedule": "0 0 * * *"
+    }
+  ]
+}

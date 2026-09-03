@@ -29,21 +29,18 @@ export function Navbar() {
 
   const navItems = [
     { label: 'About', href: '#about' },
-    { label: 'Philosophy', href: '#philosophy' },
-    { label: 'Events & Projects', href: '#events' },
-    { label: 'Formats', href: '#series' },
-    { label: 'Recent Logs', href: '#recent' },
-    { label: 'Community', href: '#team' },
-    { label: 'Archive', href: '#archive' },
+    { label: 'How It Works', href: '#philosophy' },
+    { label: 'Events', href: '/events' },
+    { label: 'Activity Log', href: '#recent' },
   ];
 
   return (
     <>
       <nav
-        className={`fixed top-0 left-0 right-0 z-50 flex h-16 md:h-[68px] items-center justify-between border-b transition-all duration-300 px-4 sm:px-6 md:px-8 lg:px-10 ${
+        className={`fixed top-0 left-0 right-0 z-50 flex h-16 md:h-[68px] items-center justify-between border-b px-4 transition-all duration-300 sm:px-6 md:px-8 lg:px-10 ${
           isScrolled
             ? 'border-[rgba(240,237,232,0.12)] bg-[#080808]/90 backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)]'
-            : 'border-[rgba(240,237,232,0.06)] bg-[#080808]/75 backdrop-blur-xl'
+            : 'pointer-events-none -translate-y-full border-transparent bg-transparent opacity-0'
         }`}
       >
         {/* Brand Logo */}
@@ -73,6 +70,12 @@ export function Navbar() {
 
         {/* Right Action / Mobile Toggle */}
         <div className="flex items-center gap-2 sm:gap-4">
+          <Link
+            href="/contact"
+            className="hidden min-h-[44px] items-center px-2 font-mono text-[11px] font-semibold tracking-[0.12em] text-[rgba(240,237,232,0.75)] uppercase transition-colors hover:text-[#c8a45a] xl:inline-flex"
+          >
+            Contact
+          </Link>
           <Link
             href="#join"
             className="hidden sm:inline-flex min-h-[44px] items-center rounded border border-[rgba(200,164,90,0.3)] bg-[rgba(200,164,90,0.06)] px-4 py-2 font-mono text-[11px] font-semibold tracking-[0.16em] text-[#f0ede8] uppercase transition-all duration-200 hover:border-[#c8a45a] hover:bg-[#c8a45a] hover:text-[#080808]"
@@ -115,6 +118,7 @@ export function Navbar() {
               { label: 'Home', href: '#home' },
               ...navItems,
               { label: 'Join / Propose', href: '#join' },
+              { label: 'お問い合わせ', href: '/contact' },
             ].map((item) => (
               <Link
                 key={item.label}
@@ -136,22 +140,6 @@ export function Navbar() {
                 className="flex min-h-[44px] items-center px-2 py-1 transition-colors hover:text-[#c8a45a]"
               >
                 GitHub
-              </a>
-              <a
-                href="https://x.com"
-                target="_blank"
-                rel="noreferrer"
-                className="flex min-h-[44px] items-center px-2 py-1 transition-colors hover:text-[#c8a45a]"
-              >
-                X (Twitter)
-              </a>
-              <a
-                href="https://discord.com"
-                target="_blank"
-                rel="noreferrer"
-                className="flex min-h-[44px] items-center px-2 py-1 transition-colors hover:text-[#c8a45a]"
-              >
-                Discord
               </a>
             </div>
             <p className="text-[10px] tracking-widest text-[rgba(240,237,232,0.3)] uppercase">

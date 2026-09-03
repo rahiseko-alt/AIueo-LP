@@ -21,7 +21,7 @@ export function RecentLog({ activities, people }: RecentLogProps) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-10">
         <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-3 border-b border-[rgba(240,237,232,0.08)] pb-6">
           <div>
-            <div className="sec-eyebrow">04 / LOGS & WHAT WE DID</div>
+            <div className="sec-eyebrow">03 / LOGS & WHAT WE DID</div>
             <h2 className="sec-title text-[#f0ede8]">Recent Activities</h2>
           </div>
           <span className="font-mono text-xs text-[rgba(240,237,232,0.5)] tracking-wider">
