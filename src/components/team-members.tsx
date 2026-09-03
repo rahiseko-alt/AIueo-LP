@@ -7,9 +7,9 @@ interface TeamMembersProps {
 }
 
 export function TeamMembers({ people, activities }: TeamMembersProps) {
-  const getActivityTitle = (actId: string) => {
-    return activities.find((a) => a.id === actId)?.title || 'AI Sprint / Workshop';
-  };
+  // 解決できない activityId は行ごと落とす。ダミー文言で埋めると
+  // データ配線が壊れたことに気付けなくなるため、あえて何も表示しない。
+  const getActivityTitle = (actId: string) => activities.find((a) => a.id === actId)?.title;
 
   return (
     <section id="team" className="section-padding border-b border-[rgba(240,237,232,0.08)] bg-[#080808]">
@@ -51,11 +51,15 @@ export function TeamMembers({ people, activities }: TeamMembersProps) {
                       Collaborated on:
                     </span>
                     <ul className="mt-2 space-y-1.5 font-sans text-xs text-[rgba(240,237,232,0.7)]">
-                      {person.activityIds.map((actId) => (
-                        <li key={actId} className="line-clamp-1">
-                          → {getActivityTitle(actId)}
-                        </li>
-                      ))}
+                      {person.activityIds.map((actId) => {
+                        const title = getActivityTitle(actId);
+                        if (!title) return null;
+                        return (
+                          <li key={actId} className="line-clamp-1">
+                            → {title}
+                          </li>
+                        );
+                      })}
                     </ul>
                   </div>
                 </div>

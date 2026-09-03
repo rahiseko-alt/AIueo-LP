@@ -20,13 +20,16 @@ export function WhoWeAre() {
     <section id="about" className="border-b border-[rgba(240,237,232,0.08)] bg-[#080808]">
       <div className="who-grid min-h-[500px] lg:min-h-[580px]">
         {/* Left: Photo Slider of Real Activities */}
-        <div className="relative min-h-[300px] sm:min-h-[420px] md:min-h-[480px] lg:min-h-full w-full overflow-hidden bg-[#0e0e0e]">
+        <div
+          data-testid="who-slider"
+          className="relative min-h-[300px] sm:min-h-[420px] md:min-h-[480px] lg:min-h-[580px] w-full overflow-hidden bg-[#0e0e0e]"
+        >
           <div
             className="flex h-full w-full transition-transform duration-500 ease-out"
             style={{ transform: `translateX(-${currentSlide * 100}%)` }}
           >
             {mockSliderPhotos.map((photo, idx) => (
-              <div key={idx} className="relative h-full w-full flex-shrink-0 min-h-[300px] sm:min-h-[420px] lg:min-h-full">
+              <div key={idx} className="relative h-full w-full flex-shrink-0 min-h-[300px] sm:min-h-[420px] lg:min-h-[580px]">
                 <Image
                   src={photo.url}
                   alt={photo.caption}

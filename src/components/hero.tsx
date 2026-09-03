@@ -1,6 +1,5 @@
 import Image from 'next/image';
 import { Activity } from '@/types';
-import { Sparkles, ArrowRight } from 'lucide-react';
 
 interface HeroProps {
   activity: Activity;
@@ -12,9 +11,9 @@ export function Hero({ activity }: HeroProps) {
       <div className="hero-split border-b border-[rgba(240,237,232,0.08)] bg-[#080808]">
         {/* Left: Huge 3-line Typography & Punchy Motto */}
         <div className="flex flex-col items-center justify-center px-4 py-10 sm:px-8 sm:py-14 md:px-12 md:py-16 text-center">
-          <div className="mb-6 inline-flex max-w-full items-center gap-2 rounded-full border border-[rgba(200,164,90,0.35)] bg-[rgba(200,164,90,0.08)] px-3.5 py-1.5 font-mono text-[10px] sm:text-[11px] font-medium tracking-[0.18em] sm:tracking-[0.22em] text-[#c8a45a] uppercase">
+          <div className="mb-6 inline-flex min-w-0 max-w-full items-center gap-2 rounded-full border border-[rgba(200,164,90,0.35)] bg-[rgba(200,164,90,0.08)] px-3.5 py-1.5 font-mono text-[10px] sm:text-[11px] font-medium tracking-[0.18em] sm:tracking-[0.22em] text-[#c8a45a] uppercase">
             <span className="h-1.5 w-1.5 flex-shrink-0 animate-ping rounded-full bg-[#c8a45a]"></span>
-            <span className="truncate">AI League · Grassroots Action Alliance</span>
+            <span className="min-w-0 truncate">AI League · Grassroots Action Alliance</span>
           </div>
 
           <h1 className="font-sans text-3xl font-light tracking-tight text-[#f0ede8] sm:text-5xl md:text-5xl lg:text-6xl xl:text-7xl">
