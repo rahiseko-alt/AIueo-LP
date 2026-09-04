@@ -39,17 +39,19 @@ export async function POST(request: NextRequest) {
   if (body.action === 'signup' && password.length < 8) return NextResponse.json({ ok: false, message: 'パスワードは8文字以上で入力してください。' }, { status: 400 });
   if (body.action !== 'signup' && body.action !== 'resend') return NextResponse.json({ ok: false, message: '不正な操作です。' }, { status: 400 });
 
-  let alreadyRegistered = false;
   if (body.action === 'signup') {
     const { error } = await neonAuth.signUp.email({ email, password, name: 'AIueo member' });
     if (error) {
       const code = (error as { code?: string }).code;
+      // 既存アドレスでも失敗として扱わない。確認コードを送って同じ応答を返すことで、
+      // 登録済みかどうかを呼び出し側から判別できないようにする。
       if (code !== 'USER_ALREADY_EXISTS') return failed('signup', error);
-      alreadyRegistered = true;
     }
   }
 
   const { error } = await neonAuth.emailOtp.sendVerificationOtp({ email, type: 'email-verification' });
   if (error) return failed('delivery', error);
-  return NextResponse.json({ ok: true, alreadyRegistered });
+
+  // 応答は常に同一。あるアドレスが会員かどうかを外部に漏らさない。
+  return NextResponse.json({ ok: true });
 }

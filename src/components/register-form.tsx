@@ -45,16 +45,16 @@ export function RegisterForm() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ action: 'signup', email, password }),
     });
-    const result = await response.json().catch(() => null) as { ok?: boolean; message?: string; alreadyRegistered?: boolean } | null;
+    const result = await response.json().catch(() => null) as { ok?: boolean; message?: string } | null;
     if (!response.ok || !result?.ok) {
       setNotice(result?.message ?? '登録を開始できませんでした。時間をおいて再度お試しください。');
       setIsWorking(false);
       return;
     }
     setScreen('verify');
-    setNotice(result.alreadyRegistered
-      ? 'すでに登録済みのメールアドレスです。確認コードを再送しました。'
-      : '確認コードを送信しました。メールの受信トレイと迷惑メールを確認してください。');
+    // 登録済みかどうかで文言を変えない。変えると、任意のアドレスが会員かを
+    // 画面から判別できてしまう。
+    setNotice('このアドレスが利用できる場合、確認コードを送信しました。メールの受信トレイと迷惑メールを確認してください。');
     setIsWorking(false);
   }
 
