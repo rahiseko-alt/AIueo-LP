@@ -43,6 +43,17 @@ export async function completeProfileAction(
   const client = await db.$client.connect();
   try {
     await client.query('begin');
+
+    // 停止・退会は管理者の措置なので、本人がこの経路で active に戻せてはいけない。
+    // 画面ではフォームを出していないが、サーバーアクションは直接呼べるためここで弾く。
+    // 行ロックを取ってから読むことで、措置と同時に走っても後勝ちで復活しない。
+    const existing = await client.query('select status from profiles where id = $1 for update', [user.id]);
+    const currentStatus = existing.rows[0]?.status as string | undefined;
+    if (currentStatus === 'suspended' || currentStatus === 'withdrawn') {
+      await client.query('rollback');
+      return { error: '現在の会員状態では登録内容を変更できません。お問い合わせください。' };
+    }
+
     const current = await client.query('select id from terms_versions where is_current = true order by document_type');
     const currentIds = current.rows.map((row) => row.id as string);
     if (currentIds.length !== 3 || currentIds.some((id) => !termsVersionIds.includes(id))) {
