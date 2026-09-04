@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { neonAuth } from '@/lib/neon/auth';
+import { consumeRateLimit } from '@/lib/rate-limit';
 
 type RegistrationRequest = {
   action?: 'signup' | 'resend';
@@ -7,9 +8,31 @@ type RegistrationRequest = {
   password?: unknown;
 };
 
+// アドレス単位とIP単位の両方で絞る。アドレス単位は1つの宛先へのメール爆撃を、
+// IP単位は多数のアドレスを試す列挙と、上流の共有枠の食い潰しを防ぐ。
+const PER_EMAIL = { scope: 'registration:email', windowSeconds: 3600, max: 3 };
+const PER_IP = { scope: 'registration:ip', windowSeconds: 3600, max: 10 };
+
 function isSameOrigin(request: NextRequest) {
   const origin = request.headers.get('origin');
   return origin === request.nextUrl.origin;
+}
+
+/**
+ * 送信元IP。Vercel は x-forwarded-for の先頭に実クライアントを入れる。
+ * 取れない場合は 'unknown' の共有枠に落とす。素通しにはしない。
+ */
+function clientIp(request: NextRequest) {
+  const forwarded = request.headers.get('x-forwarded-for');
+  return forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip')?.trim() || 'unknown';
+}
+
+function tooManyRequests(retryAfterSeconds: number) {
+  const minutes = Math.ceil(retryAfterSeconds / 60);
+  return NextResponse.json(
+    { ok: false, message: `送信回数の上限に達しました。約${minutes}分後にもう一度お試しください。` },
+    { status: 429, headers: { 'Retry-After': String(retryAfterSeconds) } },
+  );
 }
 
 function unavailable() {
@@ -38,6 +61,14 @@ export async function POST(request: NextRequest) {
   if (!email || !email.includes('@')) return NextResponse.json({ ok: false, message: 'メールアドレスを確認してください。' }, { status: 400 });
   if (body.action === 'signup' && password.length < 8) return NextResponse.json({ ok: false, message: 'パスワードは8文字以上で入力してください。' }, { status: 400 });
   if (body.action !== 'signup' && body.action !== 'resend') return NextResponse.json({ ok: false, message: '不正な操作です。' }, { status: 400 });
+
+  // 認証基盤を叩く前に消費する。上流の共有枠を守るのが目的なので、
+  // 上流へ要求を出してからでは遅い。
+  const ipLimit = await consumeRateLimit(clientIp(request), PER_IP);
+  if (!ipLimit.allowed) return tooManyRequests(ipLimit.retryAfterSeconds);
+
+  const emailLimit = await consumeRateLimit(email, PER_EMAIL);
+  if (!emailLimit.allowed) return tooManyRequests(emailLimit.retryAfterSeconds);
 
   if (body.action === 'signup') {
     const { error } = await neonAuth.signUp.email({ email, password, name: 'AIueo member' });
