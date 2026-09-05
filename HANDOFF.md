@@ -12,9 +12,10 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新の実装コミット: `245d610 fix: 引継ぎ検出フックの誤検出をなくす (#11)`
+- 最新の実装コミット: `b4fd6ba docs: drizzle/0002 を本番Neonへ適用済みとして記録する (#13)`
 - ビルド: `npm run build` が成功
-- 品質ゲート: `lint` / `typecheck` / `build` / Playwright 87件が GitHub Actions で PR ごとに必須実行され、緑
+- 品質ゲート: `lint` / `typecheck` / `build` / Playwright 93件が GitHub Actions で PR ごとに必須実行され、緑
+- **正式URLは `https://aiueo.kouheikosehira.com`**（`src/lib/site.ts`）。`https://aiueo-lp.vercel.app` も同じ内容を返すが、canonical で前者に寄せている
 - **Vercel の Git 連携が接続済み。`main` への push で本番デプロイが自動で走る**（このセッションで接続前後を実測確認）
 
 ## 今回の作業（2026-09-05 その2 / Claude Code on the web）
@@ -56,6 +57,22 @@
 
 - `tests/auth-proxy.spec.ts`（10件）: 塞いだ8パスが 404、許可パスが 404 でない、メソッド違いが 404。**許可リストを外すと10件中9件が落ちることを実測で確認した。**
 - `tests/admin-access.spec.ts`（4件）: 管理画面4ページが未認証で 200 を返さない。
+
+### 検索結果・SNS共有への対応（Tier 2）
+
+ユーザーが Tier 2 を選び、あわせて2つを決定した。**サイトの主題は「AIを前に出す」**（名前 `AI League AIueo` を維持し、矛盾していた `DIRECTION.md` 側を書き換えた）。**正式URLは `https://aiueo.kouheikosehira.com`**。
+
+修正前は `title` と `description` の2項目しか無く、全7ページが同じ文言だった。OGP・canonical・robots・sitemap はどれも存在せず、URLを貼っても画像も説明も出なかった。`description` は「週末に集まり、AIを触り、プロトタイプで遊ぶ同盟。」で本文と食い違っていた。
+
+- `src/lib/site.ts` を新設し、正式URL・サイト名・説明文・非公開パスを1箇所へ集約。`metadataBase` / canonical / OGP / robots / sitemap がすべて同じ住所を名乗るようにした。
+- `src/app/layout.tsx` に `metadataBase`、`title` の template、`openGraph`、`twitter`、`alternates.canonical`、`robots` を追加。
+- `src/app/opengraph-image.tsx` を新設。`next/og` の `ImageResponse` で 1200×630 を生成する（39KB）。**文字を英字だけにしているのは、`next/og` の既定フォントに日本語の字形が無く、和文を置くと空白になるため。** 画像素材（`public/images/japanese/*.png`）は1枚2MB前後あり、OGP画像には大きすぎるので使っていない。
+- `src/app/robots.ts` と `src/app/sitemap.ts` を新設。sitemap は公開中の企画も載せるが、**DBが無い環境やクエリ失敗では固定ページだけを返す**（ビルドと配信を落とさない）。
+- 7ページへ個別の `metadata` を追加。`/events/[slug]` は `generateMetadata` で企画名と概要を使う。**本文と同じ絞り込み条件で引き、見つからなければ企画名を出さない**（下書き・期限切れの企画名を共有カードから漏らさない）。
+- `DIRECTION.md` の「AIはサイトテーマではない」（§5）と「AI専門サイトにしない」（§18-6）を、ユーザー決定に沿って「AIを入口として名乗るが、AIの技術解説サイトにはしない」へ書き換えた。§5 の「脇役」一覧からも `AI` を外した。
+- `tests/metadata.spec.ts`（6件）を追加。**`layout.tsx` から `openGraph` を外すと落ちることを実測で確認した。**
+
+生成した OGP 画像は実際に取得して目視確認済み（黒地にゴールドの `Aiueo`、`THIS WAY. TOGETHER.`、ドメイン名。文字の切れなし）。
 
 ## 前回の作業（2026-09-05 その1 / Claude Code on the web）
 
@@ -151,20 +168,17 @@ CI もテストも無く、`npm run lint` が exit 1 のまま放置され、`ne
 
 ## 次にやること
 
-### 最優先: 確定リストの Tier 2〜4 から、ユーザーの指示を受けて着手する
+### 最優先: Tier 3（不要ファイルの掃除）と Tier 4（アクセシビリティ）
 
-Tier 1 は PR #12 で完了し、`drizzle/0002` も本番へ適用済み。**未着手の作業はユーザー判断待ちのものだけである。** 下記 X1 が決まらないと Tier 2 は始められない。
+Tier 1（PR #12）と Tier 2 は完了。`drizzle/0002` も本番へ適用済み。**X1（サイトの主題）は「AIを前に出す」で決着した。** 残るユーザー判断は X2・X3 のみで、どちらも Tier 3/4 の着手を止めない。
 
 ### 確定した問題リスト（2026-09-05 に全行を読み切って作成。推測は含まない）
 
 Tier 1（セキュリティ・確実なバグ）は実施済み。**Tier 2〜4 はユーザーの指示で持ち越し。** 行番号は `245d610` 時点。
 
-#### Tier 2 — 公開品質（X1 の決定が前提）
+#### Tier 2 — 公開品質 ✅ 完了（2026-09-05）
 
-- `src/app/layout.tsx:22-25` の `metadata` は `title` と `description` の2項目のみ。`metadataBase` / `openGraph` / `twitter` / `alternates.canonical` はすべて未設定（`src` 全体で0ヒット）。
-- `src/app/robots.ts` / `src/app/sitemap.ts` / OGP画像はいずれも**存在しない**。
-- `export const metadata` は1箇所のみ、`generateMetadata` は0件。`/events`、`/events/[slug]`、`/register`、`/contact`、`/terms`、`/privacy`、`/disclaimer` が**全ページ同一の title/description**。
-- `description`（`layout.tsx:24`）「週末に集まり、AIを触り、プロトタイプで遊ぶ同盟。」が本文（`who-we-are.tsx:16-18`, `:24`「ジャンルは自由です。」）と矛盾。検索結果とSNSに出るのはこれ。
+`metadataBase` / OGP / canonical / `robots.ts` / `sitemap.ts` / ページ別 metadata をすべて追加済み。詳細は上の「今回の作業」を参照。
 
 #### Tier 3 — 掃除
 
@@ -202,9 +216,7 @@ Tier 1（セキュリティ・確実なバグ）は実施済み。**Tier 2〜4 �
 
 ### ユーザー判断待ち
 
-- **X1**: `DIRECTION.md:132`「AIはサイトテーマではない」・`:250`「AI専門サイトにしない」と、`AGENTS.md:14`「Product: AI League AIueo（草AIチーム / AI同盟）」・`layout.tsx:23` `"AI League AIueo · Grassroots AI Alliance"` が正面衝突している。外向きに出るのは後者。**Tier 2 の前提**。
-  - DIRECTION を正とするなら → `layout.tsx:23-24` から AI 色を落とし、`AGENTS.md:14` の Product 定義も書き換える。
-  - AGENTS を正とするなら → 名前は維持し、`DIRECTION.md:132`・`:250` を削除/緩和して `description` だけ現行コピーへ直す。
+- ~~**X1**: サイトの主題~~ → **決着済み（2026-09-05）**。ユーザーの判断は「AIを前に出す」。名前 `AI League AIueo` を維持し、`DIRECTION.md` の §5・§18-6 を書き換えた。正式URLは `https://aiueo.kouheikosehira.com`。
 - **X2**: セッションキャッシュ 300秒を許容するか。
 - **X3**: 個人ドメインのメールアドレスを公開ページに平文で出し続けるか。
 

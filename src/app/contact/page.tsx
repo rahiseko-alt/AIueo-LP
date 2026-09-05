@@ -1,4 +1,12 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
+
+export const metadata: Metadata = {
+  title: 'お問い合わせ',
+  description: 'AIueoへの企画・共催・会場提供のご相談、掲載内容についてのご連絡先。',
+  alternates: { canonical: '/contact' },
+  openGraph: { title: 'お問い合わせ', description: 'AIueoへの企画・共催・会場提供のご相談、掲載内容についてのご連絡先。', url: '/contact' },
+};
 
 export default function ContactPage() {
   return (

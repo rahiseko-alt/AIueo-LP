@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { siteDescription, siteName, siteUrl } from "@/lib/site";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,8 +21,29 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  title: "AI League AIueo · Grassroots AI Alliance",
-  description: "AI同盟 / 草AIチーム — 週末に集まり、AIを触り、プロトタイプで遊ぶ同盟。",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: siteName,
+    // 各ページは短い見出しだけを書けばよい。
+    template: `%s | ${siteName}`,
+  },
+  description: siteDescription,
+  applicationName: siteName,
+  alternates: { canonical: "/" },
+  openGraph: {
+    type: "website",
+    siteName,
+    locale: "ja_JP",
+    url: "/",
+    title: siteName,
+    description: siteDescription,
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteName,
+    description: siteDescription,
+  },
+  robots: { index: true, follow: true },
 };
 
 export default function RootLayout({
