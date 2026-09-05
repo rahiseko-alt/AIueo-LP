@@ -78,7 +78,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | P7 | 横断受入・本番 | P2–P6 | 3視点の敵対検証、RLS許可/拒否、E2E、360px/768px/1280px確認、Vercel本番確認 | 未着手 |
 | P8 | 配線復旧と品質ゲート | なし | Vercel Git連携、CI必須化、Playwright、認可・列挙・レート制限の修正 | 完了（2026-09-05、本番反映済み） |
 | P9 | 未監査領域の読み切り | P8 | 残り約2,200行を監査し、問題リストを確定してユーザーの仕分けを受ける | 完了（確定リストは`HANDOFF.md`。Tier 1のみ実施、Tier 2〜4はユーザー指示で持ち越し） |
-| P10 | 認証Proxy・管理操作・スキーマ保全 | P9 | `/api/auth`の許可リスト、管理操作の失敗表示、`submitted`除去、追記専用トリガ、不足インデックス | 完了（`drizzle/0002`は本番未適用） |
+| P10 | 認証Proxy・管理操作・スキーマ保全 | P9 | `/api/auth`の許可リスト、管理操作の失敗表示、`submitted`除去、追記専用トリガ、不足インデックス | 完了 |
 
 ## データ・権限の実装境界
 
@@ -137,7 +137,8 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | 2026-09-05 | 登録エンドポイントに回数制限を追加（1アドレス3回/時、1IP 10回/時）。上流Neon Authの制限がIP単位＝アプリ単位で共有される問題への対処 | **PostgreSQL 16実機で検証**: 逐次4回で許可3件、同時20要求でも許可3件、掃除は古い行のみ削除。判定を1回分ゆるめると検証スクリプトが失敗しexit 1 | PR #9、`f7c9a50`、`drizzle/0001_rate_limits.sql`を本番Neonへ適用済み |
 | 2026-09-05 | P9: 未監査領域 約2,200行を読み切り、問題リストを確定。引継ぎ記述の誤り4点を訂正 | 確定リストを`HANDOFF.md`へ収録。ユーザー仕分けはTier 1のみ実施 | `HANDOFF.md`「確定した問題リスト」 |
 | 2026-09-05 | P10: `/api/auth/[...path]`を許可リスト方式へ。管理操作の失敗を画面表示、`submitted`／cron専用状態を選択肢から除去、同一状態への変更を拒否、`ipAddress()`／`timingSafeEqual`／uuid検証／`release(true)`を追加 | **スタブ上流を立てて実測**: 修正前は`admin/list-users`と`sign-up/email`が上流へ到達、修正後は404で到達せず、許可4パスは到達。許可リストを外すとテスト10件中9件が落ちる。lint/typecheck/build/Playwright 87件が緑 | `src/app/api/auth/[...path]/route.ts`、`src/app/admin/actions.ts`、`tests/auth-proxy.spec.ts`、`tests/admin-access.spec.ts` |
-| 2026-09-05 | `drizzle/0002_integrity_and_indexes.sql`: `moderation_actions`の追記専用トリガ、`terms_versions`の現行1件保証、欠けていたインデックス12本 | **PostgreSQL 16実機で検証**: 更新・削除が拒否、現行2件目が拒否、`reports`の未処理カウントが全走査→Index Only Scan、cronの2クエリが全走査→Index Scan。0002の効果を外すと`verify-migrations.mjs`が4件NGでexit 1 | `drizzle/0002_integrity_and_indexes.sql`、`scripts/verify-migrations.mjs`。**本番Neonへ未適用** |
+| 2026-09-05 | `drizzle/0002_integrity_and_indexes.sql`: `moderation_actions`の追記専用トリガ、`terms_versions`の現行1件保証、欠けていたインデックス12本 | **PostgreSQL 16実機で検証**: 更新・削除が拒否、現行2件目が拒否、`reports`の未処理カウントが全走査→Index Only Scan、cronの2クエリが全走査→Index Scan。0002の効果を外すと`verify-migrations.mjs`が4件NGでexit 1 | `drizzle/0002_integrity_and_indexes.sql`、`scripts/verify-migrations.mjs` |
+| 2026-09-05 | PR #12 をマージし、`drizzle/0002` を本番Neonへ適用 | 適用後に本番で実測: 追加インデックス13本、トリガ`moderation_actions_immutable` 1件を確認 | PR #12、`07fe67e`、`neon-pink-bucket` / branch `main` / database `neondb` |
 
 ## セッション終了チェック
 
