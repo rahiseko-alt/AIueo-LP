@@ -43,7 +43,7 @@
 
 ### スキーマの保全とインデックス（`drizzle/0002_integrity_and_indexes.sql`）
 
-**このマイグレーションは本番Neonへ未適用。マージ前に適用すること**（このセッションの環境に接続情報が無いため実行できなかった）。追加するのはトリガとインデックスのみで、アプリのコードはどれにも依存していないため、適用が遅れてもエンドポイントは例外にならない。
+**本番Neonへ適用済み**（2026-09-05、PR #12 のマージ後にユーザーが Vercel の Query 画面から実行）。追加するのはトリガとインデックスのみで、アプリのコードはどれにも依存していない。
 
 使い捨ての PostgreSQL 16 に 0000→0001→0002 を流して実測した。
 
@@ -151,13 +151,9 @@ CI もテストも無く、`npm run lint` が exit 1 のまま放置され、`ne
 
 ## 次にやること
 
-### 最優先: `drizzle/0002_integrity_and_indexes.sql` を本番Neonへ適用する
+### 最優先: 確定リストの Tier 2〜4 から、ユーザーの指示を受けて着手する
 
-**PR がマージされる前に適用すること。** マージ後の適用でも障害にはならない（アプリのコードはこのマイグレーションに依存していない）が、`AGENTS.md` の運用ルールは「本番へ適用してからマージ」である。
-
-- 対象: `neon-pink-bucket` / branch `main` / database `neondb`
-- 適用前の確認: `select document_type, count(*) from terms_versions where is_current group by 1;` が3種類×1件であること。2件以上ある種別があると部分UNIQUEの作成が失敗する。
-- 適用後の確認: `DATABASE_URL=<使い捨てDB> node scripts/verify-migrations.mjs`（本番の接続先は渡さない。スクリプトが弾く）
+Tier 1 は PR #12 で完了し、`drizzle/0002` も本番へ適用済み。**未着手の作業はユーザー判断待ちのものだけである。** 下記 X1 が決まらないと Tier 2 は始められない。
 
 ### 確定した問題リスト（2026-09-05 に全行を読み切って作成。推測は含まない）
 
@@ -241,7 +237,8 @@ Tier 1（セキュリティ・確実なバグ）は実施済み。**Tier 2〜4 �
 - **`drizzle/0001_rate_limits.sql` は本番Neonへ適用済み**（2026-09-05、`neon-pink-bucket` / branch `main` / database `neondb`）。今後マイグレーションを追加する場合は、**必ず本番DBへ適用してからマージする**。逆順にすると、テーブル不在で該当エンドポイントが例外になる。
 - 回数制限には CI での検証が無い（CIにDBが無いため）。`scripts/verify-rate-limit.mjs` を使い捨てDBに対して手で流すこと。本番らしい接続文字列は拒否される。
 - **上流 Neon Auth の制限はIP単位＝アプリ単位で共有される。** 自前の制限を外すと、攻撃者が上流枠を食い潰して全利用者の登録が止まる。
-- **`drizzle/0002_integrity_and_indexes.sql` は本番Neonへ未適用。** このセッションの環境に接続情報が無く実行できなかった。適用前に `terms_versions` の現行が種別ごとに1件であることを確認すること（2件以上あると部分UNIQUEの作成が失敗する）。
+- **`drizzle/0002_integrity_and_indexes.sql` は本番Neonへ適用済み**（2026-09-05、`neon-pink-bucket` / branch `main` / database `neondb`）。適用後の確認で、追加したインデックス13本とトリガ `moderation_actions_immutable` の存在を実測した。
+- **Vercel の Query 画面は複数の命令を1度に実行できない**（`cannot insert multiple commands into a prepared statement`）。マイグレーションを手で流すときは、関数定義と `do $do$ ... $do$;` ブロックの2回に分けること。画面右上の `Read-only` トグルもオフにする必要がある。
 - **`/api/auth/[...path]` を素の再エクスポートに戻さないこと。** ライブラリのハンドラは受け取ったパスをそのまま上流へ連結するので、素通しに戻すと登録の回数制限・ユーザー列挙対策・監査の全部を迂回できる。`tests/auth-proxy.spec.ts` が検出する（許可リストを外すと10件中9件が落ちる）。
 - **管理操作の失敗を握り潰さないこと。** `withAdminTransaction` の戻り値を無視して `redirect()` すると、非公開化や会員停止が効いていないのに成功と誤認される。失敗は `?error=` で画面へ出す。
 - スキーマを変更したら `scripts/verify-migrations.mjs` を使い捨てDBへ流すこと。CIにDBが無いため自動では走らない。
