@@ -14,6 +14,7 @@ export async function setProposalEventStatusAction(formData: FormData) {
   if (typeof proposalId !== 'string' || !eventStatus.success) return;
   const member = await requireActiveMember();
   const client = await db.$client.connect();
+  let broken = false;
   try {
     await client.query('begin');
     const current = await client.query('select * from proposals where id = $1 and owner_id = $2 for update', [proposalId, member.userId]);
@@ -36,10 +37,15 @@ export async function setProposalEventStatusAction(formData: FormData) {
     );
     await client.query('commit');
   } catch {
-    await client.query('rollback');
+    try {
+      await client.query('rollback');
+    } catch {
+      // rollback に失敗したコネクションはトランザクションが開いたまま残りうる。
+      broken = true;
+    }
     return;
   } finally {
-    client.release();
+    client.release(broken);
   }
   redirect(`/member/proposals/${proposalId}`);
 }

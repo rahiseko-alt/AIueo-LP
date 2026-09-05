@@ -12,6 +12,7 @@ export async function createReportAction(formData: FormData) {
   const context = await getAuthContext();
   const reporterId = context.kind === 'member' ? context.userId : null;
   const client = await db.$client.connect();
+  let broken = false;
   try {
     await client.query('begin');
     const proposal = await client.query(
@@ -32,10 +33,15 @@ export async function createReportAction(formData: FormData) {
     );
     await client.query('commit');
   } catch {
-    await client.query('rollback');
+    try {
+      await client.query('rollback');
+    } catch {
+      // rollback に失敗したコネクションはトランザクションが開いたまま残りうる。
+      broken = true;
+    }
     return;
   } finally {
-    client.release();
+    client.release(broken);
   }
   redirect(`/events/${slug}?reported=1`);
 }

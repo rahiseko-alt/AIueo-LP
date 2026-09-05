@@ -1,3 +1,4 @@
+import { timingSafeEqual } from 'node:crypto';
 import { NextResponse, type NextRequest } from 'next/server';
 import { db } from '@/lib/neon/db';
 import { pruneRateLimits } from '@/lib/rate-limit';
@@ -6,7 +7,14 @@ export const dynamic = 'force-dynamic';
 
 function isAuthorized(request: NextRequest) {
   const secret = process.env.CRON_SECRET;
-  return Boolean(secret && request.headers.get('authorization') === `Bearer ${secret}`);
+  if (!secret) return false;
+  const provided = request.headers.get('authorization');
+  if (!provided) return false;
+  // 文字列の === は先頭から一致するほど遅くなり、秘密値を1文字ずつ推測できる。
+  const expectedBytes = Buffer.from(`Bearer ${secret}`);
+  const providedBytes = Buffer.from(provided);
+  if (expectedBytes.length !== providedBytes.length) return false;
+  return timingSafeEqual(expectedBytes, providedBytes);
 }
 
 export async function GET(request: NextRequest) {
@@ -17,6 +25,7 @@ export async function GET(request: NextRequest) {
   let expired = 0;
   let autoHidden = 0;
   let reminded = 0;
+  let broken = false;
   try {
     await client.query('begin');
     const expiredRows = await client.query("select * from proposals where status = 'published' and public_expires_at <= now() for update");
@@ -44,10 +53,15 @@ export async function GET(request: NextRequest) {
     }
     await client.query('commit');
   } catch {
-    await client.query('rollback');
+    try {
+      await client.query('rollback');
+    } catch {
+      // rollback に失敗したコネクションはトランザクションが開いたまま残りうる。
+      broken = true;
+    }
     return NextResponse.json({ error: 'deadline_processing_failed' }, { status: 500 });
   } finally {
-    client.release();
+    client.release(broken);
   }
 
   // 期限切れの回数制限カウンタを掃除する。判定はウィンドウ単位で行を分けている

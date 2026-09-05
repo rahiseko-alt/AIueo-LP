@@ -41,6 +41,7 @@ export async function completeProfileAction(
   if (user.emailVerified !== true) return { error: '確認済みメールアドレスが必要です。認証メールを確認してから再度お試しください。' };
 
   const client = await db.$client.connect();
+  let broken = false;
   try {
     await client.query('begin');
 
@@ -77,10 +78,15 @@ export async function completeProfileAction(
     );
     await client.query('commit');
   } catch {
-    await client.query('rollback');
+    try {
+      await client.query('rollback');
+    } catch {
+      // rollback に失敗したコネクションはトランザクションが開いたまま残りうる。
+      broken = true;
+    }
     return { error: '登録を完了できませんでした。時間をおいて再度お試しください。' };
   } finally {
-    client.release();
+    client.release(broken);
   }
 
   redirect('/member');

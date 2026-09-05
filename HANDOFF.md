@@ -12,12 +12,52 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新の実装コミット: `f7c9a50 feat: 登録エンドポイントに回数制限を追加する (#9)`
+- 最新の実装コミット: `245d610 fix: 引継ぎ検出フックの誤検出をなくす (#11)`
 - ビルド: `npm run build` が成功
-- 品質ゲート: `lint` / `typecheck` / `build` / Playwright 73件が GitHub Actions で PR ごとに必須実行され、緑
+- 品質ゲート: `lint` / `typecheck` / `build` / Playwright 87件が GitHub Actions で PR ごとに必須実行され、緑
 - **Vercel の Git 連携が接続済み。`main` への push で本番デプロイが自動で走る**（このセッションで接続前後を実測確認）
 
-## 今回の作業（2026-09-05 / Claude Code on the web）
+## 今回の作業（2026-09-05 その2 / Claude Code on the web）
+
+### 未監査領域の読み切り（P9）
+
+残り約2,200行（`src/components/`、`src/app/admin/`、`drizzle/`、`src/proxy.ts`、`src/app/api/auth/`、`public/`、メタデータ、依存）を読み切り、問題リストを確定した。確定リストは下の「既知で未対応」に置き換えた。ユーザーの仕分けは **Tier 1（セキュリティ・確実なバグ）のみ実施**。
+
+**引継ぎ記述そのものに誤りが4点あった**（旧LP向けの一覧を引き継いでいたため）。
+
+- 「死にコード7ファイル」→ 実際は **10ファイル**（`archive-timeline` / `projects-spotlight` / `testimonials` が漏れていた）
+- 「`join.tsx` に `contact@example.com` が残る」→ **既に解消済み**
+- 「外部リンクが `https://discord.com`」→ **現行コードに存在しない**。`x.com` は死にコード `about.tsx:38` のみ
+- 「見出し階層スキップ」→ 描画中コンポーネントでは **該当なし**（h1→h2→h3 が成立）
+
+### セキュリティ修正（Tier 1）
+
+いずれも実測で確認済み。
+
+- **`/api/auth/[...path]` が上流 Neon Auth への無検査パススルーだった。** 受け取ったパスがそのまま上流へ連結されるため、PR #8・#9 で入れた対策の**片側しか塞げていなかった**。ローカルにスタブ上流を立てて実測: `POST /api/auth/email-otp/send-verification-otp` と `sign-up/email` が回数制限・同一応答を通らずに上流へ到達し、`admin/list-users` `admin/set-role` も素通りした。実際に画面が使う4パス（`get-session` / `sign-in/email` / `sign-out` / `email-otp/verify-email`）だけの許可リストに変更。登録は上流をサーバー側から直接呼ぶ経路なので、塞いでも動くことを実測で確認した。
+- **管理者操作の失敗が完全に握り潰されていた。** `catch { rollback; return false }` にログも無く、呼び出し元5箇所は戻り値を見ずに `redirect()` していた。危険な企画の非公開化や会員停止が失敗しても管理者は成功と区別できず、監査ログにも残らなかった。失敗を呼び出し元へ返し、`console.error`（個人情報なし）に残し、画面へ `role="alert"` で表示するようにした。
+- **`submitted` は DB の CHECK 制約に存在しないのに管理画面の選択肢に出ていた。** 旧 Supabase スキーマの名残で、選ぶと必ず制約違反 → 上記の握り潰しで無言のロールバック。選択肢から削除した。`auto_hidden` / `expired` も cron 専用の状態なので手で付けられないようにした（管理者が公開から外すときは `hidden`）。
+- **同じ状態への変更を拒否**するようにした。以前は版履歴・監査・通知だけが無意味に増えた。
+- 回数制限のIPを生の `x-forwarded-for` から `@vercel/functions` の `ipAddress()` 優先へ変更。CRONシークレットの比較を `timingSafeEqual` に変更。企画ID・通報IDの uuid 検証、`money_details` がオブジェクトであることの検証を追加。
+- `rollback` 自体が失敗したコネクションを破棄する（`release(true)`）ようにした。7箇所すべて。
+
+### スキーマの保全とインデックス（`drizzle/0002_integrity_and_indexes.sql`）
+
+**このマイグレーションは本番Neonへ未適用。マージ前に適用すること**（このセッションの環境に接続情報が無いため実行できなかった）。追加するのはトリガとインデックスのみで、アプリのコードはどれにも依存していないため、適用が遅れてもエンドポイントは例外にならない。
+
+使い捨ての PostgreSQL 16 に 0000→0001→0002 を流して実測した。
+
+- `moderation_actions` に追記専用トリガを追加（`audit_log` にはあったが措置記録には無かった）。例外文言をテーブル名入りに変更。更新・削除が両方拒否されることを確認。
+- `terms_versions` に「文書種別ごとに現行は1つ」の部分UNIQUEを追加。2件目の `is_current = true` が拒否され、旧版（`false`）は何件でも置けることを確認。
+- 欠けていたインデックスを追加。実測で **`reports` の未処理カウントが全走査 → Index Only Scan**、**cron の期限切れ抽出と3日前抽出が全走査 → Index Scan**、**`profiles(role, status)` が5万行で Index Scan** になることを確認した。
+- `scripts/verify-migrations.mjs` を追加。0002 の効果を外すと 4件が NG になり exit 1 することを確認済み。CIにDBが無いため手で流す。
+
+### テスト（73件 → 87件）
+
+- `tests/auth-proxy.spec.ts`（10件）: 塞いだ8パスが 404、許可パスが 404 でない、メソッド違いが 404。**許可リストを外すと10件中9件が落ちることを実測で確認した。**
+- `tests/admin-access.spec.ts`（4件）: 管理画面4ページが未認証で 200 を返さない。
+
+## 前回の作業（2026-09-05 その1 / Claude Code on the web）
 
 ### 配線の復旧（最重要）
 
@@ -111,38 +151,66 @@ CI もテストも無く、`npm run lint` が exit 1 のまま放置され、`ne
 
 ## 次にやること
 
-### 最優先: 未監査領域の読み切り（次セッションの主タスク）
+### 最優先: `drizzle/0002_integrity_and_indexes.sql` を本番Neonへ適用する
 
-問題リストが確定しないまま作業を続けると、着手のたびに新規発見が増えて終わりが見えない。**未監査領域を閉じて、リストを確定させる。**
+**PR がマージされる前に適用すること。** マージ後の適用でも障害にはならない（アプリのコードはこのマイグレーションに依存していない）が、`AGENTS.md` の運用ルールは「本番へ適用してからマージ」である。
 
-全体 3,403行のうち、このセッションで監査したのは会員機能の認可経路（`src/app/member/**`、`src/app/api/membership/registration`、`src/app/events/**`、`src/lib/auth/dal.ts`）のみ。**残り約2,200行が未監査**。
+- 対象: `neon-pink-bucket` / branch `main` / database `neondb`
+- 適用前の確認: `select document_type, count(*) from terms_versions where is_current group by 1;` が3種類×1件であること。2件以上ある種別があると部分UNIQUEの作成が失敗する。
+- 適用後の確認: `DATABASE_URL=<使い捨てDB> node scripts/verify-migrations.mjs`（本番の接続先は渡さない。スクリプトが弾く）
 
-| 未監査領域 | 規模 | 主な観点 |
-|---|---|---|
-| `src/components/` | 25ファイル / 1,821行 | 死にコード7ファイル、外部リンク、メール平文露出、アクセシビリティ |
-| `src/app/admin/` | 7ファイル / 195行 | 管理者操作の認可、監査ログの原子性 |
-| `drizzle/` | 2ファイル / 167行 | 制約、外部キー、インデックス |
-| `src/proxy.ts` | 11行 | ミドルウェアの適用範囲 |
-| `src/app/api/auth/` | 10行 | Neon Auth ハンドラの露出範囲 |
+### 確定した問題リスト（2026-09-05 に全行を読み切って作成。推測は含まない）
 
-読み切ったあと、**確定リストをユーザーへ提示し、やる/やらない/後回しの仕分けを受ける**。「やらない」と決まった項目は再提示しない。
+Tier 1（セキュリティ・確実なバグ）は実施済み。**Tier 2〜4 はユーザーの指示で持ち越し。** 行番号は `245d610` 時点。
 
-### 既知で未対応（確定リスト作成時に再検証すること）
+#### Tier 2 — 公開品質（X1 の決定が前提）
 
-**この一覧は旧LP向けに作成したものを引き継いでいる。現行コードベースでの該当を再確認してから着手すること。** 2026-09-05 時点で以下は現存を確認済み。
+- `src/app/layout.tsx:22-25` の `metadata` は `title` と `description` の2項目のみ。`metadataBase` / `openGraph` / `twitter` / `alternates.canonical` はすべて未設定（`src` 全体で0ヒット）。
+- `src/app/robots.ts` / `src/app/sitemap.ts` / OGP画像はいずれも**存在しない**。
+- `export const metadata` は1箇所のみ、`generateMetadata` は0件。`/events`、`/events/[slug]`、`/register`、`/contact`、`/terms`、`/privacy`、`/disclaimer` が**全ページ同一の title/description**。
+- `description`（`layout.tsx:24`）「週末に集まり、AIを触り、プロトタイプで遊ぶ同盟。」が本文（`who-we-are.tsx:16-18`, `:24`「ジャンルは自由です。」）と矛盾。検索結果とSNSに出るのはこれ。
 
-- 死にコード7ファイル（`about` / `archive` / `join` / `next-events` / `people` / `projects` / `recent-activities`）。`join.tsx` に `contact@example.com` が残る
-- `public/` が create-next-app 初期テンプレの SVG 5件のみ、全て未参照
-- OGP / `metadataBase` / `twitter` / canonical が未設定。`robots.ts` / `sitemap.ts` も無く、SNS共有でカードが出ない
-- `metadata.description` が旧コピーのまま（検索結果とSNSに出るのはこれ）
-- 外部リンクが招待URLでなくサービストップ（`https://discord.com` / `https://x.com`）
-- 個人メールアドレスが HTML に平文露出
-- モバイルドロワーが Escape で閉じない。`role="dialog"` / フォーカストラップ無し
-- コントラスト比 AA 未達3箇所、見出し階層スキップ、`prefers-reduced-motion` 未対応
-- `archive-timeline.tsx` がハードコード配列で `mock.ts` を参照せず、Recent Log と同じ月に別の活動を掲載
-- `clsx` / `tailwind-merge` を依存に持つが未使用
-- 認可の回帰を検出するテスト基盤が無い（DBとシードデータが必要）
-- DIRECTION.md §5「AIはサイトテーマではない」と AGENTS.md のプロダクト定義が矛盾（要判断）
+#### Tier 3 — 掃除
+
+- **未参照コンポーネント10ファイル（計691行）**: `about` / `archive` / `archive-timeline` / `join` / `next-events` / `people` / `projects` / `projects-spotlight` / `recent-activities` / `testimonials`。
+- 連鎖して死んでいる: `mock.ts` の `mockLeagueInfo` / `mockSliderPhotos` / `mockInitiativeFormats` / `mockTestimonials`、`types/index.ts:54-60` の `Testimonial`。
+- **未参照 `public/` 8件**: 初期テンプレSVG5件（`file`/`globe`/`next`/`vercel`/`window`）と旧画像3件（`avatar-1.png` / `hero.png` / `hero-ai-seminar.png`）。
+- **未使用依存**: `clsx`、`tailwind-merge`、`@neondatabase/serverless`（実際は `pg` の `Pool` を使用）、`drizzle-kit`（設定・script なし）。
+- `next.config.ts:29-35` が `images.unsplash.com` を許可しているが unsplash URL は0件。
+- `archive.tsx` と `archive-timeline.tsx` が**5ヶ月分すべて**で互いにも `mock.ts` にも一致しない活動名を持つ。両者とも `Tag` 型に無いタグ（`SPRINT`/`ALLIANCE` 等）を素の文字列で使い型検査を素通り。復活させると `id="archive"`・`id="about"`・`id="recent"`・`id="join"` が重複する。
+- 描画中ページのセクション番号が `01→(番号なし)→02→03→04→06→07` で **05 が欠番**（`05 / MEMBER VOICES` は死にコード `testimonials.tsx:7`）。`about.tsx:38` の `https://x.com` はサービストップ（死にコード内）。
+
+#### Tier 4 — アクセシビリティ
+
+- モバイルドロワー（`navbar.tsx:114-150`）に `role="dialog"` / `aria-modal` が無く、**Escape 非対応**（`keydown` が0件）、**フォーカストラップ・フォーカス復帰なし**（`useRef`/`.focus()` が0件）。`aria-expanded` はあるが `aria-controls` とドロワー側 `id` が無い。
+- `navbar.tsx:40-44` — 未スクロール時に `pointer-events-none -translate-y-full opacity-0` で隠すだけなので、**見えないのに Tab でフォーカスできる要素が8つ**残る。
+- `navbar.tsx:19-28` のスクロールロックが幅変化を考慮せず、ドロワーを開いたまま1024px以上へ広げるとページ全体がスクロール不能になる。
+- `globals.css` 全191行に **`prefers-reduced-motion` が1箇所も無い**（`scroll-behavior: smooth`、`animate-fadeIn`、`hover:-translate-y-1.5`、`group-hover:scale-105` が無条件で動く）。
+- **コントラスト AA 未達6箇所（実測）**: `navbar.tsx:145`（2.37:1）、`register-form.tsx:82` placeholder（約2.7:1）、`operating-guidelines.tsx:75`（3.39:1）、`philosophy-steps.tsx:58`（3.68:1）、`footer.tsx:87`（3.96:1）、`team-members.tsx:50`（4.03:1）。境界4.7台が `recent-log.tsx:27,78`、`upcoming-events.tsx:110`。
+- `globals.css:74,110` が `focus-visible` で `outline:none` としたうえ hover と同一の見た目にしている。
+- nav 高さ `h-16 md:h-[68px]`（`:40`）とドロワー `top-16`（`:115`）が 768–1023px で4px食い違う。`globals.css:20` の `scroll-padding-top: 68px` もモバイルの64pxと不一致。
+- `navbar.tsx:10-16` が初回に `handleScroll()` を呼ばないため、スクロール位置復元やハッシュ付きURLで読み込むとナビが消えたままになる。
+- `hero.tsx:12-13` — `src` はデータ由来なのに `alt` が固定文字列。`:28-31` の `aria-label` は role を持たない `div` に付いており支援技術に無視される。
+- `upcoming-events.tsx:44-59` のフィルタに `aria-pressed` / `aria-live` が無く、横スクロール領域が `tabIndex` 無しでキーボード操作できない。`register-form.tsx:96` はエラーも成功も同じ `role="status"`。
+- `lang="ja"`（`layout.tsx:34`）配下に英語見出し（`hero.tsx:22-24` ほか）が `lang="en"` なしで並ぶ。スキップリンクも0件。
+- `register-form.tsx:41,67` が内部遷移に `window.location.assign()` を使い ESLint 警告2件（現状の lint 唯一の警告）。
+
+#### 保留（Tier 1 の監査で見つかったが今回は未対応）
+
+- `src/lib/neon/auth.ts:13` の `sessionDataTtl: 300`。上流でのサインアウト・失効がこのアプリ側へ最大5分反映されない。ただし `dal.ts:34-39` が `role`/`status` を毎回DBから読むため、**停止措置自体は即時**に効く。仕様として許容するか、TTLを下げるかはユーザー判断（下記 X2）。
+- `proposal_versions` に版数の列が無く、順序は `created_at` のみ。会員措置には版スナップショットが無い（`before_state`/`after_state` で代替）。
+- 状態遷移の妥当性検証は「同じ状態への変更を拒否」と「cron専用状態を選ばせない」までに留めた。`cancelled` → `published` のような後戻りは仕様上「再掲載」が認められているため拒否していない。厳密な遷移表を作るなら仕様の確定が先。
+- `drizzle.config.ts` が無く `pgTable` も0件。`drizzle-orm` は `src/lib/neon/db.ts:18` の1行だけで、実体は全画面が生SQL＋手書きキャスト。
+- 日時の前後関係（募集期限 vs 開催日 vs 公開期限）と `status='published' ⇔ published_at not null` を結ぶ CHECK が無い。`reports.category`、`moderation_actions.action/reason_code`、`audit_log.action`、`notifications.kind` は CHECK なしの自由文字列。
+- 個人ドメインのアドレス `info@kouheikosehira.com` が公開3ページ（`footer.tsx:45,48`、`operating-guidelines.tsx:88,91`、`contact/page.tsx:22,25`）で平文露出（下記 X3）。
+
+### ユーザー判断待ち
+
+- **X1**: `DIRECTION.md:132`「AIはサイトテーマではない」・`:250`「AI専門サイトにしない」と、`AGENTS.md:14`「Product: AI League AIueo（草AIチーム / AI同盟）」・`layout.tsx:23` `"AI League AIueo · Grassroots AI Alliance"` が正面衝突している。外向きに出るのは後者。**Tier 2 の前提**。
+  - DIRECTION を正とするなら → `layout.tsx:23-24` から AI 色を落とし、`AGENTS.md:14` の Product 定義も書き換える。
+  - AGENTS を正とするなら → 名前は維持し、`DIRECTION.md:132`・`:250` を削除/緩和して `description` だけ現行コピーへ直す。
+- **X2**: セッションキャッシュ 300秒を許容するか。
+- **X3**: 個人ドメインのメールアドレスを公開ページに平文で出し続けるか。
 
 ### 積み残しの外部作業
 
@@ -173,5 +241,9 @@ CI もテストも無く、`npm run lint` が exit 1 のまま放置され、`ne
 - **`drizzle/0001_rate_limits.sql` は本番Neonへ適用済み**（2026-09-05、`neon-pink-bucket` / branch `main` / database `neondb`）。今後マイグレーションを追加する場合は、**必ず本番DBへ適用してからマージする**。逆順にすると、テーブル不在で該当エンドポイントが例外になる。
 - 回数制限には CI での検証が無い（CIにDBが無いため）。`scripts/verify-rate-limit.mjs` を使い捨てDBに対して手で流すこと。本番らしい接続文字列は拒否される。
 - **上流 Neon Auth の制限はIP単位＝アプリ単位で共有される。** 自前の制限を外すと、攻撃者が上流枠を食い潰して全利用者の登録が止まる。
+- **`drizzle/0002_integrity_and_indexes.sql` は本番Neonへ未適用。** このセッションの環境に接続情報が無く実行できなかった。適用前に `terms_versions` の現行が種別ごとに1件であることを確認すること（2件以上あると部分UNIQUEの作成が失敗する）。
+- **`/api/auth/[...path]` を素の再エクスポートに戻さないこと。** ライブラリのハンドラは受け取ったパスをそのまま上流へ連結するので、素通しに戻すと登録の回数制限・ユーザー列挙対策・監査の全部を迂回できる。`tests/auth-proxy.spec.ts` が検出する（許可リストを外すと10件中9件が落ちる）。
+- **管理操作の失敗を握り潰さないこと。** `withAdminTransaction` の戻り値を無視して `redirect()` すると、非公開化や会員停止が効いていないのに成功と誤認される。失敗は `?error=` で画面へ出す。
+- スキーマを変更したら `scripts/verify-migrations.mjs` を使い捨てDBへ流すこと。CIにDBが無いため自動では走らない。
 - `main` にはユーザー由来の未追跡フォルダ（`.vinext/`, `.wrangler/`, `dist/`, `work/`）がある。追加・削除しない。
 - サイト文言の法的な断定は避け、AIueoが当事者でない範囲と実際に取る措置を明確にする。
