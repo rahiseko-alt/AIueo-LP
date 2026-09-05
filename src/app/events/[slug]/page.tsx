@@ -1,9 +1,40 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { db } from '@/lib/neon/db';
 import { ReportForm } from '@/components/report-form';
 
 export const dynamic = 'force-dynamic';
+
+/**
+ * 検索結果とSNSに出す、企画ごとの見出しと説明。
+ *
+ * 本文と同じ絞り込み条件（公開・public・期限内）で引く。条件を緩めると、
+ * 下書きや期限切れの企画名が共有カードから漏れる。見つからない場合は
+ * 企画名を出さず、既定の文言だけを返す。
+ */
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const fallback: Metadata = { title: '企画', alternates: { canonical: `/events/${slug}` } };
+  if (!db) return fallback;
+
+  const result = await db.$client.query(
+    `select title, summary from proposals
+     where slug = $1 and status = 'published' and visibility = 'public' and public_expires_at > now()
+     limit 1`,
+    [slug],
+  );
+  const proposal = result.rows[0] as { title: string; summary: string } | undefined;
+  if (!proposal) return fallback;
+
+  const description = proposal.summary.length > 120 ? `${proposal.summary.slice(0, 119)}…` : proposal.summary;
+  return {
+    title: proposal.title,
+    description,
+    alternates: { canonical: `/events/${slug}` },
+    openGraph: { title: proposal.title, description, url: `/events/${slug}`, type: 'article' },
+  };
+}
 
 export default async function EventDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;

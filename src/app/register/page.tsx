@@ -1,5 +1,13 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { RegisterForm } from '@/components/register-form';
+
+export const metadata: Metadata = {
+  title: '会員登録',
+  description: '企画を立てる人向けの会員登録。参加するだけなら登録は要りません。',
+  alternates: { canonical: '/register' },
+  openGraph: { title: '会員登録', description: '企画を立てる人向けの会員登録。参加するだけなら登録は要りません。', url: '/register' },
+};
 
 export default function RegisterPage() {
   return (

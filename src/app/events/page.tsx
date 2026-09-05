@@ -1,5 +1,13 @@
+import type { Metadata } from 'next';
 import Link from 'next/link';
 import { db } from '@/lib/neon/db';
+
+export const metadata: Metadata = {
+  title: '進行中の企画',
+  description: 'AIueoで公開中の企画の一覧。参加は登録不要で、参加方法は企画ごとに主催者が示します。',
+  alternates: { canonical: '/events' },
+  openGraph: { title: '進行中の企画', description: 'AIueoで公開中の企画の一覧。参加は登録不要で、参加方法は企画ごとに主催者が示します。', url: '/events' },
+};
 
 export const dynamic = 'force-dynamic';
 
