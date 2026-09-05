@@ -38,18 +38,26 @@ git fetch origin --quiet 2>/dev/null || {
 DEFAULT_BRANCH=$(git symbolic-ref --quiet refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||')
 DEFAULT_BRANCH="${DEFAULT_BRANCH:-main}"
 
-# HANDOFF.md を変更していて、まだ default branch に入っていないブランチを探す。
+# main へ届いていない HANDOFF.md の更新を持つブランチを探す。
+#
+# 判定は2条件の論理積。どちらか片方だけでは誤検出が出る。実際に片方ずつ試して
+# 確認した（前者で6件、後者で1件の誤検出）。
+#
+#  条件A: main に取り込まれていないコミットが HANDOFF.md を触っている
+#    これだけだと squash マージ済みのブランチが残る。squash は元コミットを祖先に
+#    しないため、内容が main にあっても「未取り込みのコミット」に見える。
+#
+#  条件B: ブランチの HANDOFF.md の中身が main と実際に違う
+#    これだけだと、HANDOFF.md を触っていない古いブランチが、main 側の更新によって
+#    差分ありと判定され、片端から引っかかる。
 STRANDED=""
 for ref in $(git for-each-ref --format='%(refname:short)' refs/remotes/origin 2>/dev/null); do
   case "$ref" in
     "origin/$DEFAULT_BRANCH"|origin/HEAD) continue ;;
   esac
-  # default branch に含まれていれば対象外
-  if git merge-base --is-ancestor "$ref" "origin/$DEFAULT_BRANCH" 2>/dev/null; then continue; fi
-  # HANDOFF.md に差分があるか
-  if ! git diff --quiet "origin/$DEFAULT_BRANCH" "$ref" -- HANDOFF.md 2>/dev/null; then
-    STRANDED="$STRANDED $ref"
-  fi
+  [ -z "$(git log --format=%H "origin/$DEFAULT_BRANCH..$ref" -- HANDOFF.md 2>/dev/null)" ] && continue
+  git diff --quiet "origin/$DEFAULT_BRANCH" "$ref" -- HANDOFF.md 2>/dev/null && continue
+  STRANDED="$STRANDED $ref"
 done
 
 if [ -n "$STRANDED" ]; then
