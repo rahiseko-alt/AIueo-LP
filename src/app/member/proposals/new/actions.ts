@@ -89,6 +89,7 @@ export async function saveProposalAction(_previousState: ProposalActionState, fo
   const member = await requireActiveMember();
   const client = await db.$client.connect();
   let proposalId: string | null = null;
+  let broken = false;
   try {
     await client.query('begin');
     const currentTerms = await client.query(
@@ -132,10 +133,15 @@ export async function saveProposalAction(_previousState: ProposalActionState, fo
     );
     await client.query('commit');
   } catch {
-    await client.query('rollback');
+    try {
+      await client.query('rollback');
+    } catch {
+      // rollback に失敗したコネクションはトランザクションが開いたまま残りうる。
+      broken = true;
+    }
     return { error: '企画を保存できませんでした。ログイン状態と入力内容を確認してください。' };
   } finally {
-    client.release();
+    client.release(broken);
   }
   redirect(`/member/proposals/${proposalId}`);
 }

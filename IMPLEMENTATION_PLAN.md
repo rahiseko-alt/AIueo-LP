@@ -1,6 +1,6 @@
 # AIueo 会員・企画・管理機能 実装計画
 
-最終更新: 2026-09-03  
+最終更新: 2026-09-05  
 計画状態: **Vercel Native Neon Postgres + Neon Authへのアプリ移行を完了。登録・再送をサーバー認証APIへ集約して本番反映済み。実メール受入、初期管理者、期限通知メール、権限E2Eを残している。**
 
 この計画は、実装のたびに読む常設の進捗台帳である。仕様の正本は`MEMBERSHIP_FEATURE_SPEC.md`、セッションの正本は`HANDOFF.md`とする。3ファイルは作業開始時にこの順で確認し、終了時にすべて更新する。
@@ -77,7 +77,8 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | P6 | 通知・期限処理 | P1 + P4 + C | 7日前通知、3日前`auto_hidden`、JST判定、重複送信防止、配信失敗記録 | 実装中（Edge Function未デプロイ） |
 | P7 | 横断受入・本番 | P2–P6 | 3視点の敵対検証、RLS許可/拒否、E2E、360px/768px/1280px確認、Vercel本番確認 | 未着手 |
 | P8 | 配線復旧と品質ゲート | なし | Vercel Git連携、CI必須化、Playwright、認可・列挙・レート制限の修正 | 完了（2026-09-05、本番反映済み） |
-| P9 | 未監査領域の読み切り | P8 | 残り約2,200行を監査し、問題リストを確定してユーザーの仕分けを受ける | 未着手（次セッションの主タスク） |
+| P9 | 未監査領域の読み切り | P8 | 残り約2,200行を監査し、問題リストを確定してユーザーの仕分けを受ける | 完了（確定リストは`HANDOFF.md`。Tier 1のみ実施、Tier 2〜4はユーザー指示で持ち越し） |
+| P10 | 認証Proxy・管理操作・スキーマ保全 | P9 | `/api/auth`の許可リスト、管理操作の失敗表示、`submitted`除去、追記専用トリガ、不足インデックス | 完了（`drizzle/0002`は本番未適用） |
 
 ## データ・権限の実装境界
 
@@ -134,6 +135,9 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | 2026-09-05 | 停止・退会会員が`completeProfileAction`で自分を`active`に復活できる認可の穴を修正。セキュリティヘッダ5種を追加し`X-Powered-By`を削除 | 本番ビルドでヘッダ5種を実測。ヘッダを1つ消すとテスト5件中4件が失敗することを確認。テスト70件通過 | PR #7、`40c2607` |
 | 2026-09-05 | 登録エンドポイントの`alreadyRegistered`によるユーザー列挙を停止。応答を同一化し、未テストだった同一オリジン検証にテストを追加 | 判定行を削除すると3件中2件が失敗することを確認。テスト73件通過 | PR #8、`0d41542` |
 | 2026-09-05 | 登録エンドポイントに回数制限を追加（1アドレス3回/時、1IP 10回/時）。上流Neon Authの制限がIP単位＝アプリ単位で共有される問題への対処 | **PostgreSQL 16実機で検証**: 逐次4回で許可3件、同時20要求でも許可3件、掃除は古い行のみ削除。判定を1回分ゆるめると検証スクリプトが失敗しexit 1 | PR #9、`f7c9a50`、`drizzle/0001_rate_limits.sql`を本番Neonへ適用済み |
+| 2026-09-05 | P9: 未監査領域 約2,200行を読み切り、問題リストを確定。引継ぎ記述の誤り4点を訂正 | 確定リストを`HANDOFF.md`へ収録。ユーザー仕分けはTier 1のみ実施 | `HANDOFF.md`「確定した問題リスト」 |
+| 2026-09-05 | P10: `/api/auth/[...path]`を許可リスト方式へ。管理操作の失敗を画面表示、`submitted`／cron専用状態を選択肢から除去、同一状態への変更を拒否、`ipAddress()`／`timingSafeEqual`／uuid検証／`release(true)`を追加 | **スタブ上流を立てて実測**: 修正前は`admin/list-users`と`sign-up/email`が上流へ到達、修正後は404で到達せず、許可4パスは到達。許可リストを外すとテスト10件中9件が落ちる。lint/typecheck/build/Playwright 87件が緑 | `src/app/api/auth/[...path]/route.ts`、`src/app/admin/actions.ts`、`tests/auth-proxy.spec.ts`、`tests/admin-access.spec.ts` |
+| 2026-09-05 | `drizzle/0002_integrity_and_indexes.sql`: `moderation_actions`の追記専用トリガ、`terms_versions`の現行1件保証、欠けていたインデックス12本 | **PostgreSQL 16実機で検証**: 更新・削除が拒否、現行2件目が拒否、`reports`の未処理カウントが全走査→Index Only Scan、cronの2クエリが全走査→Index Scan。0002の効果を外すと`verify-migrations.mjs`が4件NGでexit 1 | `drizzle/0002_integrity_and_indexes.sql`、`scripts/verify-migrations.mjs`。**本番Neonへ未適用** |
 
 ## セッション終了チェック
 

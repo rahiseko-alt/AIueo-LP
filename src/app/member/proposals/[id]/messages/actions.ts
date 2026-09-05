@@ -12,6 +12,7 @@ export async function sendMemberMessageAction(formData: FormData) {
   if (typeof proposalId !== 'string' || !body.success) return;
   const member = await requireActiveMember();
   const client = await db.$client.connect();
+  let broken = false;
   try {
     await client.query('begin');
     const proposal = await client.query('select id from proposals where id = $1 and owner_id = $2 for update', [proposalId, member.userId]);
@@ -27,10 +28,15 @@ export async function sendMemberMessageAction(formData: FormData) {
     await client.query('insert into audit_log (actor_id, entity_type, entity_id, action, after_state) values ($1, $2, $3, $4, $5::jsonb)', [member.userId, 'proposal_message', message.rows[0].id, 'member_message_sent', JSON.stringify({ proposalId })]);
     await client.query('commit');
   } catch {
-    await client.query('rollback');
+    try {
+      await client.query('rollback');
+    } catch {
+      // rollback に失敗したコネクションはトランザクションが開いたまま残りうる。
+      broken = true;
+    }
     return;
   } finally {
-    client.release();
+    client.release(broken);
   }
   redirect(`/member/proposals/${proposalId}/messages`);
 }

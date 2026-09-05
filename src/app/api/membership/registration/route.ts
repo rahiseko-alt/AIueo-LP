@@ -1,3 +1,4 @@
+import { ipAddress } from '@vercel/functions';
 import { NextRequest, NextResponse } from 'next/server';
 import { neonAuth } from '@/lib/neon/auth';
 import { consumeRateLimit } from '@/lib/rate-limit';
@@ -19,12 +20,14 @@ function isSameOrigin(request: NextRequest) {
 }
 
 /**
- * 送信元IP。Vercel は x-forwarded-for の先頭に実クライアントを入れる。
- * 取れない場合は 'unknown' の共有枠に落とす。素通しにはしない。
+ * 送信元IP。まずプラットフォームが付ける値（`ipAddress`）を使う。これは
+ * Vercel 側が上書きするので、呼び出し元が申告した値ではない。取れない環境
+ * のために x-forwarded-for を残すが、順序を逆にすると申告値を優先すること
+ * になり、攻撃者がヘッダを変えるだけで枠をリセットできる。
+ * どれも取れない場合は 'unknown' の共有枠に落とす。素通しにはしない。
  */
 function clientIp(request: NextRequest) {
-  const forwarded = request.headers.get('x-forwarded-for');
-  return forwarded?.split(',')[0]?.trim() || request.headers.get('x-real-ip')?.trim() || 'unknown';
+  return ipAddress(request) || request.headers.get('x-forwarded-for')?.split(',')[0]?.trim() || 'unknown';
 }
 
 function tooManyRequests(retryAfterSeconds: number) {
