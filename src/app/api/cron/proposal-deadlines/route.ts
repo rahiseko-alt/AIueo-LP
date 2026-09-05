@@ -1,5 +1,6 @@
 import { NextResponse, type NextRequest } from 'next/server';
 import { db } from '@/lib/neon/db';
+import { pruneRateLimits } from '@/lib/rate-limit';
 
 export const dynamic = 'force-dynamic';
 
@@ -48,5 +49,15 @@ export async function GET(request: NextRequest) {
   } finally {
     client.release();
   }
-  return NextResponse.json({ ok: true, expired, autoHidden, reminded });
+
+  // 期限切れの回数制限カウンタを掃除する。判定はウィンドウ単位で行を分けている
+  // ので、掃除が失敗しても制限そのものは正しく効き続ける。処理は分離しておく。
+  let prunedRateLimits = 0;
+  try {
+    prunedRateLimits = await pruneRateLimits();
+  } catch (error) {
+    console.error('AIueo rate limit pruning failed', error);
+  }
+
+  return NextResponse.json({ ok: true, expired, autoHidden, reminded, prunedRateLimits });
 }
