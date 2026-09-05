@@ -12,11 +12,46 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新の実装コミット: `203b541 fix: handle registration through Neon Auth server`
-- ビルド: `npm run build` が成功（Neonの企画・管理・期限処理移行を含む）
-- 最新デプロイ: `https://aiueo-9jdw9ju8c-rahisekos-projects.vercel.app`。`https://aiueo-lp.vercel.app`および`https://aiueo.kouheikosehira.com`へエイリアス設定済み
+- 最新の実装コミット: `f7c9a50 feat: 登録エンドポイントに回数制限を追加する (#9)`
+- ビルド: `npm run build` が成功
+- 品質ゲート: `lint` / `typecheck` / `build` / Playwright 73件が GitHub Actions で PR ごとに必須実行され、緑
+- **Vercel の Git 連携が接続済み。`main` への push で本番デプロイが自動で走る**（このセッションで接続前後を実測確認）
 
-## 今回の作業（2026-08-31）
+## 今回の作業（2026-09-05 / Claude Code on the web）
+
+### 配線の復旧（最重要）
+
+本番はこのリポジトリと繋がっておらず、ローカルからの手動デプロイだった。GitHub の `deployments` は0件、Vercel の Connected Git Repository は未接続だった。
+
+- ローカルにしか存在しなかった実装（`203b541` 系統、Neon Auth・会員機能・規約セクションを含む）を `local/deployed-203b541` へ退避し、`main` へ統合（PR #5）。
+- Vercel の GitHub 連携を接続。**接続後の push で `Vercel: pending → success`、本番の `age` が 0 にリセットされ、新ビルドへ切り替わったことを実測**（PR #6）。
+- 旧 `main`（LP 単体）と本番版の統合では、重複ファイルは本番版を採用した。旧 main 側にのみ存在したのは未参照の `.hero-split` / `.who-grid` のみで、これは 1024px でレイアウトが潰れる原因だったため削除した。
+
+### 品質ゲートの新設（PR #1, #2, #4）
+
+CI もテストも無く、`npm run lint` が exit 1 のまま放置され、`next build` が lint を実行しないためビルド成功の裏に隠れていた。
+
+- lint を exit 0 に（`upcoming-events.tsx` の `as any` を `'ALL' | Tag` で型解決）
+- `typecheck` / `test` スクリプトを追加、`package-lock.json` を再生成（`npm ci` が EUSAGE で失敗していた）
+- Playwright を導入。公開7ページ × 8ブレイクポイント、アンカー整合、コンソールエラー、セキュリティヘッダ、登録エンドポイントの CSRF を検証
+- `.github/workflows/ci.yml` で `lint` → `typecheck` → `build` → `test` を必須化
+
+### セキュリティ修正（PR #7, #8, #9）
+
+いずれも実測で確認済み。
+
+- **停止・退会した会員が自分で `active` に復活できた。** `completeProfileAction` が `on conflict do update set status = 'active'` を無条件で実行していた。画面はフォームを出さないが、サーバーアクションは直接呼べる。トランザクション内で `for update` を取って状態を確認し、拒否するよう修正。
+- **セキュリティヘッダが皆無だった。** `X-Frame-Options` / `frame-ancestors` / `nosniff` / `Referrer-Policy` / `Permissions-Policy` を全パスへ追加し、`poweredByHeader: false`。CSP は `frame-ancestors` のみ（完全なポリシーはインラインスクリプトの計測が先）。
+- **登録エンドポイントがユーザー列挙を許していた。** 応答の `alreadyRegistered` で任意アドレスの登録有無が判別できた。応答を同一化。
+- **回数制限が皆無だった。** 上流の Neon Auth (better-auth) は `/email-otp/send-verification-otp` を60秒3回に制限するが、**キーが呼び出し元IP＝このアプリのサーバー**のため全利用者で枠を共有する。攻撃者が枠を食い潰せば正規の登録が全員止まる可用性の問題。`rate_limits` テーブルによる固定ウィンドウ方式で、1アドレス3回/時・1IP 10回/時。上流を叩く前に消費する。
+
+### 表示崩れの修正（PR #2）
+
+- 360px 幅で本文が +41px はみ出し、`overflow-x: hidden` がスクロールバーごと隠すため切れた文字に到達できなかった。`.sec-title` の `overflow-wrap` を `break-word` → `anywhere`（`break-word` は min-content 幅に効かない）、grid トラックを `minmax(0, ...)` 化。
+- 幅1024pxちょうどでスライダーが高さ5pxに潰れていた。手書き `@media (max-width:1024px)` と Tailwind `lg:` の同時成立が原因。
+- `scroll-padding-top: 68px` を追加。人物カードの `activityIds` 解決失敗で10行中6行がダミー文言になっていた配線を修正。
+
+## 過去の作業（2026-08-31）
 
 - Supabaseの空き枠不足を受け、Vercel Native Neonの利用規約へ同意し、`neon-pink-bucket`を`aiueo-lp`へ接続。PostgresとNeon Authの環境値はDevelopment/Preview/Productionへ自動設定された。
 - Neon Authのサーバー用Cookie署名鍵を各環境にSecretとして設定。値はGit・画面・チャットへ出していない。
@@ -76,6 +111,41 @@
 
 ## 次にやること
 
+### 最優先: 未監査領域の読み切り（次セッションの主タスク）
+
+問題リストが確定しないまま作業を続けると、着手のたびに新規発見が増えて終わりが見えない。**未監査領域を閉じて、リストを確定させる。**
+
+全体 3,403行のうち、このセッションで監査したのは会員機能の認可経路（`src/app/member/**`、`src/app/api/membership/registration`、`src/app/events/**`、`src/lib/auth/dal.ts`）のみ。**残り約2,200行が未監査**。
+
+| 未監査領域 | 規模 | 主な観点 |
+|---|---|---|
+| `src/components/` | 25ファイル / 1,821行 | 死にコード7ファイル、外部リンク、メール平文露出、アクセシビリティ |
+| `src/app/admin/` | 7ファイル / 195行 | 管理者操作の認可、監査ログの原子性 |
+| `drizzle/` | 2ファイル / 167行 | 制約、外部キー、インデックス |
+| `src/proxy.ts` | 11行 | ミドルウェアの適用範囲 |
+| `src/app/api/auth/` | 10行 | Neon Auth ハンドラの露出範囲 |
+
+読み切ったあと、**確定リストをユーザーへ提示し、やる/やらない/後回しの仕分けを受ける**。「やらない」と決まった項目は再提示しない。
+
+### 既知で未対応（確定リスト作成時に再検証すること）
+
+**この一覧は旧LP向けに作成したものを引き継いでいる。現行コードベースでの該当を再確認してから着手すること。** 2026-09-05 時点で以下は現存を確認済み。
+
+- 死にコード7ファイル（`about` / `archive` / `join` / `next-events` / `people` / `projects` / `recent-activities`）。`join.tsx` に `contact@example.com` が残る
+- `public/` が create-next-app 初期テンプレの SVG 5件のみ、全て未参照
+- OGP / `metadataBase` / `twitter` / canonical が未設定。`robots.ts` / `sitemap.ts` も無く、SNS共有でカードが出ない
+- `metadata.description` が旧コピーのまま（検索結果とSNSに出るのはこれ）
+- 外部リンクが招待URLでなくサービストップ（`https://discord.com` / `https://x.com`）
+- 個人メールアドレスが HTML に平文露出
+- モバイルドロワーが Escape で閉じない。`role="dialog"` / フォーカストラップ無し
+- コントラスト比 AA 未達3箇所、見出し階層スキップ、`prefers-reduced-motion` 未対応
+- `archive-timeline.tsx` がハードコード配列で `mock.ts` を参照せず、Recent Log と同じ月に別の活動を掲載
+- `clsx` / `tailwind-merge` を依存に持つが未使用
+- 認可の回帰を検出するテスト基盤が無い（DBとシードデータが必要）
+- DIRECTION.md §5「AIはサイトテーマではない」と AGENTS.md のプロダクト定義が矛盾（要判断）
+
+### 積み残しの外部作業
+
 - Supabaseに空き枠がないため、新規Supabaseプロジェクトの作成は中止。Vercel Native Neon Postgres + Neon Auth + Vercel Cronへの切替受け入れ条件を3視点で確認し、VercelからNeonを接続する。既存のSupabase秘密値・消失ホストは再利用しない。
 - Neon接続・初期schema適用・会員プロフィール・企画・管理・通報・期限処理の移行は完了。旧Supabaseのアプリ側依存は除去済み。
 - Google OAuthのprovider設定、独自ドメイン送信元/DNS認証、期限通知メールの実送信、初期管理者の監査付き付与は未設定。メールアドレス・パスワード・確認コードによる会員登録は有効化済みで、実メールの到達確認を行う。
@@ -98,5 +168,8 @@
 
 ## 注意点
 
+- **`drizzle/0001_rate_limits.sql` は本番Neonへ適用済み**（2026-09-05、`neon-pink-bucket` / branch `main` / database `neondb`）。今後マイグレーションを追加する場合は、**必ず本番DBへ適用してからマージする**。逆順にすると、テーブル不在で該当エンドポイントが例外になる。
+- 回数制限には CI での検証が無い（CIにDBが無いため）。`scripts/verify-rate-limit.mjs` を使い捨てDBに対して手で流すこと。本番らしい接続文字列は拒否される。
+- **上流 Neon Auth の制限はIP単位＝アプリ単位で共有される。** 自前の制限を外すと、攻撃者が上流枠を食い潰して全利用者の登録が止まる。
 - `main` にはユーザー由来の未追跡フォルダ（`.vinext/`, `.wrangler/`, `dist/`, `work/`）がある。追加・削除しない。
 - サイト文言の法的な断定は避け、AIueoが当事者でない範囲と実際に取る措置を明確にする。
