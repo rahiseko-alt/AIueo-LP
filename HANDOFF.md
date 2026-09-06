@@ -12,13 +12,20 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新の実装コミット: `476c0a4 fix: 会員登録フォームが黙って固まらないようにする (#16)`
+- 最新の実装コミット: `476c0a4 fix: 会員登録フォームが黙って固まらないようにする (#16)`（`7700904`は台帳の記述訂正のみ、コード変更なし）
 - **画面とフローの設計図**: https://claude.ai/code/artifact/0de7067b-8736-4325-bf09-ebe7dab72830 （全21ページ、3つの導線、不足11件。仕様書と実装の突き合わせ結果）
 - ビルド: `npm run build` が成功
 - 品質ゲート: `lint` / `typecheck` / `build` / Playwright 95件が GitHub Actions で PR ごとに必須実行され、緑
 - **CIのBuildは `NEXT_PUBLIC_NEON_AUTH_ENABLED=true` を付けて実行する。** 会員登録フォームのテストがフォームの有効な状態を見るため。認証基盤の接続情報は渡していないのでサーバー側は未設定のまま。手元で `npm test` を流すときも同じ値を付けてビルドすること
 - **正式URLは `https://aiueo.kouheikosehira.com`**（`src/lib/site.ts`）。`https://aiueo-lp.vercel.app` も同じ内容を返すが、canonical で前者に寄せている
 - **Vercel の Git 連携が接続済み。`main` への push で本番デプロイが自動で走る**（このセッションで接続前後を実測確認）
+
+## 今回の作業（2026-09-06 その2 / Claude Code on the web）
+
+台帳の進捗チェックインとPR #18（マージ済み、`7700904`）。
+
+- P3〜P5の「DB未適用」、P1の「権限テスト継続」、P6の「Edge Function未デプロイ」が2026-09-01時点の古い記述の残りだったのを訂正。実態はDB適用済み・RLS未設定でDAL層のみ・メール送信コードが存在しない、とそれぞれ正確な表現に直した。詳細は`IMPLEMENTATION_PLAN.md`の該当行と更新履歴。
+- **G1-07を決定**: 企画登録の必須項目は開催候補日のみとし、募集期限は必須項目に含めない。設計図の不足#7（`tentative_starts_at`常時必須と仕様書の矛盾）は、現行実装に仕様書側を合わせる形で解消した。`MEMBERSHIP_FEATURE_SPEC.md`企画登録フロー2項を修正済み。**コード変更は無い**（実装は決定前から既にこの内容だった）。
 
 ## 今回の作業（2026-09-05 その2 / Claude Code on the web）
 
@@ -140,7 +147,7 @@
 | 4 | メニュー/フッターから `/register` への導線 | `navbar.tsx:80,121` と `footer.tsx:20` の「Join / Propose」は `#join` アンカー。全ページ通じて `/register` へのナビリンクが無い |
 | 5 | 運営アカウント | まだ1つも存在しない。`docs/ADMIN_BOOTSTRAP_RUNBOOK.md` は旧Supabase前提で要更新 |
 | 6 | **通知メールが1通も送られない** | `resend`/`nodemailer`/`smtp` 等の依存も実装も0件。`notifications` に `email_status='pending'` で溜まるだけ。会員向けのサービス内通知UIも無い（`notifications` を読むのは `/admin` の未読数のみ） |
-| 7 | 開催日未定の呼びかけ | `tentative_starts_at` が常に必須（フォーム・zod・DB の3層）。仕様書61行は「開催候補日**または**募集期限」 |
+| ~~7~~ | ~~開催日未定の呼びかけ~~ | **2026-09-06 解消（決定によりコード変更なし）**。ユーザーが「開催候補日のみを必須とし、募集期限は必須項目に含めない」と最終決定。仕様書側を`tentative_starts_at`常時必須の現行実装に合わせて修正した |
 | 8 | 「公開名」の名称と実態の不一致 | `public_name` は `/member`・`/member/profile`・`/admin/members` にしか出ず、公開ページには一切出ない。企画ページの主催者名は別カラム `organizer_name`。フォームの説明文「企画ページの主催者表示に使います」は誤り |
 | 9 | 金銭条件の表示 | `/events/[slug]` が `JSON.stringify(money_details)` を生出力 |
 | 10 | 停止会員の読み取り専用アクセス | `/member/history` はDBを一切引かない固定文言9行。仕様書106行の要件が未達 |
@@ -256,9 +263,9 @@ CI もテストも無く、`npm run lint` が exit 1 のまま放置され、`ne
 
 ## 次にやること
 
-### 最優先: 設計図の不足11件を、番号順に片付ける
+### 最優先: 設計図の不足11件を、番号順に片付ける（#7は2026-09-06に決定により解消。残り10件）
 
-**→ https://claude.ai/code/artifact/0de7067b-8736-4325-bf09-ebe7dab72830**
+**→ https://claude.ai/code/artifact/0de7067b-8736-4325-bf09-ebe7dab72830** （リンク先の記載は公開時点のまま。#7の解消は本ファイル上部の「確定した問題リスト」を参照）
 
 1〜4 が終われば「企画を立てる道」と「参加する道」が最後までつながる。着手前に必ず設計図と上の表を読むこと。1（Google認証）と5（運営アカウント）はユーザー側の外部作業を伴う。
 
