@@ -12,7 +12,7 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新の実装コミット: `01b6c48 fix: ナビ/フッターのJoin・Proposeを/registerへの実導線にする`（ブランチ`claude/checkin-6hrtds`、PR作成・マージ待ち）
+- 最新の実装コミット: `1564f88 fix: ナビ/フッターのJoin・Proposeを/registerへの実導線にする (#26)`（`main`へマージ済み、squash）
 - **画面とフローの設計図**: https://claude.ai/code/artifact/0de7067b-8736-4325-bf09-ebe7dab72830 （全21ページ、3つの導線、不足11件。仕様書と実装の突き合わせ結果）
 - ビルド: `npm run build` が成功
 - 品質ゲート: `lint` / `typecheck` / `build` / Playwright 95件が GitHub Actions で PR ごとに必須実行され、緑
@@ -22,7 +22,7 @@
 
 ## 今回の作業（2026-09-06 その4 / チェックイン、Claude Code on the web）
 
-設計図の不足#4（ナビ/フッターの`#join`が`/register`に繋がっていない）に対応。ブランチ`claude/checkin-6hrtds`、コミット`01b6c48`。
+設計図の不足#4（ナビ/フッターの`#join`が`/register`に繋がっていない）に対応。PR #26（`1564f88`）で`main`へマージ・本番反映済み。
 
 `navbar.tsx`（デスクトップ右上ボタン・モバイルドロワー内の2箇所）と`footer.tsx`（Navigate列）の「Join / Propose」が、トップページ内の`#join`アンカーのままだった。トップページ以外（`/events`、`/member`配下等）ではこのアンカーに対応する要素が存在せず、押しても何も起きなかった。会員登録画面`/register`への通常リンクに変更した。トップページ自体の`join-section.tsx`（`id="join"`セクション）は変更していない（そのセクション内のCTAボタン自体は元々`/register`への実リンクだったため）。
 
@@ -322,7 +322,7 @@ CI もテストも無く、`npm run lint` が exit 1 のまま放置され、`ne
 
 ### 解消済み: ナビ/フッターから`/register`への導線（不足 #4）
 
-2026-09-06に対応済み（ブランチ`claude/checkin-6hrtds`、コミット`01b6c48`、上の「今回の作業」参照）。`navbar.tsx`と`footer.tsx`の「Join / Propose」を`#join`から`/register`への通常リンクに変更。まだ`main`未マージ。
+2026-09-06に対応済み（PR #26、コミット`1564f88`、`main`へマージ・本番反映済み）。`navbar.tsx`と`footer.tsx`の「Join / Propose」を`#join`から`/register`への通常リンクに変更。**本番URLで実測確認済み**: `href="/register"`のリンクがnavbar・footerに出現。
 
 ### 次点: Tier 4（アクセシビリティ）
 
