@@ -22,11 +22,12 @@
 
 ## 今回の作業（2026-09-06 その2 / Claude Code on the web）
 
-台帳の進捗チェックインとPR #18・#19（いずれもマージ済み、`7700904`・`08afd91`）。
+台帳の進捗チェックインとPR #18・#19・#20（いずれもマージ済み、`7700904`・`08afd91`・`630fc8c`）。
 
 - P3〜P5の「DB未適用」、P1の「権限テスト継続」、P6の「Edge Function未デプロイ」が2026-09-01時点の古い記述の残りだったのを訂正。実態はDB適用済み・RLS未設定でDAL層のみ・メール送信コードが存在しない、とそれぞれ正確な表現に直した。詳細は`IMPLEMENTATION_PLAN.md`の該当行と更新履歴。
 - **G1-07を決定**: 企画登録の必須項目は開催候補日のみとし、募集期限は必須項目に含めない。設計図の不足#7（`tentative_starts_at`常時必須と仕様書の矛盾）は、現行実装に仕様書側を合わせる形で解消した。`MEMBERSHIP_FEATURE_SPEC.md`企画登録フロー2項を修正済み。**コード変更は無い**（実装は決定前から既にこの内容だった）。
 - **再発防止**: 上記の状態欄の食い違いが二度と黙って残らないよう、`.claude/hooks/session-start.sh`にフェーズ表の鮮度確認を追加した。各行の最終更新日と`src/drizzle/supabase`の最終更新日を比較し、コードの方が新しい行を開始時に列挙する。実際に走らせ、現状のP0/P2/P7/P8/P9/P10/P11が候補として出ることを確認済み。`AGENTS.md`に「状態欄は前回の文言をそのまま転記しない」の節を追加した。
+- **RLS不採用を恒久決定**: P1・P7の受け入れ条件にあった「RLS許可/拒否」は、実装がPostgres RLSを使わずサーバーDAL層のtransactionのみで認可する方式に既に切り替わっていたため、文字通りには一生達成できない状態だった。ユーザーに推奨（DAL方式の追認）と理由（現行方式で機能している、NeonはSupabase型のRLSに向かず追加実装は大工事、他の優先作業がある）を説明し、承認を得て決定。`IMPLEMENTATION_PLAN.md`・`MEMBERSHIP_FEATURE_SPEC.md`の該当箇所をサーバーDAL層のallow/deny検証に書き換え、`docs/RLS_TEST_MATRIX.md`には廃止バナーを追加した（削除はしない）。**今後もRLSは実装しない。**
 
 ## 今回の作業（2026-09-05 その2 / Claude Code on the web）
 
@@ -154,7 +155,7 @@
 | 10 | 停止会員の読み取り専用アクセス | `/member/history` はDBを一切引かない固定文言9行。仕様書106行の要件が未達 |
 | 11 | `money_type='undecided'` | フォームは「未定（公開不可）」と表示するが、`new/actions.ts:70` が検証から除外しており公開できる |
 
-その他の相違: `/admin/moderation` は `reports` のみ表示し `moderation_actions`（措置履歴）を見る画面が無い。`proposal_versions`（版履歴）を表示するページも無い。`visibility='unlisted'` を閲覧できるURLが実装に存在しない。RLSは Neon 側に1つも無く（アプリ層の `owner_id` 絞りで代替）、管理者MFAも未実装。`supabase/` 一式は現行スタックから参照されていない死んだコード。
+その他の相違: `/admin/moderation` は `reports` のみ表示し `moderation_actions`（措置履歴）を見る画面が無い。`proposal_versions`（版履歴）を表示するページも無い。`visibility='unlisted'` を閲覧できるURLが実装に存在しない。RLSはNeon側に1つも無い（アプリ層の`owner_id`絞りで代替）が、**これは2026-09-06にRLS不採用として恒久決定済みであり、未解消のギャップではない**（`IMPLEMENTATION_PLAN.md`Gate 1決定状況を参照）。管理者MFAは未実装のまま。`supabase/` 一式は現行スタックから参照されていない死んだコード。
 
 ### 見逃し防止を三重にした
 
