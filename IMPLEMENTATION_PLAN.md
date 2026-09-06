@@ -80,6 +80,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | P9 | 未監査領域の読み切り | P8 | 残り約2,200行を監査し、問題リストを確定してユーザーの仕分けを受ける | 完了（確定リストは`HANDOFF.md`。Tier 1のみ実施、Tier 2〜4はユーザー指示で持ち越し） |
 | P10 | 認証Proxy・管理操作・スキーマ保全 | P9 | `/api/auth`の許可リスト、管理操作の失敗表示、`submitted`除去、追記専用トリガ、不足インデックス | 完了 |
 | P11 | 検索結果・SNS共有（Tier 2） | P9 | `metadataBase`/OGP/canonical/`robots.ts`/`sitemap.ts`/ページ別metadata、`DIRECTION.md`の矛盾解消 | 完了 |
+| P12 | 未使用コード・依存の削除（Tier 3） | P9 | 未参照コンポーネント10、`public/`8、依存4、未使用エクスポート・型 | 完了 |
 
 ## データ・権限の実装境界
 
@@ -140,6 +141,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | 2026-09-05 | P10: `/api/auth/[...path]`を許可リスト方式へ。管理操作の失敗を画面表示、`submitted`／cron専用状態を選択肢から除去、同一状態への変更を拒否、`ipAddress()`／`timingSafeEqual`／uuid検証／`release(true)`を追加 | **スタブ上流を立てて実測**: 修正前は`admin/list-users`と`sign-up/email`が上流へ到達、修正後は404で到達せず、許可4パスは到達。許可リストを外すとテスト10件中9件が落ちる。lint/typecheck/build/Playwright 87件が緑 | `src/app/api/auth/[...path]/route.ts`、`src/app/admin/actions.ts`、`tests/auth-proxy.spec.ts`、`tests/admin-access.spec.ts` |
 | 2026-09-05 | `drizzle/0002_integrity_and_indexes.sql`: `moderation_actions`の追記専用トリガ、`terms_versions`の現行1件保証、欠けていたインデックス12本 | **PostgreSQL 16実機で検証**: 更新・削除が拒否、現行2件目が拒否、`reports`の未処理カウントが全走査→Index Only Scan、cronの2クエリが全走査→Index Scan。0002の効果を外すと`verify-migrations.mjs`が4件NGでexit 1 | `drizzle/0002_integrity_and_indexes.sql`、`scripts/verify-migrations.mjs` |
 | 2026-09-05 | PR #12 をマージし、`drizzle/0002` を本番Neonへ適用 | 適用後に本番で実測: 追加インデックス13本、トリガ`moderation_actions_immutable` 1件を確認 | PR #12、`07fe67e`、`neon-pink-bucket` / branch `main` / database `neondb` |
+| 2026-09-05 | P12: 未参照のコンポーネント10・`public/`8ファイル・依存4件・未使用エクスポート/型を削除。`next.config.ts`のunsplash許可も削除。X2/X3はユーザー判断でどちらも現状維持 | **テストが93件のまま1件も減らない**ことで挙動不変を確認。`npm ci` exit 0、lint/typecheck/build も通過。`@neondatabase/serverless` が `drizzle-orm` の optional peer として残ることを `npm ls` で確認 | `src/components/`、`src/data/mock.ts`、`src/types/index.ts`、`public/`、`package.json` |
 | 2026-09-05 | P11: メタデータ・OGP画像・canonical・robots・sitemapを追加。ユーザー決定によりサイト主題は「AIを前に出す」、正式URLは`https://aiueo.kouheikosehira.com`。`DIRECTION.md`の矛盾を解消 | 本番ビルドで実測: OGP画像 200/image/png/39KB を目視確認、`robots.txt`と`sitemap.xml`の内容を確認。`openGraph`を外すと新テストが落ちる。lint/typecheck/build/Playwright 93件が緑 | `src/lib/site.ts`、`src/app/{layout.tsx,opengraph-image.tsx,robots.ts,sitemap.ts}`、`tests/metadata.spec.ts` |
 
 ## セッション終了チェック

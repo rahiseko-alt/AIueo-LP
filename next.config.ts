@@ -22,14 +22,6 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   // 稼働中のスタックとバージョンを無償で開示しない。
   poweredByHeader: false,
-  images: {
-    remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
-    ],
-  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },

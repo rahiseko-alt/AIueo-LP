@@ -39,22 +39,3 @@ export interface Activity {
   actionLabel?: string;
   isHero?: boolean;
 }
-
-export interface Project {
-  id: string;
-  title: string;
-  summary: string;
-  status: 'ACTIVE' | 'PLANNING' | 'RECRUITING';
-  tags: Tag[];
-  imageUrl: string;
-  partnerIds: string[];
-  actionUrl?: string;
-}
-
-export interface Testimonial {
-  id: string;
-  quote: string;
-  author: string;
-  role: string;
-  activityName: string;
-}

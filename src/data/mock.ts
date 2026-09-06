@@ -1,11 +1,4 @@
-import { Activity, Person, Project, Testimonial } from '@/types';
-
-export const mockLeagueInfo = {
-  name: 'AI League AIueo',
-  tagline: 'Initiative × Co-Creation × Alliance',
-  subheading: '「今度何かやりましょう」を、「こういうのやるので、一緒にどうですか？」に変える草AI同盟。',
-  location: 'Tokyo & Local & Online · Est. 2026',
-};
+import { Activity, Person } from '@/types';
 
 export const mockPeople: Person[] = [
   {
@@ -54,25 +47,6 @@ export const mockHeroActivity: Activity = {
   actionLabel: '進行中の企画を見る →',
   isHero: true,
 };
-
-export const mockSliderPhotos = [
-  {
-    url: '/images/japanese/workshop.png',
-    caption: '地域の子ども向けAIお絵描き教室',
-  },
-  {
-    url: '/images/japanese/seminar.png',
-    caption: '主婦・初心者向け暮らしのAI時短セミナー',
-  },
-  {
-    url: '/images/japanese/development.png',
-    caption: '受託開発＆プロトタイプ実装チームのキックオフ',
-  },
-  {
-    url: '/images/japanese/meetup.png',
-    caption: 'エンジニア＆クリエイター即興AI LT大会',
-  },
-];
 
 export const mockUpcomingActivities: Activity[] = [
   {
@@ -137,39 +111,6 @@ export const mockUpcomingActivities: Activity[] = [
   },
 ];
 
-export const mockInitiativeFormats: Project[] = [
-  {
-    id: 'format-1',
-    title: '暮らし・教育系 AIセミナー＆教室',
-    summary: '「主婦向け」「シニア向け」「子ども向け」など、地域や一般層にAIの楽しさと便利さを届ける普及活動・ワークショップ。',
-    status: 'ACTIVE',
-    tags: ['EDUCATION', 'COMMUNITY'],
-    imageUrl: '/images/japanese/workshop.png',
-    partnerIds: ['person-2', 'person-4'],
-    actionUrl: '#events',
-  },
-  {
-    id: 'format-2',
-    title: '受託開発・実務プロジェクト共創',
-    summary: '企業や自治体からのAI導入・プロトタイプ開発案件を、同盟メンバーでチームを組んで受注・納品する実践型アライアンス。',
-    status: 'ACTIVE',
-    tags: ['DEVELOPMENT', 'AI'],
-    imageUrl: '/images/japanese/development.png',
-    partnerIds: ['person-1', 'person-3'],
-    actionUrl: '#events',
-  },
-  {
-    id: 'format-3',
-    title: '技術LT大会＆実験ミートアップ',
-    summary: '開発者やクリエイターが自作AIツールや実験成果を発表し合い、次の新しい共同プロジェクトを生み出す熱狂の場。',
-    status: 'ACTIVE',
-    tags: ['COMMUNITY', 'CREATIVE'],
-    imageUrl: '/images/japanese/meetup.png',
-    partnerIds: ['person-1', 'person-3', 'person-4'],
-    actionUrl: '#events',
-  },
-];
-
 export const mockRecentActivities: Activity[] = [
   {
     id: 'act-1',
@@ -212,35 +153,6 @@ export const mockRecentActivities: Activity[] = [
   },
 ];
 
-export const mockTestimonials: Testimonial[] = [
-  {
-    id: 't-1',
-    quote: '「『いつか主婦向けのAIセミナーをやりたい』とずっと温めていたアイデアを、AIueoで『来月やりましょう！』と背中を押してもらえて実現できました。」',
-    author: 'Y. T.',
-    role: 'Seminar Host / Life AI Lecturer',
-    activityName: '主婦向けChatGPT活用セミナー',
-  },
-  {
-    id: 't-2',
-    quote: '「『今度何かやりましょう』の飲み会で終わらない。具体的な受託案件や地域企画のチームがその場で組めるのが本当に価値高い。」',
-    author: 'T. Y.',
-    role: 'Freelance AI Engineer',
-    activityName: '商店街AI受託プロジェクト',
-  },
-  {
-    id: 't-3',
-    quote: '「子ども向けAI教室のメンターとして参加しました。自分のスキルが地域の喜びに変わる体験ができました。」',
-    author: 'K. S.',
-    role: 'Kids AI Mentor',
-    activityName: '小学生向けAIお絵描き教室',
-  },
-];
-
-/**
- * Person.activityIds から活動を引くための全件インデックス。
- * ここに載っていない活動を参照すると人物カードの実績行が消えるため、
- * 活動を追加したらこの配列にも必ず含めること。
- */
 export const mockAllActivities: Activity[] = [
   mockHeroActivity,
   ...mockUpcomingActivities,
