@@ -29,6 +29,17 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
   - レスポンシブ設計を行う際は `define_subagent` / `invoke_subagent` で本役割を割り当てて実行すること。
 
 ## 4. Session Handoff
+
+### 見逃し防止 2/3 — 開始時の必読順序
+
+作業を始める前に、次の順で必ず読むこと。1つでも飛ばしてはならない。
+
+1. **`MEMBERSHIP_FEATURE_SPEC.md`** — 決定仕様の正本。画面構成の全URL表、会員登録フロー、企画登録フロー、状態モデル、公開前の必須設計。**ここで決着している事項をユーザーへ聞き直さない。** 変更したいときだけ、変更案として提示する。
+2. **`IMPLEMENTATION_PLAN.md`** — 進行中のゲート・依存関係・未解決事項。
+3. **`HANDOFF.md`** — 前回セッションからの引継ぎ、確定した問題リスト、ユーザー判断の結果。
+
+`CLAUDE.md` が `@` 参照で3文書を読み込み、`.claude/hooks/session-start.sh` が開始時に所在と目次を表示する。三重にしてあるのは、2026-09-06 に決定済みの仕様（参加は登録不要・AIueoは当事者にならない）をエージェントが聞き直す事故が起きたためである。
+
 - 作業を始める前に、必ずリポジトリ直下の `HANDOFF.md` を読むこと。
 - 続けて、必ず `IMPLEMENTATION_PLAN.md` を読み、進行中のゲート・依存関係・未解決事項を確認すること。
 - 作業を終える前に、`HANDOFF.md` の「現在の状態」「今回の作業」「次にやること」を更新すること。
