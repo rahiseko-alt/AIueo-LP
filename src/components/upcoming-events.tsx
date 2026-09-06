@@ -1,8 +1,5 @@
-'use client';
-
-import { useState } from 'react';
 import Image from 'next/image';
-import { Activity, Tag } from '@/types';
+import { Activity } from '@/types';
 import { MapPin } from 'lucide-react';
 
 interface UpcomingEventsProps {
@@ -10,19 +7,7 @@ interface UpcomingEventsProps {
 }
 
 export function UpcomingEvents({ activities }: UpcomingEventsProps) {
-  const [filter, setFilter] = useState<'ALL' | Tag>('ALL');
-
-  const filterButtons: { label: string; val: 'ALL' | Tag }[] = [
-    { label: 'ALL (すべて)', val: 'ALL' },
-    { label: 'EDUCATION (主婦・教育)', val: 'EDUCATION' },
-    { label: 'COMMUNITY (地域・子ども)', val: 'COMMUNITY' },
-    { label: 'DEVELOPMENT (受託・開発)', val: 'DEVELOPMENT' },
-    { label: 'CREATIVE (クリエイティブ)', val: 'CREATIVE' },
-  ];
-
-  const filteredActivities = filter === 'ALL'
-    ? activities
-    : activities.filter((act) => act.tags.includes(filter));
+  const filteredActivities = activities;
 
   return (
     <section id="events" className="section-padding border-b border-[rgba(240,237,232,0.08)] bg-[#080808]">
@@ -36,23 +21,6 @@ export function UpcomingEvents({ activities }: UpcomingEventsProps) {
           <span className="font-mono text-xs text-[#c8a45a] tracking-wider">
             {filteredActivities.length} ACTIVE PROJECTS / SESSIONS
           </span>
-        </div>
-
-        {/* Activity Filter Bar (Touch horizontal scroll on mobile, wrap on tablet/desktop) */}
-        <div className="mt-6 sm:mt-8 flex gap-2 overflow-x-auto pb-2 sm:pb-0 sm:flex-wrap no-scrollbar -mx-4 px-4 sm:mx-0 sm:px-0">
-          {filterButtons.map((btn) => (
-            <button
-              key={btn.val}
-              onClick={() => setFilter(btn.val)}
-              className={`flex min-h-[44px] flex-shrink-0 items-center justify-center rounded-full px-4 py-2 font-mono text-xs font-medium tracking-wider uppercase transition-all select-none ${
-                filter === btn.val
-                  ? 'border border-[#c8a45a] bg-[#c8a45a] text-[#080808] shadow-[0_0_16px_rgba(200,164,90,0.3)]'
-                  : 'border border-[rgba(240,237,232,0.15)] bg-transparent text-[rgba(240,237,232,0.7)] hover:border-[#c8a45a] hover:text-[#c8a45a]'
-              }`}
-            >
-              {btn.label}
-            </button>
-          ))}
         </div>
 
         <div className="-mx-4 mt-8 overflow-x-auto px-4 pb-5 sm:-mx-6 sm:mt-10 sm:px-6 md:-mx-10 md:px-10 no-scrollbar">
