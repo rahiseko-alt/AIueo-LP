@@ -1,11 +1,17 @@
 #!/bin/bash
 # セッション開始時のセットアップと、引継ぎの到達確認。
 #
-# このフックの主目的は2つ。
+# このフックの主目的は3つ。
 #  1. lint / typecheck / build / test が最初から動くよう依存を入れる
-#  2. HANDOFF.md の更新が main に到達しているかを確認する
+#  2. 決定事項の正本3文書の所在と目次を画面へ出す（見逃し防止 3/3）
+#  3. HANDOFF.md の更新が main に到達しているかを確認する
 #
-# 2 は実際に起きた事故への対処である。引継ぎを未マージのブランチに置いたまま
+# 2 は 2026-09-06 の事故への対処である。MEMBERSHIP_FEATURE_SPEC.md に
+# 「参加は会員登録不要」「AIueoは当事者にならない」と明記されているのに、
+# エージェントがその決定をユーザーへ聞き直した。CLAUDE.md の @ 参照と
+# AGENTS.md の必読順序と合わせ、三重にして見逃しを止める。
+#
+# 3 も実際に起きた事故への対処である。引継ぎを未マージのブランチに置いたまま
 # セッションを終えたため、次のセッションが5日前の記述を読んで作業を始めた。
 # 規約に「main へ到達させる」と書いても人もエージェントも忘れるので、
 # 開始時に機械が気付く形にしてある。
@@ -19,6 +25,29 @@ cd "$PROJECT_DIR" || exit 0
 if [ -f package.json ]; then
   echo "== 依存関係を導入中 =="
   npm install --no-audit --no-fund 2>&1 | tail -3
+fi
+
+# --- 決定事項の正本 -------------------------------------------------------
+# 目次まで出すのは、「どこに何が決まっているか」を開かずに把握させるため。
+# ファイル名だけの案内では、結局読まずに設計を始める。
+echo
+echo "== 決定事項の正本（作業前に必ず読む） =="
+for doc in MEMBERSHIP_FEATURE_SPEC.md IMPLEMENTATION_PLAN.md HANDOFF.md; do
+  if [ -f "$doc" ]; then
+    UPDATED=$(git log -1 --format=%ad --date=short -- "$doc" 2>/dev/null)
+    printf '  %-30s %4s行  最終更新 %s\n' "$doc" "$(wc -l < "$doc")" "${UPDATED:-不明}"
+  else
+    printf '  %-30s ⚠ 見つからない\n' "$doc"
+  fi
+done
+
+if [ -f MEMBERSHIP_FEATURE_SPEC.md ]; then
+  echo
+  echo "  MEMBERSHIP_FEATURE_SPEC.md（決定仕様）の目次:"
+  grep -n '^##' MEMBERSHIP_FEATURE_SPEC.md 2>/dev/null | sed 's/^/    /'
+  echo
+  echo "  ここで決着している事項をユーザーへ聞き直さないこと。"
+  echo "  変えたいときだけ、変更案として提示する。"
 fi
 
 # --- 引継ぎの到達確認 -----------------------------------------------------
