@@ -77,7 +77,7 @@ export function Navbar() {
             Contact
           </Link>
           <Link
-            href="#join"
+            href="/register"
             className="hidden sm:inline-flex min-h-[44px] items-center rounded border border-[rgba(200,164,90,0.3)] bg-[rgba(200,164,90,0.06)] px-4 py-2 font-mono text-[11px] font-semibold tracking-[0.16em] text-[#f0ede8] uppercase transition-all duration-200 hover:border-[#c8a45a] hover:bg-[#c8a45a] hover:text-[#080808]"
           >
             Join / Propose
@@ -117,7 +117,7 @@ export function Navbar() {
             {[
               { label: 'Home', href: '#home' },
               ...navItems,
-              { label: 'Join / Propose', href: '#join' },
+              { label: 'Join / Propose', href: '/register' },
               { label: 'お問い合わせ', href: '/contact' },
             ].map((item) => (
               <Link
