@@ -1,7 +1,7 @@
 # AIueo 会員・企画・管理機能 実装計画
 
-最終更新: 2026-09-05  
-計画状態: **Vercel Native Neon Postgres + Neon Authへのアプリ移行を完了。登録・再送をサーバー認証APIへ集約して本番反映済み。実メール受入、初期管理者、期限通知メール、権限E2Eを残している。**
+最終更新: 2026-09-06  
+計画状態: **Neonへの移行と品質ゲートは完了し、本番稼働中。P9の全行監査で確定した問題のうちTier 1〜3を実施済み。P14で仕様書と実装21ページを突き合わせ、画面構成と3導線を確定した。残るのはGoogle認証への切替、通知メールの送信、企画の編集手段、トップのDB接続、初期管理者の付与である。**
 
 この計画は、実装のたびに読む常設の進捗台帳である。仕様の正本は`MEMBERSHIP_FEATURE_SPEC.md`、セッションの正本は`HANDOFF.md`とする。3ファイルは作業開始時にこの順で確認し、終了時にすべて更新する。
 
@@ -84,6 +84,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | P13 | 会員登録フォームの例外処理 | P3 | 通信失敗時に理由を表示し、ボタンが固まらないこと | 完了 |
 | P14 | 画面とフローの確定 | P9 | 仕様書と実装21ページの突き合わせ、3導線の確定、不足の列挙、見逃し防止の三重化 | 完了（設計図を公開） |
 | P15 | Google認証への切替 | P14 | `/register` をGoogle認証1タップにし、パスワードを預からない形にする | 未着手（ユーザー決定済み。Google側の設定作業が必要） |
+| P16 | 台帳更新の強制（チェックアウト） | P14 | 終了時に`IMPLEMENTATION_PLAN.md`/`HANDOFF.md`の未更新を機械が指摘する | 完了 |
 
 ## データ・権限の実装境界
 
@@ -144,6 +145,8 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | 2026-09-05 | P10: `/api/auth/[...path]`を許可リスト方式へ。管理操作の失敗を画面表示、`submitted`／cron専用状態を選択肢から除去、同一状態への変更を拒否、`ipAddress()`／`timingSafeEqual`／uuid検証／`release(true)`を追加 | **スタブ上流を立てて実測**: 修正前は`admin/list-users`と`sign-up/email`が上流へ到達、修正後は404で到達せず、許可4パスは到達。許可リストを外すとテスト10件中9件が落ちる。lint/typecheck/build/Playwright 87件が緑 | `src/app/api/auth/[...path]/route.ts`、`src/app/admin/actions.ts`、`tests/auth-proxy.spec.ts`、`tests/admin-access.spec.ts` |
 | 2026-09-05 | `drizzle/0002_integrity_and_indexes.sql`: `moderation_actions`の追記専用トリガ、`terms_versions`の現行1件保証、欠けていたインデックス12本 | **PostgreSQL 16実機で検証**: 更新・削除が拒否、現行2件目が拒否、`reports`の未処理カウントが全走査→Index Only Scan、cronの2クエリが全走査→Index Scan。0002の効果を外すと`verify-migrations.mjs`が4件NGでexit 1 | `drizzle/0002_integrity_and_indexes.sql`、`scripts/verify-migrations.mjs` |
 | 2026-09-05 | PR #12 をマージし、`drizzle/0002` を本番Neonへ適用 | 適用後に本番で実測: 追加インデックス13本、トリガ`moderation_actions_immutable` 1件を確認 | PR #12、`07fe67e`、`neon-pink-bucket` / branch `main` / database `neondb` |
+| 2026-09-06 | P16: セッション終了フック（Stop）を新設。main に未到達のコミットが実装ファイルを触っていて台帳が未更新なら警告する。開始側（正本3文書の提示）と対にした | 実際に走らせ、`.claude/` 配下の変更を検出し台帳更新済みと判定することを確認 | `.claude/hooks/session-end.sh`、`.claude/settings.json`、`AGENTS.md` |
+| 2026-09-06 | P14 の続き: PR #17 を作成。CI が1件失敗したが、差分は文書とフックのみでアプリのコードを含まないため、この変更が原因ではない。トップページが `networkidle` で30秒に収まらずタイムアウト | 原因の裏づけ（画像最適化の実測）は未完了。テスト `layout.spec.ts:146` は `main` でも同じ条件で走っており、以前は緑だった | PR #17、`tests/layout.spec.ts:146` |
 | 2026-09-06 | P14: `MEMBERSHIP_FEATURE_SPEC.md` と実装21ページを1対1で突き合わせ、画面一覧・3導線・不足11件を設計図として公開。あわせて見逃し防止を `CLAUDE.md` の`@`参照・`AGENTS.md`の必読順序・セッション開始フックの3か所に入れた | 全ページの認可・リンク・状態遷移をコードで確認。通知メールが1通も送られないこと、企画の編集手段が無いことなどを特定 | https://claude.ai/code/artifact/0de7067b-8736-4325-bf09-ebe7dab72830 、`CLAUDE.md`、`AGENTS.md`、`.claude/hooks/session-start.sh` |
 | 2026-09-06 | P13: 会員登録フォームの4経路を try/catch/finally で囲み、失敗理由を `role="alert"` で表示。ユーザーが確認コード画面で無言のまま固まる不具合の修正 | **修正前のコードに戻すと新テストが落ちることを実測**。通信を強制失敗させ、メッセージ表示とボタン復帰を確認。Playwright 95件が緑。CIのBuildに `NEXT_PUBLIC_NEON_AUTH_ENABLED=true` を追加 | `src/components/register-form.tsx`、`tests/register-form.spec.ts`、`.github/workflows/ci.yml` |
 | 2026-09-05 | P12: 未参照のコンポーネント10・`public/`8ファイル・依存4件・未使用エクスポート/型を削除。`next.config.ts`のunsplash許可も削除。X2/X3はユーザー判断でどちらも現状維持 | **テストが93件のまま1件も減らない**ことで挙動不変を確認。`npm ci` exit 0、lint/typecheck/build も通過。`@neondatabase/serverless` が `drizzle-orm` の optional peer として残ることを `npm ls` で確認 | `src/components/`、`src/data/mock.ts`、`src/types/index.ts`、`public/`、`package.json` |

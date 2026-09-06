@@ -44,6 +44,12 @@ This block is written and re-added by `next dev` — verify at `node_modules/nex
 - 続けて、必ず `IMPLEMENTATION_PLAN.md` を読み、進行中のゲート・依存関係・未解決事項を確認すること。
 - 作業を終える前に、`HANDOFF.md` の「現在の状態」「今回の作業」「次にやること」を更新すること。
 - 作業を終える前に、`IMPLEMENTATION_PLAN.md` の進捗表と更新履歴も更新すること。更新しない作業完了は認めない。
+
+### 終了時の台帳更新（チェックアウト）
+
+`.claude/hooks/session-end.sh` が終了時に走り、`main` に未到達のコミットが実装ファイル（`src/` `drizzle/` `tests/` `scripts/` `public/` `.github/` `.claude/` 等）を触っているのに `IMPLEMENTATION_PLAN.md` または `HANDOFF.md` が未更新なら警告する。開始側のフックが正本3文書を提示するのと対になっている。
+
+**`IMPLEMENTATION_PLAN.md` を更新するときは、進捗欄だけを書き換える。** 基本方針・確定事項・技術方針・依存関係・受け入れ条件は勝手に変えない。方向を変えたいときは、変更案としてユーザーへ出して判断を仰ぐこと。
 - 引継ぎ内容には、公開URL・直近のコミット・未解決事項・ユーザー確認待ちの判断を残すこと。
 
 ### 引継ぎは `main` に到達して初めて完了とする

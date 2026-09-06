@@ -152,9 +152,15 @@
 
 ユーザー指示。2026-09-06、仕様書に明記されている決定事項（参加は登録不要・AIueoは当事者にならない）をエージェントがユーザーへ聞き直す事故が起きたことへの対処。
 
-1. **`CLAUDE.md`** — `@MEMBERSHIP_FEATURE_SPEC.md` / `@IMPLEMENTATION_PLAN.md` / `@HANDOFF.md` を `@` 参照で強制読み込み。ファイル名と役割も本文に明記。
+1. **`CLAUDE.md`** — `@MEMBERSHIP_FEATURE_SPEC.md` / `@IMPLEMENTATION_PLAN.md` / `@HANDOFF.md` を `@` 参照で強制読み込み。ファイル名と役割も本文に明記。**3層のうち、これだけが機械的に働く。**
 2. **`AGENTS.md` §4** — 開始時の必読順序に `MEMBERSHIP_FEATURE_SPEC.md` を第1位で追加。「ここで決着している事項をユーザーへ聞き直さない」と明記。
 3. **`.claude/hooks/session-start.sh`** — 開始時に3文書の行数・最終更新日と、決定仕様の目次（`##` 見出し）を画面へ出す。
+
+### 終了側（チェックアウト）も対にした
+
+`.claude/hooks/session-end.sh`（Stop フック）を新設。`main` に未到達のコミットが実装ファイルを触っているのに `IMPLEMENTATION_PLAN.md` または `HANDOFF.md` が未更新なら警告する。あわせて「このブランチは main に未到達である」ことも毎回出す。
+
+**`IMPLEMENTATION_PLAN.md` は進捗欄だけを書き換えること。** 基本方針・確定事項・技術方針・受け入れ条件は勝手に変えない。方向を変えるなら変更案としてユーザーへ出す。この規約は `AGENTS.md` §4 にも書いた。
 
 ## 前回の作業（2026-09-05 その1 / Claude Code on the web）
 
