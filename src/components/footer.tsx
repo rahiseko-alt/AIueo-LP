@@ -17,7 +17,7 @@ export function Footer() {
                 { label: 'How It Works', href: '#philosophy' },
                 { label: 'Events', href: '/events' },
                 { label: 'Activity Log', href: '#recent' },
-                { label: 'Join / Propose', href: '#join' },
+                { label: 'Join / Propose', href: '/register' },
                 { label: 'Operating Guidelines', href: '#guidelines' },
               ].map((link) => (
                 <Link
