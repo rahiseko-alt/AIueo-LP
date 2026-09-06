@@ -12,7 +12,7 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新の実装コミット: `b4fd6ba docs: drizzle/0002 を本番Neonへ適用済みとして記録する (#13)`
+- 最新の実装コミット: `c617469 feat: 検索結果とSNS共有に出る情報を整える (#14)`
 - ビルド: `npm run build` が成功
 - 品質ゲート: `lint` / `typecheck` / `build` / Playwright 93件が GitHub Actions で PR ごとに必須実行され、緑
 - **正式URLは `https://aiueo.kouheikosehira.com`**（`src/lib/site.ts`）。`https://aiueo-lp.vercel.app` も同じ内容を返すが、canonical で前者に寄せている
@@ -73,6 +73,25 @@
 - `tests/metadata.spec.ts`（6件）を追加。**`layout.tsx` から `openGraph` を外すと落ちることを実測で確認した。**
 
 生成した OGP 画像は実際に取得して目視確認済み（黒地にゴールドの `Aiueo`、`THIS WAY. TOGETHER.`、ドメイン名。文字の切れなし）。
+
+### 使われていないファイル・依存の削除（Tier 3）
+
+見た目も動きも変えない掃除。目的は、今後の作業で使われていないコードに手を入れて混乱するのを防ぐこと。すべて削除前に `grep` で参照0件を確認している。
+
+- **未参照のコンポーネント10ファイル**: `about` / `archive` / `archive-timeline` / `join` / `next-events` / `people` / `projects` / `projects-spotlight` / `recent-activities` / `testimonials`。`about.tsx:38` に残っていた `https://x.com`（サービストップへのリンク）もこれで消えた。5ヶ月分すべてが実データと矛盾していた `archive.tsx` / `archive-timeline.tsx` の問題も、ファイルごと消えたことで解消。
+- **連鎖して未使用になったもの**: `mock.ts` の `mockLeagueInfo` / `mockSliderPhotos` / `mockInitiativeFormats` / `mockTestimonials`、`types/index.ts` の `Project` / `Testimonial`。`Category` と `ActivityStatus` は `Activity` の中で使うため残した。
+- **未参照の `public/` 8ファイル**: 初期テンプレSVG5件と旧画像3件。
+- **未使用の依存4件**: `clsx` / `tailwind-merge` / `@neondatabase/serverless` / `drizzle-kit`。**`@neondatabase/serverless` は `drizzle-orm` の optional peer dependency として引き続きインストールされる**ことを `npm ls` で確認済み（このアプリは `pg` 経由で接続するため直接は使わない）。`drizzle-kit` は `@neondatabase/auth` 経由でも入る。
+- `next.config.ts` の `images.remotePatterns` から `images.unsplash.com` を削除（unsplash の URL はリポジトリに0件）。
+
+**テストは93件のまま1件も減っていない。** これが「掃除で挙動が変わっていない」証拠である。`npm ci` が exit 0 で通ることも確認済み。
+
+### 判断待ちの決着（X2・X3）
+
+ユーザーの判断により、**どちらも現状維持**。
+
+- **X3 メールアドレス**: `info@kouheikosehira.com` は公開3ページに出したままにする。git履歴では 2026-08-31（`2ee1404` ほか）に入ったもので露出期間は短いが、文字でもリンクでも収集プログラムには拾われるため、中途半端な難読化は効かない。実害（迷惑メールの増加）が出てから、捨てられる専用アドレスへ替える。
+- **X2 セッションの5分キャッシュ**: `src/lib/neon/auth.ts:13` の `sessionDataTtl: 300` は維持する。停止措置は `dal.ts` が毎回DBを読むため即時に効き、残るのは「盗まれたセッションが最大5分生き残る」範囲にとどまる。
 
 ## 前回の作業（2026-09-05 その1 / Claude Code on the web）
 
@@ -168,9 +187,9 @@ CI もテストも無く、`npm run lint` が exit 1 のまま放置され、`ne
 
 ## 次にやること
 
-### 最優先: Tier 3（不要ファイルの掃除）と Tier 4（アクセシビリティ）
+### 最優先: Tier 4（アクセシビリティ）
 
-Tier 1（PR #12）と Tier 2 は完了。`drizzle/0002` も本番へ適用済み。**X1（サイトの主題）は「AIを前に出す」で決着した。** 残るユーザー判断は X2・X3 のみで、どちらも Tier 3/4 の着手を止めない。
+Tier 1〜3 は完了。`drizzle/0002` も本番へ適用済み。**X1・X2・X3 のユーザー判断はすべて決着した。** 確定リストで残っているのは Tier 4 だけである。
 
 ### 確定した問題リスト（2026-09-05 に全行を読み切って作成。推測は含まない）
 
@@ -180,7 +199,9 @@ Tier 1（セキュリティ・確実なバグ）は実施済み。**Tier 2〜4 �
 
 `metadataBase` / OGP / canonical / `robots.ts` / `sitemap.ts` / ページ別 metadata をすべて追加済み。詳細は上の「今回の作業」を参照。
 
-#### Tier 3 — 掃除
+#### Tier 3 — 掃除 ✅ 完了（2026-09-05）
+
+削除済み。以下は当時の記録。
 
 - **未参照コンポーネント10ファイル（計691行）**: `about` / `archive` / `archive-timeline` / `join` / `next-events` / `people` / `projects` / `projects-spotlight` / `recent-activities` / `testimonials`。
 - 連鎖して死んでいる: `mock.ts` の `mockLeagueInfo` / `mockSliderPhotos` / `mockInitiativeFormats` / `mockTestimonials`、`types/index.ts:54-60` の `Testimonial`。
@@ -216,9 +237,11 @@ Tier 1（セキュリティ・確実なバグ）は実施済み。**Tier 2〜4 �
 
 ### ユーザー判断待ち
 
-- ~~**X1**: サイトの主題~~ → **決着済み（2026-09-05）**。ユーザーの判断は「AIを前に出す」。名前 `AI League AIueo` を維持し、`DIRECTION.md` の §5・§18-6 を書き換えた。正式URLは `https://aiueo.kouheikosehira.com`。
-- **X2**: セッションキャッシュ 300秒を許容するか。
-- **X3**: 個人ドメインのメールアドレスを公開ページに平文で出し続けるか。
+すべて決着済み（2026-09-05）。再提示しないこと。
+
+- ~~**X1**: サイトの主題~~ → 「AIを前に出す」。名前 `AI League AIueo` を維持し、`DIRECTION.md` の §5・§18-6 を書き換えた。正式URLは `https://aiueo.kouheikosehira.com`。
+- ~~**X2**: セッションキャッシュ 300秒~~ → 現状維持。
+- ~~**X3**: メールアドレスの平文露出~~ → 現状維持（放置）。
 
 ### 積み残しの外部作業
 
