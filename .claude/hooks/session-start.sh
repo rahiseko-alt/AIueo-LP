@@ -1,10 +1,11 @@
 #!/bin/bash
 # セッション開始時のセットアップと、引継ぎの到達確認。
 #
-# このフックの主目的は3つ。
+# このフックの主目的は4つ。
 #  1. lint / typecheck / build / test が最初から動くよう依存を入れる
 #  2. 決定事項の正本3文書の所在と目次を画面へ出す（見逃し防止 3/3）
 #  3. HANDOFF.md の更新が main に到達しているかを確認する
+#  4. IMPLEMENTATION_PLAN.md の状態欄のうち、コードより古い行を再確認候補として出す
 #
 # 2 は 2026-09-06 の事故への対処である。MEMBERSHIP_FEATURE_SPEC.md に
 # 「参加は会員登録不要」「AIueoは当事者にならない」と明記されているのに、
@@ -15,6 +16,15 @@
 # セッションを終えたため、次のセッションが5日前の記述を読んで作業を始めた。
 # 規約に「main へ到達させる」と書いても人もエージェントも忘れるので、
 # 開始時に機械が気付く形にしてある。
+#
+# 4 も実際に起きた事故への対処である。2026-09-06、P3〜P6の状態欄が
+# 「DB未適用」「Edge Function未デプロイ」等の古い文言のまま残り、実態
+# （DB適用済み・メール送信コード自体が無い等）と食い違っていた。前回の
+# 文言をコードの再確認なしにそのまま転記していたのが原因。同じ食い違いを
+# 内容ベースで検出することはできないので、代わりに「この行がいつ最後に
+# 書かれたか」と「コード(src/drizzle/supabase)がいつ最後に変わったか」を
+# 比較し、コードの方が新しい行を再確認候補として出す。誤りの証明ではなく、
+# 転記の前に立ち止まらせるための注意である。
 set -uo pipefail
 
 PROJECT_DIR="${CLAUDE_PROJECT_DIR:-$(pwd)}"
@@ -48,6 +58,35 @@ if [ -f MEMBERSHIP_FEATURE_SPEC.md ]; then
   echo
   echo "  ここで決着している事項をユーザーへ聞き直さないこと。"
   echo "  変えたいときだけ、変更案として提示する。"
+fi
+
+# --- 進捗台帳(状態欄)の鮮度確認 --------------------------------------------
+if [ -f IMPLEMENTATION_PLAN.md ] && git rev-parse --git-dir >/dev/null 2>&1; then
+  PHASE_START=$(grep -n '^## 実装フェーズと受け入れ条件' IMPLEMENTATION_PLAN.md | head -1 | cut -d: -f1)
+  PHASE_END=$(grep -n '^## データ・権限の実装境界' IMPLEMENTATION_PLAN.md | head -1 | cut -d: -f1)
+  LATEST_CODE=$(git log -1 --format=%ad --date=short -- src drizzle supabase 2>/dev/null)
+
+  if [ -n "$PHASE_START" ] && [ -n "$PHASE_END" ] && [ -n "$LATEST_CODE" ]; then
+    STALE_ROWS=""
+    while IFS= read -r LN; do
+      ID=$(sed -n "${LN}p" IMPLEMENTATION_PLAN.md | awk -F'|' '{gsub(/^ +| +$/,"",$2); print $2}')
+      ROW_DATE=$(git blame -L "$LN,$LN" --date=short -- IMPLEMENTATION_PLAN.md 2>/dev/null | grep -oE '[0-9]{4}-[0-9]{2}-[0-9]{2}' | head -1)
+      if [ -n "$ROW_DATE" ] && [ "$ROW_DATE" \< "$LATEST_CODE" ]; then
+        STALE_ROWS="$STALE_ROWS $ID"
+      fi
+    done < <(awk -v s="$PHASE_START" -v e="$PHASE_END" 'NR>s && NR<e && /^\| P[0-9]+ \|/{print NR}' IMPLEMENTATION_PLAN.md)
+
+    echo
+    echo "== 進捗台帳(状態欄)の鮮度確認 =="
+    if [ -n "$STALE_ROWS" ]; then
+      echo "  コード(src/drizzle/supabase)の最終更新($LATEST_CODE)より前に書かれた状態欄:"
+      echo "   $STALE_ROWS"
+      echo "  前回の文言をそのまま転記せず、扱う前にコードを見て再確認すること。"
+      echo "  (2026-09-06、P3〜P6の状態欄が古い文言のまま実態と食い違っていた事故への対処)"
+    else
+      echo "  ✅ 全フェーズの状態欄がコードの最終更新以降に書かれている"
+    fi
+  fi
 fi
 
 # --- 引継ぎの到達確認 -----------------------------------------------------

@@ -160,6 +160,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | 2026-09-05 | P12: 未参照のコンポーネント10・`public/`8ファイル・依存4件・未使用エクスポート/型を削除。`next.config.ts`のunsplash許可も削除。X2/X3はユーザー判断でどちらも現状維持 | **テストが93件のまま1件も減らない**ことで挙動不変を確認。`npm ci` exit 0、lint/typecheck/build も通過。`@neondatabase/serverless` が `drizzle-orm` の optional peer として残ることを `npm ls` で確認 | `src/components/`、`src/data/mock.ts`、`src/types/index.ts`、`public/`、`package.json` |
 | 2026-09-05 | P11: メタデータ・OGP画像・canonical・robots・sitemapを追加。ユーザー決定によりサイト主題は「AIを前に出す」、正式URLは`https://aiueo.kouheikosehira.com`。`DIRECTION.md`の矛盾を解消 | 本番ビルドで実測: OGP画像 200/image/png/39KB を目視確認、`robots.txt`と`sitemap.xml`の内容を確認。`openGraph`を外すと新テストが落ちる。lint/typecheck/build/Playwright 93件が緑 | `src/lib/site.ts`、`src/app/{layout.tsx,opengraph-image.tsx,robots.ts,sitemap.ts}`、`tests/metadata.spec.ts` |
 | 2026-09-06 | G1-07を決定。企画登録の必須項目は開催候補日のみとし、募集期限は含めない。設計図の不足#7（`tentative_starts_at`常時必須と仕様書「開催候補日または募集期限」の矛盾）は、仕様書側をこの決定に合わせて解消した。現行実装は変更前から既にこの決定と一致しており、コード変更は無い | `MEMBERSHIP_FEATURE_SPEC.md`企画登録フロー2項を修正。ユーザーの最終決定として本ファイルGate 1決定状況へ記録 | `MEMBERSHIP_FEATURE_SPEC.md`、本ファイルGate 1決定状況 |
+| 2026-09-06 | P3〜P6の状態欄が古い文言のまま実態と食い違っていた事故の再発防止として、`session-start.sh`に進捗台帳の鮮度確認を追加。フェーズ表の各行の最終更新日と`src/drizzle/supabase`の最終更新日を比較し、コードの方が新しい行を開始時に列挙する。`AGENTS.md`に「状態欄は前回の文言をそのまま転記しない」の節を追加 | 実際に走らせ、現状のP0/P2/P7/P8/P9/P10/P11が再確認候補として出ることを確認した（P1/P3〜P6/P12〜P16は今回のセッションで書いたため対象外） | `.claude/hooks/session-start.sh`、`AGENTS.md` |
 
 ## セッション終了チェック
 
