@@ -1,6 +1,6 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
-import { db } from '@/lib/neon/db';
+import { getPublicProposals } from '@/lib/proposals/public';
 
 export const metadata: Metadata = {
   title: '進行中の企画',
@@ -10,20 +10,6 @@ export const metadata: Metadata = {
 };
 
 export const dynamic = 'force-dynamic';
-
-type PublicProposal = { id: string; slug: string; title: string; summary: string; format: string; tentative_starts_at: string | null; organizer_name: string; participation_method: string; visibility: string; money_type: string; money_details: Record<string, string> | null; published_at: string | null };
-
-async function getPublicProposals() {
-  if (!db) return [] as PublicProposal[];
-  const result = await db.$client.query(
-    `select id, slug, title, summary, format, tentative_starts_at, organizer_name,
-      participation_method, visibility, money_type, money_details, published_at
-     from proposals
-     where status = 'published' and visibility = 'public' and public_expires_at > now()
-     order by tentative_starts_at asc`,
-  );
-  return result.rows as PublicProposal[];
-}
 
 export default async function EventsPage() {
   const proposals = await getPublicProposals();

@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export function WhoWeAre() {
   return (
     <section id="about" className="section-padding border-b border-[rgba(240,237,232,0.08)] bg-[#080808]">
@@ -26,9 +28,9 @@ export function WhoWeAre() {
             <a href="#philosophy" className="btn-ghost">
               AIueoの使い方 ↓
             </a>
-            <a href="#events" className="btn-solid">
+            <Link href="/events" className="btn-solid">
               進行中の企画を見る →
-            </a>
+            </Link>
           </div>
         </div>
       </div>
