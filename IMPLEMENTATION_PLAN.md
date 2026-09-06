@@ -71,9 +71,9 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | P0 | 運用プロトコル | なし | 開始時必読、終了時の計画/引継ぎ更新、実装ゲートを`AGENTS.md`へ固定 | 完了 |
 | P1 | Neon基盤への移行 | G1 | 開発/本番環境分離、Auth SSR、DB migration、サーバーDAL、監査ログ、権限テスト | 実装中（初期schema適用・会員プロフィール移行完了、権限テスト継続） |
 | P2 | 公開文書・登録導線 | G1 | `/terms`、`/disclaimer`、`/privacy`、`/register`に同意と用途表示を実装 | 完了（外部認証接続待ち） |
-| P3 | 会員機能 | P1 + P2 | 外部認証、即時`active`化、同意履歴、自己プロフィール、停止時の読取専用アクセス | 完了（DB未適用・E2E未実施） |
-| P4 | 企画機能 | P1 + P3 | 必須入力、金銭条件、状態遷移、公開/再掲載、公開企画ページ | 完了（DB未適用・E2E未実施） |
-| P5 | 管理・連絡・通報 | P1 + P4 | 全企画の管理権限、企画別メッセージ、通報、理由/差分/監査ログ | 完了（DB未適用・E2E未実施） |
+| P3 | 会員機能 | P1 + P2 | 外部認証、即時`active`化、同意履歴、自己プロフィール、停止時の読取専用アクセス | 完了（DB適用済み・状態遷移の自動E2E未実施） |
+| P4 | 企画機能 | P1 + P3 | 必須入力、金銭条件、状態遷移、公開/再掲載、公開企画ページ | 完了（DB適用済み・状態遷移の自動E2E未実施） |
+| P5 | 管理・連絡・通報 | P1 + P4 | 全企画の管理権限、企画別メッセージ、通報、理由/差分/監査ログ | 完了（DB適用済み・状態遷移の自動E2E未実施） |
 | P6 | 通知・期限処理 | P1 + P4 + C | 7日前通知、3日前`auto_hidden`、JST判定、重複送信防止、配信失敗記録 | 実装中（Edge Function未デプロイ） |
 | P7 | 横断受入・本番 | P2–P6 | 3視点の敵対検証、RLS許可/拒否、E2E、360px/768px/1280px確認、Vercel本番確認 | 未着手 |
 | P8 | 配線復旧と品質ゲート | なし | Vercel Git連携、CI必須化、Playwright、認可・列挙・レート制限の修正 | 完了（2026-09-05、本番反映済み） |
@@ -146,6 +146,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | 2026-09-05 | `drizzle/0002_integrity_and_indexes.sql`: `moderation_actions`の追記専用トリガ、`terms_versions`の現行1件保証、欠けていたインデックス12本 | **PostgreSQL 16実機で検証**: 更新・削除が拒否、現行2件目が拒否、`reports`の未処理カウントが全走査→Index Only Scan、cronの2クエリが全走査→Index Scan。0002の効果を外すと`verify-migrations.mjs`が4件NGでexit 1 | `drizzle/0002_integrity_and_indexes.sql`、`scripts/verify-migrations.mjs` |
 | 2026-09-05 | PR #12 をマージし、`drizzle/0002` を本番Neonへ適用 | 適用後に本番で実測: 追加インデックス13本、トリガ`moderation_actions_immutable` 1件を確認 | PR #12、`07fe67e`、`neon-pink-bucket` / branch `main` / database `neondb` |
 | 2026-09-06 | P16: セッション終了フック（Stop）を新設。main に未到達のコミットが実装ファイルを触っていて台帳が未更新なら警告する。開始側（正本3文書の提示）と対にした | 実際に走らせ、`.claude/` 配下の変更を検出し台帳更新済みと判定することを確認 | `.claude/hooks/session-end.sh`、`.claude/settings.json`、`AGENTS.md` |
+| 2026-09-06 | P3〜P5の状態欄「DB未適用」を訂正。2026-09-01時点（Neon移行前）の記述が残っていただけで、`drizzle/0000`（10テーブル一括作成）は2026-08-31に本番Neonへ適用済み、`0001`・`0002`もPR #9・#12で本番適用を実測確認済み。DB自体は3フェーズとも適用済みで、未実施なのは状態遷移・管理者操作を検証する自動E2Eテストと、運営アカウント不在による実データでの通し確認 | `table_count: 10`（08-31実測）、PR #9/#12の適用実測記録、HANDOFF.md「運営アカウントがまだ1つも存在しない」の記述と突き合わせて確認 | 本ファイルP3〜P5行、`HANDOFF.md` |
 | 2026-09-06 | P14 の続き: PR #17 を作成。CI が1件失敗したが、差分は文書とフックのみでアプリのコードを含まないため、この変更が原因ではない。トップページが `networkidle` で30秒に収まらずタイムアウト | 原因の裏づけ（画像最適化の実測）は未完了。テスト `layout.spec.ts:146` は `main` でも同じ条件で走っており、以前は緑だった | PR #17、`tests/layout.spec.ts:146` |
 | 2026-09-06 | P14: `MEMBERSHIP_FEATURE_SPEC.md` と実装21ページを1対1で突き合わせ、画面一覧・3導線・不足11件を設計図として公開。あわせて見逃し防止を `CLAUDE.md` の`@`参照・`AGENTS.md`の必読順序・セッション開始フックの3か所に入れた | 全ページの認可・リンク・状態遷移をコードで確認。通知メールが1通も送られないこと、企画の編集手段が無いことなどを特定 | https://claude.ai/code/artifact/0de7067b-8736-4325-bf09-ebe7dab72830 、`CLAUDE.md`、`AGENTS.md`、`.claude/hooks/session-start.sh` |
 | 2026-09-06 | P13: 会員登録フォームの4経路を try/catch/finally で囲み、失敗理由を `role="alert"` で表示。ユーザーが確認コード画面で無言のまま固まる不具合の修正 | **修正前のコードに戻すと新テストが落ちることを実測**。通信を強制失敗させ、メッセージ表示とボタン復帰を確認。Playwright 95件が緑。CIのBuildに `NEXT_PUBLIC_NEON_AUTH_ENABLED=true` を追加 | `src/components/register-form.tsx`、`tests/register-form.spec.ts`、`.github/workflows/ci.yml` |
