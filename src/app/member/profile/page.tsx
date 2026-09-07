@@ -30,6 +30,22 @@ export default async function MemberProfilePage() {
   }
 
   if (context.kind === 'member' && context.profile.status === 'active') {
+    let needsReconsent = false;
+    if (db) {
+      const consentResult = await db.$client.query(
+        `select count(*)::integer as count
+         from terms_versions tv
+         join consents c on c.terms_version_id = tv.id and c.user_id = $1
+         where tv.is_current = true`,
+        [context.userId],
+      );
+      needsReconsent = Number(consentResult.rows[0]?.count) !== 3;
+    }
+
+    if (needsReconsent) {
+      return <Shell><section className="mt-8 border border-[rgba(200,164,90,0.42)] bg-[#12110d] p-6 sm:p-10"><p className="font-mono text-xs tracking-[0.2em] text-[#c8a45a]">PROFILE / RE-CONSENT</p><h1 className="mt-4 text-4xl font-light">会員規約が更新されました</h1><p className="mt-4 leading-8 text-white/75">引き続き企画の登録・編集を行うには、最新の3文書への同意が必要です。公開名・協力したい内容は現在の登録内容が入っています。</p><ProfileCompletionForm versions={versions} defaultPublicName={context.profile.public_name ?? undefined} defaultCollaborationInterest={context.profile.collaboration_interest ?? undefined} /></section></Shell>;
+    }
+
     return <Shell><section className="mt-8 border border-[rgba(200,164,90,0.42)] bg-[#12110d] p-6 sm:p-10"><p className="font-mono text-xs tracking-[0.2em] text-[#c8a45a]">PROFILE</p><h1 className="mt-4 text-4xl font-light">登録内容</h1><dl className="mt-8 grid gap-6 text-sm sm:grid-cols-2"><div><dt className="font-mono text-xs tracking-[0.12em] text-[#c8a45a]">公開名</dt><dd className="mt-2 text-lg">{context.profile.public_name}</dd></div><div><dt className="font-mono text-xs tracking-[0.12em] text-[#c8a45a]">会員状態</dt><dd className="mt-2 text-lg">有効</dd></div><div className="sm:col-span-2"><dt className="font-mono text-xs tracking-[0.12em] text-[#c8a45a]">協力したい内容</dt><dd className="mt-2 leading-7 text-white/75">{context.profile.collaboration_interest}</dd></div></dl><div className="mt-8 flex flex-wrap gap-3"><Link href="/member" className="btn-solid">会員ページへ</Link><Link href="/member/history" className="btn-ghost">企画・メッセージ履歴</Link></div></section></Shell>;
   }
 

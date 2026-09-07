@@ -12,13 +12,27 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新の実装コミット: `04c625a feat: 公開名の説明文・金銭条件の表示・停止会員の履歴閲覧を実装する (#30)`（`main`へマージ済み、squash）
+- 最新の実装コミット: `3c7c80d docs: PR #30マージ後の台帳を実態に合わせて訂正 (#31)`（`main`へマージ済み。新規実装はブランチ`claude/checkin-6hrtds`でPR作成・マージ待ち）
 - **画面とフローの設計図**: https://claude.ai/code/artifact/0de7067b-8736-4325-bf09-ebe7dab72830 （全21ページ、3つの導線、不足11件。仕様書と実装の突き合わせ結果）
 - ビルド: `npm run build` が成功
 - 品質ゲート: `lint` / `typecheck` / `build` / Playwright 95件が GitHub Actions で PR ごとに必須実行され、緑
 - **CIのBuildは `NEXT_PUBLIC_NEON_AUTH_ENABLED=true` を付けて実行する。** 会員登録フォームのテストがフォームの有効な状態を見るため。認証基盤の接続情報は渡していないのでサーバー側は未設定のまま。手元で `npm test` を流すときも同じ値を付けてビルドすること
 - **正式URLは `https://aiueo.kouheikosehira.com`**（`src/lib/site.ts`）。`https://aiueo-lp.vercel.app` も同じ内容を返すが、canonical で前者に寄せている
 - **Vercel の Git 連携が接続済み。`main` への push で本番デプロイが自動で走る**（このセッションで接続前後を実測確認）
+
+## 今回の作業（2026-09-07 その2 / チェックイン、Claude Code on the web）
+
+P20（会員規約再同意導線の修復）に対応。ブランチ`claude/checkin-6hrtds`。
+
+### 実装
+
+- `src/app/member/profile/page.tsx`の`status === 'active'`分岐に、現行の会員規約・免責事項・プライバシーポリシー3文書すべてに同意済みかを確認するクエリ(`consents`×`terms_versions`、`is_current = true`の件数が3か)を追加。同意済みでない場合は、従来の読み取り専用「登録内容」表示ではなく、公開名・協力したい内容を既存値で埋めた`ProfileCompletionForm`（再同意用の見出し・説明文）を表示するようにした。
+- `src/components/profile-completion-form.tsx`に`defaultPublicName`/`defaultCollaborationInterest`のオプショナルpropsを追加し、既存会員が再同意する際に公開名・協力したい内容を毎回入力し直さずに済むようにした（新規登録時は未指定のまま、従来どおり空欄）。
+- サーバー側の`completeProfileAction`（`src/app/member/profile/actions.ts`）は元々、規約が更新されている場合のエラー処理と、同意済み文書だけを追加する`on conflict do nothing`のロジックを持っていたため、変更していない。今回はこのサーバーロジックに到達できるようフロント側の表示分岐を直しただけ。
+
+### 検証
+
+`npm run typecheck`/`lint`/`NEXT_PUBLIC_NEON_AUTH_ENABLED=true npm run build`/Playwright全95件、いずれも成功。**開発用DBが無いため、実際に会員規約を更新した状態での再同意フォーム表示・同意後の状態遷移の実DB確認は未実施。**
 
 ## 今回の作業（2026-09-07 / チェックイン、Claude Code on the web）
 
@@ -360,7 +374,11 @@ CI もテストも無く、`npm run lint` が exit 1 のまま放置され、`ne
 
 **→ https://claude.ai/code/artifact/0de7067b-8736-4325-bf09-ebe7dab72830** （リンク先の記載は公開時点のまま。解消済み分は本ファイル上部の「今回の作業」「確定した問題リスト」を参照）
 
-「企画を立てる道」「参加する道」は最後までつながった。残るのは1（Google認証、外部設定待ち）と5（運営アカウント、外部作業待ち）で、いずれもユーザー側の外部作業が必要。6（通知メール未送信）はG1-02未決定のため送信基盤そのものが無い。**#3の実装で見つかった3件の関連バグ(会員規約再同意導線の欠落、仕様書の用語矛盾、管理者措置理由の非表示)、#8〜#10の実装で見つかった`/member/proposals/[id]`系ページの停止会員アクセス不可は「今回の作業」の「未解決事項」を参照。特に会員規約再同意導線の欠落は、規約を更新する前に必ず対応すること。**
+「企画を立てる道」「参加する道」は最後までつながった。残るのは1（Google認証、外部設定待ち）と5（運営アカウント、外部作業待ち）で、いずれもユーザー側の外部作業が必要。6（通知メール未送信）はG1-02未決定のため送信基盤そのものが無い。**#3の実装で見つかった残り2件の関連バグ(仕様書の用語矛盾、管理者措置理由の非表示)、#8〜#10の実装で見つかった`/member/proposals/[id]`系ページの停止会員アクセス不可は「今回の作業」の「未解決事項」を参照。**
+
+### 解消済み: 会員規約再同意導線の修復（P20）
+
+2026-09-07に対応済み（ブランチ`claude/checkin-6hrtds`、上の「今回の作業」参照）。`/member/profile`の`status='active'`分岐に、現行3文書への同意確認を追加し、未同意なら`ProfileCompletionForm`（既存値付き）を表示するようにした。**まだ`main`未マージ、規約を実際に更新した状態での実DB確認も未実施。**
 
 ### 解消済み: 「公開名」の説明文修正・金銭条件の表示・停止会員の履歴閲覧（不足 #8・#9・#10）
 

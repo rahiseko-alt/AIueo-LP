@@ -8,7 +8,7 @@ type TermVersion = { id: string; document_type: 'terms' | 'disclaimer' | 'privac
 
 const labels = { terms: ['会員規約', '/terms'], disclaimer: ['免責事項', '/disclaimer'], privacy: ['プライバシーポリシー', '/privacy'] } as const;
 
-export function ProfileCompletionForm({ versions }: { versions: TermVersion[] }) {
+export function ProfileCompletionForm({ versions, defaultPublicName, defaultCollaborationInterest }: { versions: TermVersion[]; defaultPublicName?: string; defaultCollaborationInterest?: string }) {
   const [state, formAction, isPending] = useActionState<ProfileActionState, FormData>(completeProfileAction, { error: null });
   const byType = new Map(versions.map((version) => [version.document_type, version]));
   const isReady = (['terms', 'disclaimer', 'privacy'] as const).every((type) => byType.has(type));
@@ -16,8 +16,8 @@ export function ProfileCompletionForm({ versions }: { versions: TermVersion[] })
   return (
     <form action={formAction} className="mt-8 space-y-6">
       <div className="grid gap-5 sm:grid-cols-2">
-        <label className="block text-sm sm:col-span-2"><span className="font-mono text-xs tracking-[0.12em] text-[#c8a45a]">公開名 *</span><input name="publicName" required maxLength={80} className="mt-2 min-h-11 w-full border border-white/20 bg-black/20 px-3 text-base outline-none focus:border-[#c8a45a]" /><span className="mt-2 block text-xs text-white/55">会員ページに表示される、あなたの名前です。企画ページの主催者名は、企画ごとに別途入力します。認証メールアドレスは公開しません。</span></label>
-        <label className="block text-sm sm:col-span-2"><span className="font-mono text-xs tracking-[0.12em] text-[#c8a45a]">協力したい内容 *</span><textarea name="collaborationInterest" required maxLength={500} rows={4} className="mt-2 w-full resize-y border border-white/20 bg-black/20 px-3 py-2 text-base outline-none focus:border-[#c8a45a]" /><span className="mt-2 block text-xs text-white/55">初期版では会員一覧に公開しません。氏名・住所・電話番号・参加者情報は入力しないでください。</span></label>
+        <label className="block text-sm sm:col-span-2"><span className="font-mono text-xs tracking-[0.12em] text-[#c8a45a]">公開名 *</span><input name="publicName" required maxLength={80} defaultValue={defaultPublicName} className="mt-2 min-h-11 w-full border border-white/20 bg-black/20 px-3 text-base outline-none focus:border-[#c8a45a]" /><span className="mt-2 block text-xs text-white/55">会員ページに表示される、あなたの名前です。企画ページの主催者名は、企画ごとに別途入力します。認証メールアドレスは公開しません。</span></label>
+        <label className="block text-sm sm:col-span-2"><span className="font-mono text-xs tracking-[0.12em] text-[#c8a45a]">協力したい内容 *</span><textarea name="collaborationInterest" required maxLength={500} rows={4} defaultValue={defaultCollaborationInterest} className="mt-2 w-full resize-y border border-white/20 bg-black/20 px-3 py-2 text-base outline-none focus:border-[#c8a45a]" /><span className="mt-2 block text-xs text-white/55">初期版では会員一覧に公開しません。氏名・住所・電話番号・参加者情報は入力しないでください。</span></label>
       </div>
       <fieldset className="space-y-4 border-t border-white/10 pt-6"><legend className="font-mono text-xs tracking-[0.12em] text-[#c8a45a]">同意と確認 *</legend>
         <label className="flex min-h-11 items-start gap-3 text-sm leading-7"><input name="ageConfirmed" type="checkbox" required className="mt-2 h-4 w-4 accent-[#c8a45a]" />18歳以上であることを確認します。未成年向けイベントの参加者情報はAIueoへ入力しません。</label>
