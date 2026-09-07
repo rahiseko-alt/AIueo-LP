@@ -1,7 +1,7 @@
 # AIueo 会員・企画・管理機能 実装計画
 
 最終更新: 2026-09-06  
-計画状態: **Neonへの移行と品質ゲートは完了し、本番稼働中。P9の全行監査で確定した問題のうちTier 1〜3を実施済み。P14で仕様書と実装21ページを突き合わせ、画面構成と3導線を確定した。P17でトップのDB接続、P18でナビ/フッターの`/register`導線を実施し、いずれも本番反映済み。P19で企画の編集・下書き公開機能を実装した（本番マージ待ち）。残るのはGoogle認証への切替、通知メールの送信、初期管理者の付与である。**
+計画状態: **Neonへの移行と品質ゲートは完了し、本番稼働中。P9の全行監査で確定した問題のうちTier 1〜3を実施済み。P14で仕様書と実装21ページを突き合わせ、画面構成と3導線を確定した。P17でトップのDB接続、P18でナビ/フッターの`/register`導線を実施し、いずれも本番反映済み。P19で企画の編集・下書き公開機能を実装し、本番反映済み。残るのはGoogle認証への切替、通知メールの送信、初期管理者の付与、P20(会員規約再同意導線)である。**
 
 この計画は、実装のたびに読む常設の進捗台帳である。仕様の正本は`MEMBERSHIP_FEATURE_SPEC.md`、セッションの正本は`HANDOFF.md`とする。3ファイルは作業開始時にこの順で確認し、終了時にすべて更新する。
 
@@ -96,7 +96,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | P16 | 台帳更新の強制（チェックアウト） | P14 | 終了時に`IMPLEMENTATION_PLAN.md`/`HANDOFF.md`の未更新を機械が指摘する | 完了 |
 | P17 | トップページのDB接続 | P14 | トップの「進行中の企画」を`/events`と同じ公開企画データへ接続し、即時反映する。0件時は非表示、タグ絞り込みは削除 | 完了（PR #24、`d34f539`で`main`へマージ・本番反映済み。実企画データでの見た目確認は未実施） |
 | P18 | ナビ/フッターの`/register`導線 | P14 | `navbar.tsx`/`footer.tsx`の「Join / Propose」を`#join`アンカーから`/register`への通常リンクに変更する | 完了（PR #26、`1564f88`で`main`へマージ・本番反映済み） |
-| P19 | 企画の編集・下書きからの公開 | P14 | `/member/proposals/[id]`から企画内容を編集し、下書き⇔公開を切り替えられるようにする。新規作成時の`money_type='undecided'`検証漏れ(不足#11)も同時に修正する | 完了（ブランチ`claude/checkin-6hrtds`、本番マージ待ち。開発用DBでの手動確認は未実施） |
+| P19 | 企画の編集・下書きからの公開 | P14 | `/member/proposals/[id]`から企画内容を編集し、下書き⇔公開を切り替えられるようにする。新規作成時の`money_type='undecided'`検証漏れ(不足#11)も同時に修正する | 完了（PR #28、`5198d8b`で`main`へマージ・本番反映済み。実DBでの動作確認は運営アカウント不在のため未実施） |
 | P20 | 会員規約再同意導線の修復 | P19の敵対検証で発見 | `/member/profile`のactive分岐に再同意フォーム(`ProfileCompletionForm`)が出ず、規約更新後は既存会員が編集も新規作成も一切できなくなる。規約を実際に更新する前に必ず対応する | 未着手（現状は規約未更新のため実害なし） |
 
 ## データ・権限の実装境界
@@ -173,7 +173,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | 2026-09-06 | G1-06を決定。管理者は全企画の全項目（金銭条件・日程・主催者情報を含む）を編集できるが、版履歴・変更差分・理由・企画者への即時通知を必須とする。`MEMBERSHIP_FEATURE_SPEC.md`敵対検証を受けた公開前の必須設計3項の内容と一致しており、管理者編集の実装も変更前から既にこの内容だったため、コード変更は無い | ユーザー承認。本ファイルGate 1決定状況へ記録 | 本ファイルGate 1決定状況 |
 | 2026-09-06 | P17: トップページの「進行中の企画」を`/events`と同じ公開企画クエリ(`src/lib/proposals/public.ts`に共有DAL化)へ接続。0件時はセクション非表示、タグ絞り込みボタンは削除(DBに分類が無く恒久的に無反応になるため)、画像は`mock.ts`の既存素材を順番に割り当て。3視点の敵対検証で見つけた`#events`アンカーリンク破損(who-we-are.tsx/footer.tsx)も同時に修正。PR #24を`main`へマージ | `npm run typecheck`/`lint`/`build`通過、Playwright全95件緑。ローカルDB未接続下で0件時の非表示・リンク遷移・コンソールエラー無しを実測確認。**本番URL(`https://aiueo-lp.vercel.app/`)でも実測**: `id="events"`セクション無し(企画0件のため非表示)、`href="/events"`リンク正常、フィルタボタン文言も残っていない。実企画データでの見た目確認は未実施(運営アカウント不在のため) | PR #24、コミット`d34f539`、`src/lib/proposals/public.ts` |
 | 2026-09-06 | P18: `navbar.tsx`(デスクトップ・モバイルドロワーの2箇所)と`footer.tsx`の「Join / Propose」を、トップページ内`#join`アンカーから`/register`への通常リンクに変更。トップページ以外(`/events`、`/member`配下等)でこのボタンを押しても何も起きなかった不具合の修正。PR #26を`main`へマージ | `npm run typecheck`/`lint`/`build`通過、Playwright全95件緑。本番URL(`https://aiueo-lp.vercel.app/`)で`href="/register"`のリンク出現を実測確認 | PR #26、コミット`1564f88` |
-| 2026-09-06 | P19: `updateProposalAction`を新設し、`/member/proposals/[id]`で企画内容の編集・下書き⇔公開の切替を可能にした。所有者チェック二重化、`hidden`/`ended`/`cancelled`からの編集拒否、`money_type='undecided'`のまま公開させないガード、`auto_hidden`から日時未更新のまま再公開させない検証(cronへの即時差し戻し=「ヨーヨー」防止)、日時変換(`toDatetimeLocal`)・金銭条件キー変換(`toProposalDefaults`)を実装。`ProposalForm`を`action`/`defaultValues`/`proposalId`のprops化で新規作成・編集共用にした。3視点の敵対検証で見つかった`money_type='undecided'`の新規作成側の検証漏れ(不足#11)、開催状況フォームによる`hidden`企画の無条件status上書きも同時に修正 | `npm run typecheck`/`lint`/`build`通過、Playwright全95件緑。**開発用DBが無く、実DBに対する手動確認(所有者チェック・状態遷移・日時検証)は未実施** | ブランチ`claude/checkin-6hrtds` |
+| 2026-09-06 | P19: `updateProposalAction`を新設し、`/member/proposals/[id]`で企画内容の編集・下書き⇔公開の切替を可能にした。所有者チェック二重化、`hidden`/`ended`/`cancelled`からの編集拒否、`money_type='undecided'`のまま公開させないガード、`auto_hidden`から日時未更新のまま再公開させない検証(cronへの即時差し戻し=「ヨーヨー」防止)、日時変換(`toDatetimeLocal`)・金銭条件キー変換(`toProposalDefaults`)を実装。`ProposalForm`を`action`/`defaultValues`/`proposalId`のprops化で新規作成・編集共用にした。3視点の敵対検証で見つかった`money_type='undecided'`の新規作成側の検証漏れ(不足#11)、開催状況フォームによる`hidden`企画の無条件status上書きも同時に修正。PR #28を`main`へマージ | `npm run typecheck`/`lint`/`build`通過、Playwright全95件緑。本番URL(`https://aiueo-lp.vercel.app/`)で`/member/proposals/new`が未認証307を実測確認。**運営アカウント不在のため、実DBに対する所有者チェック・状態遷移・日時検証の動作確認は未実施** | PR #28、コミット`5198d8b` |
 
 ## セッション終了チェック
 
