@@ -12,13 +12,41 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新の実装コミット: `1564f88 fix: ナビ/フッターのJoin・Proposeを/registerへの実導線にする (#26)`（`main`へマージ済み、squash）
+- 最新の実装コミット: `7b2f52b feat: 企画の編集・下書きからの公開を実装する`（ブランチ`claude/checkin-6hrtds`、PR作成・マージ待ち）
 - **画面とフローの設計図**: https://claude.ai/code/artifact/0de7067b-8736-4325-bf09-ebe7dab72830 （全21ページ、3つの導線、不足11件。仕様書と実装の突き合わせ結果）
 - ビルド: `npm run build` が成功
 - 品質ゲート: `lint` / `typecheck` / `build` / Playwright 95件が GitHub Actions で PR ごとに必須実行され、緑
 - **CIのBuildは `NEXT_PUBLIC_NEON_AUTH_ENABLED=true` を付けて実行する。** 会員登録フォームのテストがフォームの有効な状態を見るため。認証基盤の接続情報は渡していないのでサーバー側は未設定のまま。手元で `npm test` を流すときも同じ値を付けてビルドすること
 - **正式URLは `https://aiueo.kouheikosehira.com`**（`src/lib/site.ts`）。`https://aiueo-lp.vercel.app` も同じ内容を返すが、canonical で前者に寄せている
 - **Vercel の Git 連携が接続済み。`main` への push で本番デプロイが自動で走る**（このセッションで接続前後を実測確認）
+
+## 今回の作業（2026-09-06 その5 / チェックイン、Claude Code on the web）
+
+設計図の不足#3（企画の編集・下書きからの公開手段が無い）に対応。ブランチ`claude/checkin-6hrtds`。
+
+### 実装
+
+- `src/app/member/proposals/[id]/actions.ts`に`updateProposalAction`を新設。所有者チェック(`for update`ロック＋UPDATE文にも`owner_id`を二重付与)、企画者が編集できる状態を`draft`/`published`/`needs_revision`/`auto_hidden`/`expired`に限定(`hidden`/`ended`/`cancelled`は拒否)、`money_type='undecided'`のまま公開しようとするとエラー、`auto_hidden`から日時を更新せず再公開しようとするとエラー(cronに即座に差し戻される「ヨーヨー」を防止)、`published_at`は初回公開日時を保持、`proposal_versions`/`audit_log`へ記録。
+- `src/components/proposal-form.tsx`に`action`/`defaultValues`/`proposalId`のpropsを追加し、新規作成・編集の両方で同じフォームを再利用できるようにした(複製しない)。`action`は呼び出し側が明示的に渡す必須propsとし、新規作成用と取り違えて別企画が複製される事故を防いだ。
+- `src/app/member/proposals/[id]/page.tsx`に`toDatetimeLocal`(DBのUTC ISO文字列→JSTの`datetime-local`表記への変換)、`toProposalDefaults`(`money_details`のDBキー`label`等からフォームの`name`属性`moneyLabel`等への変換、欠損キーは空文字)を追加。`status`が`hidden`/`ended`/`cancelled`のときは編集フォームを出さず固定文言(「管理者とのメッセージからお問い合わせください」)を表示。
+- `src/app/member/proposals/new/actions.ts`に、新規作成時も`money_type='undecided'`のまま公開できてしまう既存の穴(設計図の不足#11)を塞ぐガードを追加(1行)。
+- `src/app/member/proposals/[id]/actions.ts`の`setProposalEventStatusAction`に、`status='hidden'`(管理者の緊急非公開)のときは開催状況変更(終了・中止による`status`上書き)を拒否するガードを追加。
+
+### 敵対検証（3視点、サブエージェントで実施）で見つかった欠落と対応
+
+当初案には日時変換・金銭条件のキー変換が抜けており、そのまま実装すると開催候補日時が9時間ズレて表示される不具合になることを検証で発見、上記の`toDatetimeLocal`/`toProposalDefaults`で解消した。`auto_hidden`/`expired`から日時を更新せず再公開すると次回cron実行で即座に元の状態へ戻る「ヨーヨー」バグも検証で発見し、日時の未来性検証を追加して解消した。
+
+3視点の検証では、他に3件の関連する既存バグ・欠落を発見した。ユーザー判断により、#11(money_type='undecided'の検証漏れ)と開催状況フォームの無条件status上書きは今回まとめて修正、管理者措置理由の表示は固定文言のみ追加、会員規約再同意導線の欠落(下記「未解決事項」参照)は今回は対応しないこととした。
+
+### 検証
+
+`npm run typecheck`/`lint`/`NEXT_PUBLIC_NEON_AUTH_ENABLED=true npm run build`/Playwright全95件、いずれも成功。**開発用DBが無いため、実際のDBに対する手動確認(他人の企画IDでの拒否、状態遷移、`money_type=undecided`のガード等)は未実施。**
+
+### 未解決事項として持ち越し（今回スコープ外、ユーザー承認済み）
+
+- 会員規約の再同意が必要な状態の会員は、`/member/profile`のactive分岐に再同意フォーム(`ProfileCompletionForm`)が表示されないため、既存企画の編集も新規作成も一切できなくなる(既存の別バグ)。現状は規約が未更新のため実害は発生していない。規約を更新する前に必ず対応すること。
+- `MEMBERSHIP_FEATURE_SPEC.md`の企画登録フロー7項が「公開状態を`hidden`にする」と書いているが、実装・敵対検証を受けた公開前の必須設計4項は`auto_hidden`という別状態を使っている。仕様書側の用語矛盾が未解消。
+- 管理者措置(`hidden`)の実際の理由文言(`moderation_actions.reason_text`)は、会員画面にまだ表示されない(固定文言のみ)。
 
 ## 今回の作業（2026-09-06 その4 / チェックイン、Claude Code on the web）
 
@@ -310,11 +338,15 @@ CI もテストも無く、`npm run lint` が exit 1 のまま放置され、`ne
 
 ## 次にやること
 
-### 最優先: 設計図の不足11件を、番号順に片付ける（#2・#4・#7は解消。残り8件）
+### 最優先: 設計図の不足11件を、番号順に片付ける（#2・#3・#4・#7・#11は解消。残り6件）
 
 **→ https://claude.ai/code/artifact/0de7067b-8736-4325-bf09-ebe7dab72830** （リンク先の記載は公開時点のまま。解消済み分は本ファイル上部の「今回の作業」「確定した問題リスト」を参照）
 
-残る中で最優先は**#3（企画の編集・下書きからの公開手段が無い）**。これが終われば「企画を立てる道」が最後までつながる（#4は解消済みのため導線自体は繋がった）。着手前に必ず設計図と上の表を読むこと。1（Google認証）と5（運営アカウント）はユーザー側の外部作業を伴う。
+「企画を立てる道」「参加する道」は#2〜#4の解消で最後までつながった。残るのは1（Google認証、外部設定待ち）、5（運営アカウント、外部作業待ち）、6（通知メール未送信）、8〜10（表示・アクセス系の細かい不足）。着手前に必ず設計図と上の表を読むこと。**#3の実装で見つかった3件の関連バグ(会員規約再同意導線の欠落、仕様書の用語矛盾、管理者措置理由の非表示)は「今回の作業」の「未解決事項」を参照。特に会員規約再同意導線の欠落は、規約を更新する前に必ず対応すること。**
+
+### 解消済み: 企画の編集・下書きからの公開（不足 #3）、金銭条件「未定」の検証漏れ（不足 #11）
+
+2026-09-06に対応済み（ブランチ`claude/checkin-6hrtds`、上の「今回の作業」参照）。`/member/proposals/[id]`から企画内容を編集し、下書き⇔公開を切り替えられるようにした。新規作成時に`money_type='undecided'`のまま公開できてしまう検証漏れ(#11)も同時に修正。**まだ`main`未マージ、開発用DBでの手動確認も未実施。**
 
 ### 解消済み: トップページの「進行中の企画」をデータベースにつなぐ（不足 #2）
 
