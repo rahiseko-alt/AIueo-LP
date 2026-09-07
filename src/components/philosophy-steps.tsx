@@ -55,7 +55,7 @@ export function PhilosophySteps() {
                   className={`font-mono text-[10px] font-semibold tracking-[0.2em] sm:text-xs ${
                     flow.featured
                       ? 'text-[#c8a45a]'
-                      : 'text-[rgba(240,237,232,0.42)]'
+                      : 'text-[rgba(240,237,232,0.6)]'
                   }`}
                 >
                   {flow.label}

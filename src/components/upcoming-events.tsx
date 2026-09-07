@@ -23,7 +23,12 @@ export function UpcomingEvents({ activities }: UpcomingEventsProps) {
           </span>
         </div>
 
-        <div className="-mx-4 mt-8 overflow-x-auto px-4 pb-5 sm:-mx-6 sm:mt-10 sm:px-6 md:-mx-10 md:px-10 no-scrollbar">
+        <div
+          tabIndex={0}
+          role="region"
+          aria-label="進行中の企画一覧、横スクロール"
+          className="-mx-4 mt-8 overflow-x-auto px-4 pb-5 sm:-mx-6 sm:mt-10 sm:px-6 md:-mx-10 md:px-10 no-scrollbar"
+        >
           <div className="flex w-max snap-x snap-mandatory gap-4 sm:gap-5">
           {filteredActivities.map((act) => (
             <div

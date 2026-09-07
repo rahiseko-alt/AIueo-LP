@@ -12,13 +12,39 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新の実装コミット: `377200a feat: 管理者措置理由を会員向けに表示する(P22) (#34)`（`main`へマージ済み、squash）
-- **画面とフローの設計図**: https://claude.ai/code/artifact/0de7067b-8736-4325-bf09-ebe7dab72830 （全21ページ、3つの導線、不足11件。仕様書と実装の突き合わせ結果）
+- 最新の実装コミット: `634a22f docs: 仕様書のhidden/auto_hidden用語矛盾を解消する(P23) (#36)`（`main`へマージ済み、squash）
+- **画面とフローの設計図**: https://claude.ai/code/artifact/0de7067b-8736-4325-bf09-ebe7dab72830 （全21ページ、3つの導線。仕様書と実装の突き合わせ結果。掲載時点の不足11件はコード対応可能な分すべて解消済み、詳細は本ファイル該当セクション参照）
 - ビルド: `npm run build` が成功
-- 品質ゲート: `lint` / `typecheck` / `build` / Playwright 95件が GitHub Actions で PR ごとに必須実行され、緑
+- 品質ゲート: `lint` / `typecheck` / `build` / Playwright 98件が GitHub Actions で PR ごとに必須実行され、緑
 - **CIのBuildは `NEXT_PUBLIC_NEON_AUTH_ENABLED=true` を付けて実行する。** 会員登録フォームのテストがフォームの有効な状態を見るため。認証基盤の接続情報は渡していないのでサーバー側は未設定のまま。手元で `npm test` を流すときも同じ値を付けてビルドすること
 - **正式URLは `https://aiueo.kouheikosehira.com`**（`src/lib/site.ts`）。`https://aiueo-lp.vercel.app` も同じ内容を返すが、canonical で前者に寄せている
 - **Vercel の Git 連携が接続済み。`main` への push で本番デプロイが自動で走る**（このセッションで接続前後を実測確認）
+
+## 今回の作業（2026-09-07 その5 / チェックイン、Claude Code on the web）
+
+P24（アクセシビリティ Tier 4 の現存11件を修正）に対応。ブランチ`claude/checkin-6hrtds`（本番マージ待ち）。
+
+### 背景
+
+2026-09-05のP9全行監査で「Tier 4 — アクセシビリティ」として13件を確定リストに残していたが、ユーザーの仕分けでTier 1〜3のみ着手しTier 4は持ち越していた。今回、Exploreエージェントで13件を現行コードと突き合わせたところ、2件は別作業で既に解消済みと判明した（企画一覧のタグ絞り込みボタンはP17で削除済みのため該当箇所自体が消滅、`register-form.tsx`の`role="alert"`/`"status"`分離はP13で実施済み）。残る11件を今回修正した。
+
+### 実装
+
+- `src/components/navbar.tsx`: モバイルドロワーに`role="dialog"`/`aria-modal="true"`/`id="mobile-drawer"`、トグルボタンに`aria-controls="mobile-drawer"`を追加。ドロワー表示中はEscapeで閉じる、Tabキーでドロワー内をループするフォーカストラップ、閉じたときにトグルボタンへフォーカスを戻す処理を追加。未スクロール時のnavに`inert`属性を追加し、非表示中はTabフォーカスされないようにした（既存の`pointer-events-none`/`opacity-0`と併用）。ドロワー表示中にウィンドウ幅が1024px以上になったら自動的に閉じる処理を追加（既存の`body.style.overflow`ロック解除バグの修正を兼ねる）。スクロール監視の`useEffect`で初回マウント時に`handleScroll()`を即時実行し、既にスクロールした状態で読み込まれた場合にnavが非表示のまま固まらないようにした。ドロワーの上端オフセットを`top-16 md:top-[68px]`にしてnavの実高さと一致させた。フッターのラベル文言の不透明度を0.3→0.6に引き上げ（コントラスト対応）。
+- `src/app/globals.css`: `prefers-reduced-motion: reduce`時にアニメーション・トランジション・スムーズスクロールを実質無効化する対応を追加。`.btn-ghost`/`.btn-solid`の`:focus-visible`から`outline: none`を外し、ホバーと区別できる可視のフォーカスリング（`outline: 2px solid var(--gold)`）を専用ルールで追加。`scroll-padding-top`を768px未満は64px、768px以上は68pxに分離し、nav実高さと一致させた。
+- コントラスト不足のあった6箇所（`operating-guidelines.tsx`、`philosophy-steps.tsx`、`footer.tsx`、`team-members.tsx`）と境界値だった2箇所（`recent-log.tsx`）の文字色不透明度を、いずれも0.6以上へ引き上げた（`navbar.tsx`の1箇所は上記navbar項目に含む）。`register-form.tsx`のプレースホルダ（0.55）は既に十分なコントラストがあるため対象外とした。
+- `src/components/hero.tsx`: 装飾的な「AIueo」ワードマークの`aria-label`付き`<div>`に`role="img"`を追加（roleの無いdivではaria-labelが支援技術に無視されるため）。英語見出し「THIS WAY. TOGETHER.」の`<h1>`に`lang="en"`を追加。
+- `src/components/upcoming-events.tsx`: 横スクロールの企画カード列に`tabIndex={0}`/`role="region"`/`aria-label`を追加し、キーボードでもスクロールできるようにした。
+- `src/app/layout.tsx`・`src/components/skip-link.tsx`（新設）: 本文へのスキップリンクを追加。全ページで`<main>`を最上位要素に使う既存の構成を踏まえ、各ページファイルを触らずに済むよう、クリック時に`document.querySelector('main')`へ`tabindex="-1"`を付けてフォーカスするクライアントコンポーネントとして実装した。
+- `src/components/register-form.tsx`: ログイン成功時・確認コード検証成功時の`window.location.assign('/member/profile')`を`useRouter().push('/member/profile')`に置換（ESLintの`@next/next/no-location-assign-relative-destination`警告2件を解消）。
+
+### 対象外（今回は対応しない）
+
+- `hero.tsx`の`alt`属性が`activity.imageUrl`に対して固定文字列である点（設計図調査で発見）。現状は呼び出し元が1箇所（トップページの固定`mockHeroActivity`）のみで実害は無く、正しく直すには`Activity`型に画像説明フィールドを追加する必要があり、今回のスコープを超えるため見送った。
+
+### 検証
+
+`npm run typecheck`/`lint`（0件）/`NEXT_PUBLIC_NEON_AUTH_ENABLED=true npm run build`、いずれも成功。Playwright全98件緑（既存95件+今回追加した`tests/accessibility.spec.ts`3件）。新規テストは実ブラウザで、モバイルドロワーがdialogとして開きEscapeで閉じてフォーカスが戻ること、スキップリンクがフォーカスで可視化し本文へ遷移すること、未スクロール時のnavがinertでTabフォーカスされないことを確認する。
 
 ## 今回の作業（2026-09-07 その4 / チェックイン、Claude Code on the web）
 
@@ -452,9 +478,9 @@ CI もテストも無く、`npm run lint` が exit 1 のまま放置され、`ne
 
 2026-09-06に対応済み（PR #26、コミット`1564f88`、`main`へマージ・本番反映済み）。`navbar.tsx`と`footer.tsx`の「Join / Propose」を`#join`から`/register`への通常リンクに変更。**本番URLで実測確認済み**: `href="/register"`のリンクがnavbar・footerに出現。
 
-### 次点: Tier 4（アクセシビリティ）
+### Tier 4（アクセシビリティ）✅ 完了（2026-09-07、P24）
 
-Tier 1〜3 は完了。`drizzle/0002` も本番へ適用済み。**X1・X2・X3 のユーザー判断はすべて決着した。** 確定リストで残っているのは Tier 4 だけである。
+Tier 1〜4 すべて完了。`drizzle/0002` も本番へ適用済み。**X1・X2・X3 のユーザー判断はすべて決着した。** Tier 4は当初13件のうち2件が別作業(P13・P17)で既に解消済みと判明し、残る11件をP24で修正した。詳細は上の「今回の作業（2026-09-07 その5）」を参照。
 
 ### 確定した問題リスト（2026-09-05 に全行を読み切って作成。推測は含まない）
 
@@ -476,20 +502,22 @@ Tier 1（セキュリティ・確実なバグ）は実施済み。**Tier 2〜4 �
 - `archive.tsx` と `archive-timeline.tsx` が**5ヶ月分すべて**で互いにも `mock.ts` にも一致しない活動名を持つ。両者とも `Tag` 型に無いタグ（`SPRINT`/`ALLIANCE` 等）を素の文字列で使い型検査を素通り。復活させると `id="archive"`・`id="about"`・`id="recent"`・`id="join"` が重複する。
 - 描画中ページのセクション番号が `01→(番号なし)→02→03→04→06→07` で **05 が欠番**（`05 / MEMBER VOICES` は死にコード `testimonials.tsx:7`）。`about.tsx:38` の `https://x.com` はサービストップ（死にコード内）。
 
-#### Tier 4 — アクセシビリティ
+#### Tier 4 — アクセシビリティ ✅ 完了（2026-09-07、P24）
 
-- モバイルドロワー（`navbar.tsx:114-150`）に `role="dialog"` / `aria-modal` が無く、**Escape 非対応**（`keydown` が0件）、**フォーカストラップ・フォーカス復帰なし**（`useRef`/`.focus()` が0件）。`aria-expanded` はあるが `aria-controls` とドロワー側 `id` が無い。
-- `navbar.tsx:40-44` — 未スクロール時に `pointer-events-none -translate-y-full opacity-0` で隠すだけなので、**見えないのに Tab でフォーカスできる要素が8つ**残る。
-- `navbar.tsx:19-28` のスクロールロックが幅変化を考慮せず、ドロワーを開いたまま1024px以上へ広げるとページ全体がスクロール不能になる。
-- `globals.css` 全191行に **`prefers-reduced-motion` が1箇所も無い**（`scroll-behavior: smooth`、`animate-fadeIn`、`hover:-translate-y-1.5`、`group-hover:scale-105` が無条件で動く）。
-- **コントラスト AA 未達6箇所（実測）**: `navbar.tsx:145`（2.37:1）、`register-form.tsx:82` placeholder（約2.7:1）、`operating-guidelines.tsx:75`（3.39:1）、`philosophy-steps.tsx:58`（3.68:1）、`footer.tsx:87`（3.96:1）、`team-members.tsx:50`（4.03:1）。境界4.7台が `recent-log.tsx:27,78`、`upcoming-events.tsx:110`。
-- `globals.css:74,110` が `focus-visible` で `outline:none` としたうえ hover と同一の見た目にしている。
-- nav 高さ `h-16 md:h-[68px]`（`:40`）とドロワー `top-16`（`:115`）が 768–1023px で4px食い違う。`globals.css:20` の `scroll-padding-top: 68px` もモバイルの64pxと不一致。
-- `navbar.tsx:10-16` が初回に `handleScroll()` を呼ばないため、スクロール位置復元やハッシュ付きURLで読み込むとナビが消えたままになる。
-- `hero.tsx:12-13` — `src` はデータ由来なのに `alt` が固定文字列。`:28-31` の `aria-label` は role を持たない `div` に付いており支援技術に無視される。
-- `upcoming-events.tsx:44-59` のフィルタに `aria-pressed` / `aria-live` が無く、横スクロール領域が `tabIndex` 無しでキーボード操作できない。`register-form.tsx:96` はエラーも成功も同じ `role="status"`。
-- `lang="ja"`（`layout.tsx:34`）配下に英語見出し（`hero.tsx:22-24` ほか）が `lang="en"` なしで並ぶ。スキップリンクも0件。
-- `register-form.tsx:41,67` が内部遷移に `window.location.assign()` を使い ESLint 警告2件（現状の lint 唯一の警告）。
+2026-09-05時点の記録（当時未着手）。P24でExploreエージェントが現行コードと再照合し、`upcoming-events.tsx`のフィルタ関連(P17でボタン自体を削除済み)と`register-form.tsx:96`のrole分離(P13で実施済み)の2件は解消済みと判明。残り11件は下記のとおりP24で修正した。
+
+- モバイルドロワー（`navbar.tsx:114-150`）に `role="dialog"` / `aria-modal` が無く、**Escape 非対応**（`keydown` が0件）、**フォーカストラップ・フォーカス復帰なし**（`useRef`/`.focus()` が0件）。`aria-expanded` はあるが `aria-controls` とドロワー側 `id` が無い。→ 修正済み。
+- `navbar.tsx:40-44` — 未スクロール時に `pointer-events-none -translate-y-full opacity-0` で隠すだけなので、**見えないのに Tab でフォーカスできる要素が8つ**残る。→ `inert`属性を追加して修正済み。
+- `navbar.tsx:19-28` のスクロールロックが幅変化を考慮せず、ドロワーを開いたまま1024px以上へ広げるとページ全体がスクロール不能になる。→ リサイズ時に自動でドロワーを閉じるよう修正済み。
+- `globals.css` 全191行に **`prefers-reduced-motion` が1箇所も無い**（`scroll-behavior: smooth`、`animate-fadeIn`、`hover:-translate-y-1.5`、`group-hover:scale-105` が無条件で動く）。→ 修正済み。
+- **コントラスト AA 未達6箇所（実測）**: `navbar.tsx:145`（2.37:1）、`register-form.tsx:82` placeholder（約2.7:1）、`operating-guidelines.tsx:75`（3.39:1）、`philosophy-steps.tsx:58`（3.68:1）、`footer.tsx:87`（3.96:1）、`team-members.tsx:50`（4.03:1）。境界4.7台が `recent-log.tsx:27,78`、`upcoming-events.tsx:110`。→ `register-form.tsx`のplaceholderは既に0.55へ引き上げ済み(P9)で計算上6.24:1と十分だったため対象外、`upcoming-events.tsx:110`はP17の該当箇所削除により消滅。残り6+2箇所は不透明度0.6以上へ引き上げて修正済み。
+- `globals.css:74,110` が `focus-visible` で `outline:none` としたうえ hover と同一の見た目にしている。→ 修正済み。
+- nav 高さ `h-16 md:h-[68px]`（`:40`）とドロワー `top-16`（`:115`）が 768–1023px で4px食い違う。`globals.css:20` の `scroll-padding-top: 68px` もモバイルの64pxと不一致。→ 修正済み。
+- `navbar.tsx:10-16` が初回に `handleScroll()` を呼ばないため、スクロール位置復元やハッシュ付きURLで読み込むとナビが消えたままになる。→ 修正済み。
+- `hero.tsx:12-13` — `src` はデータ由来なのに `alt` が固定文字列。`:28-31` の `aria-label` は role を持たない `div` に付いており支援技術に無視される。→ `alt`固定文字列は呼び出し元が1箇所のみで実害が無いためP24では対象外(下の「今回の作業」参照)、`aria-label`のdivには`role="img"`を追加して修正済み。
+- `upcoming-events.tsx:44-59` のフィルタに `aria-pressed` / `aria-live` が無く、横スクロール領域が `tabIndex` 無しでキーボード操作できない。`register-form.tsx:96` はエラーも成功も同じ `role="status"`。→ フィルタ自体がP17で削除済みのため前半は対象外、横スクロール領域への`tabIndex`はP24で追加済み、role分離はP13で解消済み。
+- `lang="ja"`（`layout.tsx:34`）配下に英語見出し（`hero.tsx:22-24` ほか）が `lang="en"` なしで並ぶ。スキップリンクも0件。→ 修正済み。
+- `register-form.tsx:41,67` が内部遷移に `window.location.assign()` を使い ESLint 警告2件（現状の lint 唯一の警告）。→ `useRouter().push()`へ置換して修正済み（ESLint警告は現在0件）。
 
 #### 保留（Tier 1 の監査で見つかったが今回は未対応）
 

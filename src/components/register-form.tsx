@@ -1,6 +1,7 @@
 'use client';
 
 import { FormEvent, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createAuthClient } from '@neondatabase/auth/next';
 
 type Screen = 'credentials' | 'verify';
@@ -31,6 +32,7 @@ function withCause(base: string, cause: unknown) {
 }
 
 export function RegisterForm() {
+  const router = useRouter();
   const configured = Boolean(process.env.NEXT_PUBLIC_NEON_AUTH_ENABLED === 'true');
   const [screen, setScreen] = useState<Screen>('credentials');
   const [intent, setIntent] = useState<'signup' | 'signin'>('signup');
@@ -76,7 +78,7 @@ export function RegisterForm() {
           setNotice({ kind: 'error', text: withCause('ログインできませんでした', error) });
           return;
         }
-        window.location.assign('/member/profile');
+        router.push('/member/profile');
         return;
       }
 
@@ -115,7 +117,7 @@ export function RegisterForm() {
         setNotice({ kind: 'error', text: withCause('確認できませんでした。最新のメールに届いたコードを入力してください', error) });
         return;
       }
-      window.location.assign('/member/profile');
+      router.push('/member/profile');
     } catch (error) {
       console.error('AIueo email verification failed', error);
       setNotice({ kind: 'error', text: NETWORK_MESSAGE });

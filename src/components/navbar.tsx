@@ -1,29 +1,69 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 
 export function Navbar() {
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const toggleButtonRef = useRef<HTMLButtonElement>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const handleScroll = () => {
       setIsScrolled(window.scrollY > 20);
     };
+    handleScroll();
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Lock body scroll when mobile drawer is open
+  // Lock body scroll when mobile drawer is open, and drop the lock if the
+  // viewport crosses into the desktop breakpoint (drawer markup is lg:hidden,
+  // so the state must follow or the scroll lock outlives the drawer).
   useEffect(() => {
-    if (isDrawerOpen) {
-      document.body.style.overflow = 'hidden';
-    } else {
+    if (!isDrawerOpen) {
       document.body.style.overflow = '';
+      return;
     }
+    document.body.style.overflow = 'hidden';
+    const handleResize = () => {
+      if (window.innerWidth >= 1024) setIsDrawerOpen(false);
+    };
+    window.addEventListener('resize', handleResize);
     return () => {
       document.body.style.overflow = '';
+      window.removeEventListener('resize', handleResize);
+    };
+  }, [isDrawerOpen]);
+
+  // Close on Escape, trap Tab within the drawer, and return focus to the toggle button on close.
+  useEffect(() => {
+    if (!isDrawerOpen) return;
+    const toggleButton = toggleButtonRef.current;
+    drawerRef.current?.focus();
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsDrawerOpen(false);
+        return;
+      }
+      if (event.key !== 'Tab' || !drawerRef.current) return;
+      const focusable = drawerRef.current.querySelectorAll<HTMLElement>('a[href], button');
+      if (focusable.length === 0) return;
+      const first = focusable[0];
+      const last = focusable[focusable.length - 1];
+      if (event.shiftKey && document.activeElement === first) {
+        event.preventDefault();
+        last.focus();
+      } else if (!event.shiftKey && document.activeElement === last) {
+        event.preventDefault();
+        first.focus();
+      }
+    };
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      toggleButton?.focus();
     };
   }, [isDrawerOpen]);
 
@@ -37,6 +77,7 @@ export function Navbar() {
   return (
     <>
       <nav
+        inert={!isScrolled}
         className={`fixed top-0 left-0 right-0 z-50 flex h-16 md:h-[68px] items-center justify-between border-b px-4 transition-all duration-300 sm:px-6 md:px-8 lg:px-10 ${
           isScrolled
             ? 'border-[rgba(240,237,232,0.12)] bg-[#080808]/90 backdrop-blur-2xl shadow-[0_10px_30px_rgba(0,0,0,0.5)]'
@@ -84,10 +125,12 @@ export function Navbar() {
           </Link>
 
           <button
+            ref={toggleButtonRef}
             onClick={() => setIsDrawerOpen(!isDrawerOpen)}
             className="flex h-11 w-11 items-center justify-center rounded-lg border border-[rgba(240,237,232,0.12)] bg-[rgba(240,237,232,0.03)] text-white transition-colors hover:border-[#c8a45a] hover:text-[#c8a45a] lg:hidden"
             aria-label={isDrawerOpen ? 'Close Menu' : 'Open Menu'}
             aria-expanded={isDrawerOpen}
+            aria-controls="mobile-drawer"
           >
             <div className="flex h-4 w-5 flex-col justify-between">
               <span
@@ -112,7 +155,15 @@ export function Navbar() {
 
       {/* Mobile Drawer (Visible on < lg screens) */}
       {isDrawerOpen && (
-        <div className="fixed inset-0 top-16 z-40 flex flex-col justify-between overflow-y-auto bg-[#080808]/98 px-6 py-8 backdrop-blur-3xl lg:hidden animate-fadeIn">
+        <div
+          id="mobile-drawer"
+          ref={drawerRef}
+          role="dialog"
+          aria-modal="true"
+          aria-label="メニュー"
+          tabIndex={-1}
+          className="fixed inset-0 top-16 md:top-[68px] z-40 flex flex-col justify-between overflow-y-auto bg-[#080808]/98 px-6 py-8 backdrop-blur-3xl lg:hidden animate-fadeIn outline-none"
+        >
           <div className="flex flex-col items-center gap-2 py-4">
             {[
               { label: 'Home', href: '#home' },
@@ -142,7 +193,7 @@ export function Navbar() {
                 GitHub
               </a>
             </div>
-            <p className="text-[10px] tracking-widest text-[rgba(240,237,232,0.3)] uppercase">
+            <p className="text-[10px] tracking-widest text-[rgba(240,237,232,0.6)] uppercase">
               AI League AIueo · Grassroots Alliance
             </p>
           </div>
