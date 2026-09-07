@@ -70,6 +70,9 @@ export async function saveProposalAction(_previousState: ProposalActionState, fo
   if (input.moneyType !== 'none' && input.moneyType !== 'undecided' && (!input.moneyAmount || !input.moneyRecipient || !input.moneySettlement)) {
     return { error: '金銭が発生する場合は、金額、支払先、精算方法を入力してください。' };
   }
+  if (input.moneyType === 'undecided' && input.intent === 'publish') {
+    return { error: '金銭条件が未定のままでは公開できません。下書き保存のみ可能です。' };
+  }
 
   const payload = {
     slug: `proposal-${crypto.randomUUID()}`,
