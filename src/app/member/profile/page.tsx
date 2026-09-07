@@ -20,7 +20,17 @@ export default async function MemberProfilePage() {
     return <Shell><section className="mt-8 border border-[#c8a45a]/40 bg-[#12110d] p-6 sm:p-10"><h1 className="text-3xl font-light">ログインが必要です</h1><p className="mt-4 leading-8 text-white/75">企画を掲載・管理する人は、外部認証でログインしてください。</p><Link href="/register" className="btn-solid mt-7">会員登録・ログイン</Link></section></Shell>;
   }
   if (context.kind === 'member' && (context.profile.status === 'suspended' || context.profile.status === 'withdrawn')) {
-    return <Shell><section className="mt-8 border border-red-300/35 bg-[#18100f] p-6 sm:p-10"><p className="font-mono text-xs tracking-[0.2em] text-[#d7bd82]">READ ONLY</p><h1 className="mt-4 text-3xl font-light">会員状態を確認してください</h1><p className="mt-4 leading-8 text-white/75">現在の状態: <strong className="text-white">{context.profile.status === 'suspended' ? '利用停止' : '退会済み'}</strong>。新しい企画の登録・編集・公開はできません。</p><div className="mt-7 flex flex-wrap gap-3"><Link href="/member/history" className="btn-ghost">自分の履歴を見る</Link><Link href="/contact" className="btn-ghost">異議・お問い合わせ</Link></div></section></Shell>;
+    let statusReason: { reason_text: string; created_at: string } | undefined;
+    if (db) {
+      const reasonResult = await db.$client.query(
+        `select reason_text, created_at from moderation_actions
+         where target_type = 'member' and target_id = $1 and action = 'admin_member_status_changed'
+         order by created_at desc limit 1`,
+        [context.userId],
+      );
+      statusReason = reasonResult.rows[0] as { reason_text: string; created_at: string } | undefined;
+    }
+    return <Shell><section className="mt-8 border border-red-300/35 bg-[#18100f] p-6 sm:p-10"><p className="font-mono text-xs tracking-[0.2em] text-[#d7bd82]">READ ONLY</p><h1 className="mt-4 text-3xl font-light">会員状態を確認してください</h1><p className="mt-4 leading-8 text-white/75">現在の状態: <strong className="text-white">{context.profile.status === 'suspended' ? '利用停止' : '退会済み'}</strong>。新しい企画の登録・編集・公開はできません。</p>{statusReason && <p className="mt-2 leading-7 text-white/70">理由: {statusReason.reason_text}（{new Date(statusReason.created_at).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}）</p>}<div className="mt-7 flex flex-wrap gap-3"><Link href="/member/history" className="btn-ghost">自分の履歴を見る</Link><Link href="/contact" className="btn-ghost">異議・お問い合わせ</Link></div></section></Shell>;
   }
 
   let versions: TermVersion[] = [];
