@@ -12,7 +12,7 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新の実装コミット: `9ec5716 feat: 企画の編集・下書きからの公開を実装する`（ブランチ`claude/checkin-6hrtds`、PR作成・マージ待ち）
+- 最新の実装コミット: `7b2f52b feat: 企画の編集・下書きからの公開を実装する`（ブランチ`claude/checkin-6hrtds`、PR作成・マージ待ち）
 - **画面とフローの設計図**: https://claude.ai/code/artifact/0de7067b-8736-4325-bf09-ebe7dab72830 （全21ページ、3つの導線、不足11件。仕様書と実装の突き合わせ結果）
 - ビルド: `npm run build` が成功
 - 品質ゲート: `lint` / `typecheck` / `build` / Playwright 95件が GitHub Actions で PR ごとに必須実行され、緑
