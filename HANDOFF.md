@@ -12,7 +12,7 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新の実装コミット: `3c7c80d docs: PR #30マージ後の台帳を実態に合わせて訂正 (#31)`（`main`へマージ済み。新規実装はブランチ`claude/checkin-6hrtds`でPR作成・マージ待ち）
+- 最新の実装コミット: `c920152 fix: 会員規約が更新された既存会員に再同意フォームを表示する (#32)`（`main`へマージ済み、squash）
 - **画面とフローの設計図**: https://claude.ai/code/artifact/0de7067b-8736-4325-bf09-ebe7dab72830 （全21ページ、3つの導線、不足11件。仕様書と実装の突き合わせ結果）
 - ビルド: `npm run build` が成功
 - 品質ゲート: `lint` / `typecheck` / `build` / Playwright 95件が GitHub Actions で PR ごとに必須実行され、緑
@@ -22,7 +22,7 @@
 
 ## 今回の作業（2026-09-07 その2 / チェックイン、Claude Code on the web）
 
-P20（会員規約再同意導線の修復）に対応。ブランチ`claude/checkin-6hrtds`。
+P20（会員規約再同意導線の修復）に対応。PR #32（`c920152`）で`main`へマージ・本番反映済み。
 
 ### 実装
 
@@ -378,7 +378,7 @@ CI もテストも無く、`npm run lint` が exit 1 のまま放置され、`ne
 
 ### 解消済み: 会員規約再同意導線の修復（P20）
 
-2026-09-07に対応済み（ブランチ`claude/checkin-6hrtds`、上の「今回の作業」参照）。`/member/profile`の`status='active'`分岐に、現行3文書への同意確認を追加し、未同意なら`ProfileCompletionForm`（既存値付き）を表示するようにした。**まだ`main`未マージ、規約を実際に更新した状態での実DB確認も未実施。**
+2026-09-07に対応済み（PR #32、コミット`c920152`、`main`へマージ・本番反映済み）。`/member/profile`の`status='active'`分岐に、現行3文書への同意確認を追加し、未同意なら`ProfileCompletionForm`（既存値付き）を表示するようにした。**本番URLで実測確認済み**: `/`・`/member/profile`ともに200。**規約を実際に更新した状態での実DB確認は未実施。**
 
 ### 解消済み: 「公開名」の説明文修正・金銭条件の表示・停止会員の履歴閲覧（不足 #8・#9・#10）
 
