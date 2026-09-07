@@ -16,11 +16,17 @@
 
   html {
     scroll-behavior: smooth;
-    /* 固定ナビの高さぶんアンカー位置をずらす */
-    scroll-padding-top: 68px;
+    /* 固定ナビの高さぶんアンカー位置をずらす(モバイルは64px、md:以上は68px) */
+    scroll-padding-top: 64px;
     text-size-adjust: 100%;
     -webkit-text-size-adjust: 100%;
     overflow-x: clip;
+  }
+
+  @media (min-width: 768px) {
+    html {
+      scroll-padding-top: 68px;
+    }
   }
 
   body {
@@ -71,7 +77,11 @@
   background: rgba(200, 164, 90, 0.1);
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(200, 164, 90, 0.15);
-  outline: none;
+}
+
+.btn-ghost:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
 }
 
 .btn-ghost:active {
@@ -107,7 +117,11 @@
   border-color: var(--gold);
   transform: translateY(-2px);
   box-shadow: 0 8px 24px rgba(200, 164, 90, 0.25);
-  outline: none;
+}
+
+.btn-solid:focus-visible {
+  outline: 2px solid var(--gold);
+  outline-offset: 2px;
 }
 
 .btn-solid:active {
@@ -187,4 +201,18 @@
 
 .animate-fadeIn {
   animation: fadeIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

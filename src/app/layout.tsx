@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { siteDescription, siteName, siteUrl } from "@/lib/site";
+import { SkipLink } from "@/components/skip-link";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -56,7 +57,10 @@ export default function RootLayout({
       lang="ja"
       className={`${geistSans.variable} ${geistMono.variable} scroll-smooth antialiased bg-[#080808] text-[#f0ede8]`}
     >
-      <body className="min-h-full flex flex-col bg-[#080808] overflow-x-hidden">{children}</body>
+      <body className="min-h-full flex flex-col bg-[#080808] overflow-x-hidden">
+        <SkipLink />
+        {children}
+      </body>
     </html>
   );
 }

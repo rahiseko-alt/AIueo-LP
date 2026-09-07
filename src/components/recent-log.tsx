@@ -24,7 +24,7 @@ export function RecentLog({ activities, people }: RecentLogProps) {
             <div className="sec-eyebrow">03 / LOGS & WHAT WE DID</div>
             <h2 className="sec-title text-[#f0ede8]">Recent Activities</h2>
           </div>
-          <span className="font-mono text-xs text-[rgba(240,237,232,0.5)] tracking-wider">
+          <span className="font-mono text-xs text-[rgba(240,237,232,0.6)] tracking-wider">
             ACTIVITY ARCHIVE
           </span>
         </div>
@@ -75,7 +75,7 @@ export function RecentLog({ activities, people }: RecentLogProps) {
                     </p>
                   </div>
 
-                  <div className="mt-4 flex flex-wrap items-center gap-3 sm:gap-4 font-mono text-xs text-[rgba(240,237,232,0.5)]">
+                  <div className="mt-4 flex flex-wrap items-center gap-3 sm:gap-4 font-mono text-xs text-[rgba(240,237,232,0.6)]">
                     {act.participantCount && (
                       <div className="flex items-center gap-1.5">
                         <Users className="h-3.5 w-3.5 text-[#c8a45a]" />

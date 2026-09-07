@@ -18,7 +18,7 @@ export function Hero({ activity }: HeroProps) {
       />
       <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/65 via-black/15 to-black/60 sm:from-black/45 sm:via-black/5 sm:to-black/55" />
       <div className="pointer-events-none absolute left-5 top-[max(2rem,env(safe-area-inset-top))] text-left sm:left-8 sm:top-8 lg:left-[8%] lg:top-[10%]">
-        <h1 className="font-mono text-[clamp(1.45rem,6.2vw,3.6rem)] font-medium leading-none tracking-[-0.04em] text-[#f0ede8] drop-shadow-[0_4px_22px_rgba(0,0,0,0.8)] lg:text-[clamp(2.8rem,4.2vw,4.2rem)]">
+        <h1 lang="en" className="font-mono text-[clamp(1.45rem,6.2vw,3.6rem)] font-medium leading-none tracking-[-0.04em] text-[#f0ede8] drop-shadow-[0_4px_22px_rgba(0,0,0,0.8)] lg:text-[clamp(2.8rem,4.2vw,4.2rem)]">
           THIS WAY.
           <br />
           <span className="text-[#c8a45a]">TOGETHER.</span>
@@ -26,6 +26,7 @@ export function Hero({ activity }: HeroProps) {
       </div>
 
       <div
+        role="img"
         aria-label="AIueo"
         className="pointer-events-none absolute left-1/2 top-1/2 flex -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-2 font-mono text-center text-[#f0ede8]/90 drop-shadow-[0_4px_28px_rgba(0,0,0,0.65)]"
       >

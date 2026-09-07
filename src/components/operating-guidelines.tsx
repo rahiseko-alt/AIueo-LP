@@ -72,7 +72,7 @@ export function OperatingGuidelines() {
           </div>
         </div>
 
-        <p className="mt-10 border-t border-[rgba(240,237,232,0.08)] pt-5 font-mono text-[10px] leading-relaxed tracking-wide text-[rgba(240,237,232,0.4)] sm:text-xs">
+        <p className="mt-10 border-t border-[rgba(240,237,232,0.08)] pt-5 font-mono text-[10px] leading-relaxed tracking-wide text-[rgba(240,237,232,0.6)] sm:text-xs">
           AIueoは、必要に応じて掲載内容・メンバー登録・企画の公開を見直し、非公開・削除・登録取消の措置を行うことがあります。利用前に、主催者が提示する個別の条件も必ず確認してください。
         </p>
 

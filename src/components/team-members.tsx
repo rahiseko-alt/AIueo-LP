@@ -47,7 +47,7 @@ export function TeamMembers({ people, activities }: TeamMembersProps) {
                   </h3>
 
                   <div className="mt-5 border-t border-[rgba(240,237,232,0.08)] pt-4">
-                    <span className="font-mono text-[10px] tracking-wider text-[rgba(240,237,232,0.45)] uppercase">
+                    <span className="font-mono text-[10px] tracking-wider text-[rgba(240,237,232,0.6)] uppercase">
                       Collaborated on:
                     </span>
                     <ul className="mt-2 space-y-1.5 font-sans text-xs text-[rgba(240,237,232,0.7)]">
