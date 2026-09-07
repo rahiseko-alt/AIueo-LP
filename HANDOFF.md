@@ -12,7 +12,7 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新の実装コミット: `c868e6e docs: PR #28マージ後の台帳を実態に合わせて訂正 (#29)`（`main`へマージ済み。新規実装はブランチ`claude/checkin-6hrtds`でPR作成・マージ待ち）
+- 最新の実装コミット: `04c625a feat: 公開名の説明文・金銭条件の表示・停止会員の履歴閲覧を実装する (#30)`（`main`へマージ済み、squash）
 - **画面とフローの設計図**: https://claude.ai/code/artifact/0de7067b-8736-4325-bf09-ebe7dab72830 （全21ページ、3つの導線、不足11件。仕様書と実装の突き合わせ結果）
 - ビルド: `npm run build` が成功
 - 品質ゲート: `lint` / `typecheck` / `build` / Playwright 95件が GitHub Actions で PR ごとに必須実行され、緑
@@ -22,7 +22,7 @@
 
 ## 今回の作業（2026-09-07 / チェックイン、Claude Code on the web）
 
-設計図の不足#8（「公開名」の説明文と実態の食い違い）、#9（金銭条件のJSON生出力）、#10（`/member/history`が固定文言のみ）に対応。ブランチ`claude/checkin-6hrtds`。
+設計図の不足#8（「公開名」の説明文と実態の食い違い）、#9（金銭条件のJSON生出力）、#10（`/member/history`が固定文言のみ）に対応。PR #30（`04c625a`）で`main`へマージ・本番反映済み。
 
 ### 実装
 
@@ -364,7 +364,7 @@ CI もテストも無く、`npm run lint` が exit 1 のまま放置され、`ne
 
 ### 解消済み: 「公開名」の説明文修正・金銭条件の表示・停止会員の履歴閲覧（不足 #8・#9・#10）
 
-2026-09-07に対応済み（ブランチ`claude/checkin-6hrtds`、上の「今回の作業」参照）。`profile-completion-form.tsx`の公開名説明文を実態に合わせ、`/events/[slug]`の金銭条件表示を`JSON.stringify`生出力から整形表示に、`/member/history`を固定文言から実データ表示に変更した。**まだ`main`未マージ、開発用DBでの手動確認も未実施。**
+2026-09-07に対応済み（PR #30、コミット`04c625a`、`main`へマージ・本番反映済み）。`profile-completion-form.tsx`の公開名説明文を実態に合わせ、`/events/[slug]`の金銭条件表示を`JSON.stringify`生出力から整形表示に、`/member/history`を固定文言から実データ表示に変更した。**本番URLで実測確認済み**: `/`・`/member/history`ともに200。**開発用DBが無いため、実データ(企画・メッセージ・同意履歴)での表示確認はまだ。**
 
 ### 解消済み: 企画の編集・下書きからの公開（不足 #3）、金銭条件「未定」の検証漏れ（不足 #11）
 
