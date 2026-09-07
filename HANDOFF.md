@@ -12,7 +12,7 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新の実装コミット: `c920152 fix: 会員規約が更新された既存会員に再同意フォームを表示する (#32)`（`main`へマージ済み、squash）
+- 最新の実装コミット: `377200a feat: 管理者措置理由を会員向けに表示する(P22) (#34)`（`main`へマージ済み、squash）
 - **画面とフローの設計図**: https://claude.ai/code/artifact/0de7067b-8736-4325-bf09-ebe7dab72830 （全21ページ、3つの導線、不足11件。仕様書と実装の突き合わせ結果）
 - ビルド: `npm run build` が成功
 - 品質ゲート: `lint` / `typecheck` / `build` / Playwright 95件が GitHub Actions で PR ごとに必須実行され、緑
@@ -22,7 +22,7 @@
 
 ## 今回の作業（2026-09-07 その3 / チェックイン、Claude Code on the web）
 
-P22（管理者措置理由の会員向け表示）に対応。ブランチ`claude/checkin-6hrtds`（本番マージ待ち）。
+P22（管理者措置理由の会員向け表示）に対応。PR #34（`377200a`）で`main`へマージ・本番反映済み。
 
 ### 背景
 
@@ -412,7 +412,7 @@ CI もテストも無く、`npm run lint` が exit 1 のまま放置され、`ne
 
 ### 解消済み: 管理者措置理由の会員向け表示（P22）
 
-2026-09-07に対応済み（ブランチ`claude/checkin-6hrtds`、上の「今回の作業」参照）。`moderation_actions.reason_text`を、企画非公開時(`/member/proposals/[id]`)、企画履歴一覧(`/member/history`)、会員停止時(`/member/profile`)の3画面へ表示するようにした。**まだ`main`未マージ。開発用DBが無いため、実際に理由を入力した状態での表示確認は未実施。**
+2026-09-07に対応済み（PR #34、コミット`377200a`、`main`へマージ・本番反映済み）。`moderation_actions.reason_text`を、企画非公開時(`/member/proposals/[id]`)、企画履歴一覧(`/member/history`)、会員停止時(`/member/profile`)の3画面へ表示するようにした。**本番URLで実測確認済み**: `/`・`/member/history`ともに200。**開発用DBが無いため、実際に理由を入力した状態での表示確認は未実施。**
 
 ### 解消済み: 会員規約再同意導線の修復（P20）
 
