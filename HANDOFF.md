@@ -22,7 +22,7 @@
 
 ## 今回の作業（2026-09-07 その4 / チェックイン、Claude Code on the web）
 
-P23（`MEMBERSHIP_FEATURE_SPEC.md`の`hidden`/`auto_hidden`用語矛盾の解消）に対応。ブランチ`claude/checkin-6hrtds`（本番マージ待ち）。ドキュメントのみの変更で、コード・DB変更は無い。
+P23（`MEMBERSHIP_FEATURE_SPEC.md`の`hidden`/`auto_hidden`用語矛盾の解消）に対応。PR #36（`634a22f`）で`main`へマージ・本番反映済み。ドキュメントのみの変更で、コード・DB変更は無い。
 
 ### 背景
 
@@ -426,7 +426,7 @@ CI もテストも無く、`npm run lint` が exit 1 のまま放置され、`ne
 
 ### 解消済み: 仕様書の`hidden`/`auto_hidden`用語矛盾（P23）
 
-2026-09-07に対応済み（ブランチ`claude/checkin-6hrtds`、上の「今回の作業」参照）。企画登録フロー4項から実装に存在しない`submitted`を除去し`auto_hidden`を追加、7項の3日前自動除外先を`hidden`から`auto_hidden`に訂正した。ドキュメントのみの変更でコード・DB変更は無い。**まだ`main`未マージ。**
+2026-09-07に対応済み（PR #36、コミット`634a22f`、`main`へマージ・本番反映済み）。企画登録フロー4項から実装に存在しない`submitted`を除去し`auto_hidden`を追加、7項の3日前自動除外先を`hidden`から`auto_hidden`に訂正した。ドキュメントのみの変更でコード・DB変更は無い。
 
 ### 解消済み: 管理者措置理由の会員向け表示（P22）
 
