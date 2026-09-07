@@ -7,6 +7,9 @@ export const dynamic = 'force-dynamic';
 type ProposalRow = { id: string; title: string; status: string; event_status: string; updated_at: string };
 type MessageRow = { proposal_id: string; sender_id: string; body: string; created_at: string };
 type ConsentRow = { document_type: string; version: string; accepted_at: string };
+type ModerationReasonRow = { target_id: string; reason_text: string; created_at: string };
+
+const LOCKED_STATUSES = new Set(['hidden', 'ended', 'cancelled']);
 
 const DOCUMENT_LABELS: Record<string, string> = { terms: '会員規約', disclaimer: '免責事項', privacy: 'プライバシーポリシー' };
 
@@ -24,6 +27,7 @@ export default async function MemberHistoryPage() {
   let proposals: ProposalRow[] = [];
   let messagesByProposal = new Map<string, MessageRow[]>();
   let consents: ConsentRow[] = [];
+  const reasonByProposal = new Map<string, ModerationReasonRow>();
 
   if (db) {
     const proposalsResult = await db.$client.query(
@@ -43,6 +47,19 @@ export default async function MemberHistoryPage() {
         list.push(message);
         messagesByProposal.set(message.proposal_id, list);
       }
+
+      const lockedIds = proposals.filter((proposal) => LOCKED_STATUSES.has(proposal.status)).map((proposal) => proposal.id);
+      if (lockedIds.length > 0) {
+        const reasonResult = await db.$client.query(
+          `select target_id, reason_text, created_at from moderation_actions
+           where target_type = 'proposal' and target_id = any($1::text[]) and action = 'admin_proposal_state_changed'
+           order by created_at desc`,
+          [lockedIds],
+        );
+        for (const row of reasonResult.rows as ModerationReasonRow[]) {
+          if (!reasonByProposal.has(row.target_id)) reasonByProposal.set(row.target_id, row);
+        }
+      }
     }
 
     const consentsResult = await db.$client.query(
@@ -61,6 +78,7 @@ export default async function MemberHistoryPage() {
       {proposals.length === 0 ? <p className="mt-4 text-sm text-white/60">企画はまだありません。</p> : <div className="mt-6 space-y-6">
         {proposals.map((proposal) => {
           const messages = messagesByProposal.get(proposal.id) ?? [];
+          const reason = reasonByProposal.get(proposal.id);
           return <article key={proposal.id} className="border border-white/10 bg-black/20 p-5">
             <div className="flex flex-wrap items-baseline justify-between gap-2">
               {isActive ? <Link href={`/member/proposals/${proposal.id}`} className="text-lg font-medium text-[#d7bd82] hover:text-white">{proposal.title}</Link> : <span className="text-lg font-medium">{proposal.title}</span>}
@@ -70,6 +88,7 @@ export default async function MemberHistoryPage() {
               <span>掲載: {proposal.status}</span>
               <span>開催: {proposal.event_status}</span>
             </div>
+            {reason && <p className="mt-2 text-sm leading-6 text-white/70">理由: {reason.reason_text}（{formatDate(reason.created_at)}）</p>}
             {messages.length > 0 && <div className="mt-4 space-y-2 border-t border-white/10 pt-4">
               <p className="font-mono text-[10px] tracking-[0.15em] text-white/40">管理者とのメッセージ</p>
               {messages.map((message, index) => <div key={index} className="border border-white/10 bg-black/20 p-3 text-sm"><p className="font-mono text-[10px] text-white/40">{message.sender_id === member.userId ? 'あなた' : '管理者'} · {formatDate(message.created_at)}</p><p className="mt-1 whitespace-pre-line leading-6 text-white/80">{message.body}</p></div>)}

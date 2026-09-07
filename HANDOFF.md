@@ -20,6 +20,40 @@
 - **正式URLは `https://aiueo.kouheikosehira.com`**（`src/lib/site.ts`）。`https://aiueo-lp.vercel.app` も同じ内容を返すが、canonical で前者に寄せている
 - **Vercel の Git 連携が接続済み。`main` への push で本番デプロイが自動で走る**（このセッションで接続前後を実測確認）
 
+## 今回の作業（2026-09-07 その3 / チェックイン、Claude Code on the web）
+
+P22（管理者措置理由の会員向け表示）に対応。ブランチ`claude/checkin-6hrtds`（本番マージ待ち）。
+
+### 背景
+
+`MEMBERSHIP_FEATURE_SPEC.md`「敵対検証を受けた公開前の必須設計」5項は「対象会員は自分の企画、メッセージ、**措置理由**、版履歴を読み取り専用で確認できる」と定めているが、管理者が非公開・状態変更・会員停止の際に入力する`reasonText`は`moderation_actions.reason_text`に保存されるだけで、会員側のどの画面にも表示されていなかった。企画者・停止会員は固定文言（「管理者により非公開」等）しか見えず、実際の理由は企画別メッセージで聞き直すしかなかった。
+
+Exploreエージェントによる調査で、`moderation_actions`への書込みは`src/app/admin/actions.ts`の`recordAdminChange()`経由のみで、企画の状態変更(`hidden`/`ended`/`cancelled`)は`adminSetProposalStateAction`(action=`admin_proposal_state_changed`)、会員状態変更は`adminSetMemberStatusAction`(action=`admin_member_status_changed`)のみが担うことを確認した（企画者側の`updateProposalAction`はこの3状態には遷移できないため、これらのstatusになる経路は必ず管理者の操作を通り、必ず理由が存在する）。`moderation_actions`はアプリ全体でこれまで一度も読み取られておらず（admin側の`/admin/moderation`も`reports`のみ表示）、書き込み専用のテーブルだった。
+
+### 実装
+
+- `src/app/member/proposals/[id]/page.tsx`: `LOCKED_STATUS_LABELS`（hidden/ended/cancelled）に該当する場合、`moderation_actions`から`target_type='proposal' and target_id=$1 and action='admin_proposal_state_changed'`で最新1件を取得し、固定文言に続けて「理由: ○○（日時）」を追加表示。
+- `src/app/member/history/page.tsx`: 企画一覧のうち状態がロックされた企画のidをまとめてバッチクエリ（既存の`proposal_messages`バッチ取得と同じ`= any($1::...[])`方式）し、各企画カードの掲載/開催状態表示の下に理由を追加。
+- `src/app/member/profile/page.tsx`: `suspended`/`withdrawn`分岐で`target_type='member' and target_id=$1(=context.userId) and action='admin_member_status_changed'`の最新1件を取得し、現在の状態表示の下に理由を追加。
+- 3箇所とも`action`列を上記の値だけに絞り込み、内容編集(`admin_proposal_edited`)など状態変更を伴わない理由が紛れ込まないようにした。クエリはいずれも既存の所有者チェック（`owner_id`一致）または認証済み`context.userId`の後段に置いており、他人の企画・会員の理由が漏れる経路はない。管理者の内部運用値である`reason_code`と`actor_id`（操作した管理者のID）は表示に含めていない。
+- DBスキーマ変更・マイグレーション追加は無し（読み取りのみ）。
+
+### 3視点の自己検証（読み取り専用の小規模変更のためサブエージェントは使わずインラインで実施）
+
+- **セキュリティ/権限**: 上記の通り、いずれのクエリも既存の所有者/本人確認の後段でのみ実行され、他会員の理由が漏れる経路はない。表示するのは`reason_text`と`created_at`のみ。
+- **企画者・参加者の利用**: 理由が分からないまま非公開・停止された場合の不信感を解消する。異議申立ての導線（企画別メッセージ、`/contact`）は変更していない。
+- **運用・法務**: `MEMBERSHIP_FEATURE_SPEC.md`必須設計5項の未達成部分を解消する。`moderation_actions`は追記専用トリガで保護されており、表示機能の追加による改ざん・削除リスクは無い。
+
+### 検証
+
+`npm run typecheck`/`lint`/`NEXT_PUBLIC_NEON_AUTH_ENABLED=true npm run build`/Playwright全95件、いずれも成功。**開発用DBが無いため、実際に管理者が理由を入力した状態での表示確認は未実施。**
+
+### 対象外（今回は変更しない）
+
+- admin向けの`moderation_actions`閲覧画面（`/admin/moderation`は現状`reports`のみ）の新設。
+- `proposal_versions`（版履歴）の表示。
+- `MEMBERSHIP_FEATURE_SPEC.md`の`hidden`/`auto_hidden`用語矛盾の文言修正（別のフォローアップ項目、今回は対応しない）。
+
 ## 今回の作業（2026-09-07 その2 / チェックイン、Claude Code on the web）
 
 P20（会員規約再同意導線の修復）に対応。PR #32（`c920152`）で`main`へマージ・本番反映済み。
@@ -374,7 +408,11 @@ CI もテストも無く、`npm run lint` が exit 1 のまま放置され、`ne
 
 **→ https://claude.ai/code/artifact/0de7067b-8736-4325-bf09-ebe7dab72830** （リンク先の記載は公開時点のまま。解消済み分は本ファイル上部の「今回の作業」「確定した問題リスト」を参照）
 
-「企画を立てる道」「参加する道」は最後までつながった。残るのは1（Google認証、外部設定待ち）と5（運営アカウント、外部作業待ち）で、いずれもユーザー側の外部作業が必要。6（通知メール未送信）はG1-02未決定のため送信基盤そのものが無い。**#3の実装で見つかった残り2件の関連バグ(仕様書の用語矛盾、管理者措置理由の非表示)、#8〜#10の実装で見つかった`/member/proposals/[id]`系ページの停止会員アクセス不可は「今回の作業」の「未解決事項」を参照。**
+「企画を立てる道」「参加する道」は最後までつながった。残るのは1（Google認証、外部設定待ち）と5（運営アカウント、外部作業待ち）で、いずれもユーザー側の外部作業が必要。6（通知メール未送信）はG1-02未決定のため送信基盤そのものが無い。**#3の実装で見つかった関連バグのうち、管理者措置理由の非表示はP22で解消済み。残るのは仕様書の用語矛盾(下記)と、#8〜#10の実装で見つかった`/member/proposals/[id]`系ページの停止会員アクセス不可（「今回の作業」の「未解決事項」を参照）。**
+
+### 解消済み: 管理者措置理由の会員向け表示（P22）
+
+2026-09-07に対応済み（ブランチ`claude/checkin-6hrtds`、上の「今回の作業」参照）。`moderation_actions.reason_text`を、企画非公開時(`/member/proposals/[id]`)、企画履歴一覧(`/member/history`)、会員停止時(`/member/profile`)の3画面へ表示するようにした。**まだ`main`未マージ。開発用DBが無いため、実際に理由を入力した状態での表示確認は未実施。**
 
 ### 解消済み: 会員規約再同意導線の修復（P20）
 
