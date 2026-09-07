@@ -1,7 +1,7 @@
 # AIueo 会員・企画・管理機能 実装計画
 
 最終更新: 2026-09-06  
-計画状態: **Neonへの移行と品質ゲートは完了し、本番稼働中。P9の全行監査で確定した問題のうちTier 1〜3を実施済み。P14で仕様書と実装21ページを突き合わせ、画面構成と3導線を確定した。P17でトップのDB接続、P18でナビ/フッターの`/register`導線を実施し、いずれも本番反映済み。P19で企画の編集・下書き公開機能を実装し、本番反映済み。P21で公開名の説明文・金銭条件表示・停止会員の履歴閲覧を実装し、本番反映済み。P20(会員規約再同意導線)を実装し、本番反映済み。P22(管理者措置理由の会員向け表示)を実装した（本番マージ待ち）。残るのはGoogle認証への切替、通知メールの送信、初期管理者の付与である。**
+計画状態: **Neonへの移行と品質ゲートは完了し、本番稼働中。P9の全行監査で確定した問題のうちTier 1〜3を実施済み。P14で仕様書と実装21ページを突き合わせ、画面構成と3導線を確定した。P17でトップのDB接続、P18でナビ/フッターの`/register`導線を実施し、いずれも本番反映済み。P19で企画の編集・下書き公開機能を実装し、本番反映済み。P21で公開名の説明文・金銭条件表示・停止会員の履歴閲覧を実装し、本番反映済み。P20(会員規約再同意導線)を実装し、本番反映済み。P22(管理者措置理由の会員向け表示)を実装し、本番反映済み。残るのはGoogle認証への切替、通知メールの送信、初期管理者の付与である。**
 
 この計画は、実装のたびに読む常設の進捗台帳である。仕様の正本は`MEMBERSHIP_FEATURE_SPEC.md`、セッションの正本は`HANDOFF.md`とする。3ファイルは作業開始時にこの順で確認し、終了時にすべて更新する。
 
@@ -99,7 +99,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | P19 | 企画の編集・下書きからの公開 | P14 | `/member/proposals/[id]`から企画内容を編集し、下書き⇔公開を切り替えられるようにする。新規作成時の`money_type='undecided'`検証漏れ(不足#11)も同時に修正する | 完了（PR #28、`5198d8b`で`main`へマージ・本番反映済み。実DBでの動作確認は運営アカウント不在のため未実施） |
 | P20 | 会員規約再同意導線の修復 | P19の敵対検証で発見 | `/member/profile`のactive分岐に再同意フォーム(`ProfileCompletionForm`)が出ず、規約更新後は既存会員が編集も新規作成も一切できなくなる。規約を実際に更新する前に必ず対応する | 完了（PR #32、`c920152`で`main`へマージ・本番反映済み。規約更新後の実DB確認は未実施） |
 | P21 | 公開名説明文・金銭条件表示・停止会員履歴（不足#8〜#10） | P14 | `profile-completion-form.tsx`の公開名説明文を実態に合わせる。`/events/[slug]`の金銭条件表示を`JSON.stringify`生出力から整形表示にする。`/member/history`を固定文言から実データ表示にする | 完了（PR #30、`04c625a`で`main`へマージ・本番反映済み。開発用DBでの手動確認は未実施） |
-| P22 | 管理者措置理由の会員向け表示 | P19の敵対検証で発見 | `MEMBERSHIP_FEATURE_SPEC.md`必須設計5項「措置理由を読み取り専用で確認できる」の未達成部分を解消する。管理者が入力した`moderation_actions.reason_text`を、企画非公開時(`/member/proposals/[id]`)、企画履歴一覧(`/member/history`)、会員停止時(`/member/profile`)の3画面へ表示する | 完了（ブランチ`claude/checkin-6hrtds`、本番マージ待ち。読み取り専用の追加表示のみでスキーマ変更なし。開発用DBが無いため実データでの表示確認は未実施） |
+| P22 | 管理者措置理由の会員向け表示 | P19の敵対検証で発見 | `MEMBERSHIP_FEATURE_SPEC.md`必須設計5項「措置理由を読み取り専用で確認できる」の未達成部分を解消する。管理者が入力した`moderation_actions.reason_text`を、企画非公開時(`/member/proposals/[id]`)、企画履歴一覧(`/member/history`)、会員停止時(`/member/profile`)の3画面へ表示する | 完了（PR #34、`377200a`で`main`へマージ・本番反映済み。読み取り専用の追加表示のみでスキーマ変更なし。開発用DBが無いため実データでの表示確認は未実施） |
 
 ## データ・権限の実装境界
 
@@ -178,7 +178,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | 2026-09-06 | P19: `updateProposalAction`を新設し、`/member/proposals/[id]`で企画内容の編集・下書き⇔公開の切替を可能にした。所有者チェック二重化、`hidden`/`ended`/`cancelled`からの編集拒否、`money_type='undecided'`のまま公開させないガード、`auto_hidden`から日時未更新のまま再公開させない検証(cronへの即時差し戻し=「ヨーヨー」防止)、日時変換(`toDatetimeLocal`)・金銭条件キー変換(`toProposalDefaults`)を実装。`ProposalForm`を`action`/`defaultValues`/`proposalId`のprops化で新規作成・編集共用にした。3視点の敵対検証で見つかった`money_type='undecided'`の新規作成側の検証漏れ(不足#11)、開催状況フォームによる`hidden`企画の無条件status上書きも同時に修正。PR #28を`main`へマージ | `npm run typecheck`/`lint`/`build`通過、Playwright全95件緑。本番URL(`https://aiueo-lp.vercel.app/`)で`/member/proposals/new`が未認証307を実測確認。**運営アカウント不在のため、実DBに対する所有者チェック・状態遷移・日時検証の動作確認は未実施** | PR #28、コミット`5198d8b` |
 | 2026-09-07 | P21: `profile-completion-form.tsx`の公開名説明文を実態(公開名は会員ページのみ、企画の主催者名は別項目`organizer_name`)に合わせて修正。`/events/[slug]`に`MoneyConditions`コンポーネントを追加し、`JSON.stringify(money_details)`の生出力を金銭種別ラベル+項目別の整形表示に変更。`/member/history`を固定文言9行から、自分の企画一覧・企画別メッセージ・同意履歴をDBから取得する実データ表示へ全面改修。停止・退会会員は個別企画ページ(`requireActiveMember()`でガードされ非activeはアクセス不可)へのリンクを出さずプレーンテキスト表示にすることで、押しても弾かれるリンクを回避。PR #30を`main`へマージ | `npm run typecheck`/`lint`/`build`通過、Playwright全95件緑。本番URL(`https://aiueo-lp.vercel.app/`)で`/`・`/member/history`とも200を実測確認。**開発用DBが無く、実データでの表示確認(企画・メッセージ・同意履歴)は未実施** | PR #30、コミット`04c625a` |
 | 2026-09-07 | P20: `/member/profile`の`status='active'`分岐に、現行3文書(会員規約・免責事項・プライバシーポリシー)への同意確認クエリを追加。未同意なら読み取り専用の「登録内容」表示ではなく、公開名・協力したい内容を既存値で埋めた`ProfileCompletionForm`(再同意用の見出し・説明文)を表示するようにした。サーバー側の`completeProfileAction`(規約更新時のエラー処理、同意済み分だけ追加する`on conflict do nothing`)は元々あったため変更していない | `npm run typecheck`/`lint`/`build`通過、Playwright全95件緑。**開発用DBが無く、規約を実際に更新した状態での再同意フォーム表示・同意後の状態遷移の実DB確認は未実施** | PR #32、コミット`c920152` |
-| 2026-09-07 | P22: `moderation_actions.reason_text`(管理者が非公開・状態変更・会員停止時に入力する理由)を会員向けに表示。`/member/proposals/[id]`(hidden/ended/cancelled時)、`/member/history`(企画一覧、状態がロックされた企画のみ)、`/member/profile`(suspended/withdrawn時)の3画面に追加。`action`列で`admin_proposal_state_changed`/`admin_member_status_changed`のみに絞り込み、内容編集(`admin_proposal_edited`)等の無関係な理由が紛れないようにした。クエリはいずれも既存の`owner_id`/認証済み`userId`によるスコープの後に追加しており、他人の企画・会員の理由が漏れる経路はない。スキーマ変更・DBマイグレーションは無い | `npm run typecheck`/`lint`/`NEXT_PUBLIC_NEON_AUTH_ENABLED=true npm run build`通過、Playwright全95件緑。**開発用DBが無く、実際に管理者が理由を入力した状態での表示確認は未実施** | ブランチ`claude/checkin-6hrtds` |
+| 2026-09-07 | P22: `moderation_actions.reason_text`(管理者が非公開・状態変更・会員停止時に入力する理由)を会員向けに表示。`/member/proposals/[id]`(hidden/ended/cancelled時)、`/member/history`(企画一覧、状態がロックされた企画のみ)、`/member/profile`(suspended/withdrawn時)の3画面に追加。`action`列で`admin_proposal_state_changed`/`admin_member_status_changed`のみに絞り込み、内容編集(`admin_proposal_edited`)等の無関係な理由が紛れないようにした。クエリはいずれも既存の`owner_id`/認証済み`userId`によるスコープの後に追加しており、他人の企画・会員の理由が漏れる経路はない。スキーマ変更・DBマイグレーションは無い | `npm run typecheck`/`lint`/`NEXT_PUBLIC_NEON_AUTH_ENABLED=true npm run build`通過、Playwright全95件緑。**開発用DBが無く、実際に管理者が理由を入力した状態での表示確認は未実施** | PR #34、コミット`377200a` |
 
 ## セッション終了チェック
 
