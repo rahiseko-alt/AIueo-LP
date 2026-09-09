@@ -3,6 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { siteDescription, siteName, siteUrl } from "@/lib/site";
 import { SkipLink } from "@/components/skip-link";
+import { AccountBadge } from "@/components/account-badge";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -59,6 +60,7 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-[#080808] overflow-x-hidden">
         <SkipLink />
+        <AccountBadge />
         {children}
       </body>
     </html>
