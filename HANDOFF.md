@@ -13,7 +13,8 @@
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
 - 最新の実装コミット: `f899bf2 fix: アクセシビリティTier 4の現存11件を修正する(P24) (#38)`（`main`へマージ済み、squash）
-- **公開前に扱いを決める必要がある問題が7件ある。** `docs/OPERATION_SCENARIOS.md` の「❌」行と、下の「今回の作業（2026-09-09）」を参照
+- **権限別の操作シナリオ100件**: https://claude.ai/code/artifact/3ad3f202-9c2a-4ebb-97d6-41deeb496876 （正本は `docs/OPERATION_SCENARIOS.md`。権限6区分×オーソドックス50件・危険操作50件を、実コードのガード条件に紐づけて判定したもの。絞り込んで読める）
+- **公開前に扱いを決める必要がある問題が7件ある。** 上のシナリオで「要判断」に絞るか、`docs/OPERATION_SCENARIOS.md` の「❌」行と、下の「今回の作業（2026-09-09）」を参照
 - **画面とフローの設計図**: https://claude.ai/code/artifact/0de7067b-8736-4325-bf09-ebe7dab72830 （全21ページ、3つの導線。仕様書と実装の突き合わせ結果。掲載時点の不足11件はコード対応可能な分すべて解消済み、詳細は本ファイル該当セクション参照）
 - ビルド: `npm run build` が成功
 - 品質ゲート: `lint` / `typecheck` / `build` / Playwright 98件が GitHub Actions で PR ごとに必須実行され、緑
