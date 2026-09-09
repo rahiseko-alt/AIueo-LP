@@ -6,8 +6,8 @@ import { test, expect } from '@playwright/test';
  * 素の再エクスポートに戻すと、受け取ったパスがそのまま上流へ連結される。
  * そのとき起きることは2つある。
  *
- * 1. 登録と確認コード送信を直接叩けるようになり、`/api/membership/registration`
- *    の回数制限と、登録済みかどうかを漏らさない同一応答を迂回できる。
+ * 1. 2026-09-09 に廃止したメール認証（登録・ログイン・確認コード）が、Proxy 経由
+ *    でだけ生き残る。上流の Neon Auth 側でもメールログインは無効にしてある。
  * 2. 上流の管理API（利用者一覧・ロール変更・なりすまし）が自ドメイン配下に出る。
  *    通ってしまえば、このアプリの `audit_log` には何も残らない。
  *
@@ -16,9 +16,11 @@ import { test, expect } from '@playwright/test';
  */
 
 const BLOCKED = [
-  // 回数制限とユーザー列挙対策を迂回できる2本
+  // 廃止したメール認証の一式
+  'sign-in/email',
   'sign-up/email',
   'email-otp/send-verification-otp',
+  'email-otp/verify-email',
   // 上流の管理API
   'admin/list-users',
   'admin/set-role',
@@ -42,16 +44,17 @@ for (const path of BLOCKED) {
 test('許可したパスは塞がれていない', async ({ request }) => {
   // 認証基盤が未設定の環境では 503 になる。ここで確かめるのは
   // 「許可リストから漏れて 404 になっていないこと」だけ。
-  const res = await request.post('/api/auth/sign-in/email', {
+  // これが 404 になると Google ログインがボタンを押した瞬間に失敗する。
+  const res = await request.post('/api/auth/sign-in/social', {
     headers: { 'Content-Type': 'application/json' },
-    data: { email: 'someone@example.com', password: 'password1234' },
+    data: { provider: 'google' },
   });
 
-  expect(res.status(), 'ログイン経路まで塞いでいる').not.toBe(404);
+  expect(res.status(), 'Google ログインの経路まで塞いでいる').not.toBe(404);
 });
 
 test('許可したパスでもメソッドが違えば通さない', async ({ request }) => {
-  const res = await request.get('/api/auth/sign-in/email');
+  const res = await request.get('/api/auth/sign-in/social');
 
   expect(res.status(), 'メソッドを見ずに通している').toBe(404);
 });

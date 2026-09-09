@@ -33,6 +33,32 @@ P15（Google認証への切替）の外部設定を、ユーザーがGoogle Clou
 - **OAuthクライアントは未作成。** `OAuth の概要`に「このプロジェクトの OAuth クライアントはまだ構成されていません」と表示されている状態。
 - 次に必要なのは、Neon Console の Auth → Configuration → Google に表示される **リダイレクトURI**。これをGoogle側のウェブアプリケーション用クライアントへ登録する。**この値はまだ取得できていない**（リポジトリ内にも記載は無い）。
 
+### 決定事項（恒久・聞き直さない）
+
+- **既存のメール登録会員2名は引き継がない。** Google認証へ切り替える時点で存在したメール＋パスワード登録の会員は移行せず、Googleログインで作られるアカウントは別人として扱う。アドレスの引き継ぎ・アカウント統合・救済導線はいずれも実装しない。2名とも動作確認用で、実運用の企画・同意履歴を持たないため。**この事項は決着済みであり、次のセッション以降でユーザーへ聞き直さない**（`IMPLEMENTATION_PLAN.md`「Gate 1 決定状況」にも記録済み）。
+
+### 外部設定の完了状況（2026-09-09）
+
+Google側・Neon側とも**設定は完了した**。残るのはアプリ側のコードのみ。
+
+- Google Cloud（`aiueo-lp`）: ブランディング作成済み。ウェブアプリケーション用OAuthクライアント作成済み。承認済みリダイレクトURIに `https://ep-bitter-queen-awnva15n.neonauth.c-12.us-east-1.aws.neon.tech/neondb/auth/callback/google` を登録済み（Neon公式手順の `{Auth URL}/callback/google` と一致）
+- Neon Console: Googleプロバイダーを共用鍵から**自前の鍵へ切替済み**。`Shared keys` バッジが消えたことを画面で確認
+- Neon Console: **`Sign-in with Email` をオフ**にした。上流のメール＋パスワードログインは既に無効で、現行サイトのログインはこの時点から機能していない
+
+### アプリ側で判明した障害（コードとSDK実装を直接読んで確認、推測ではない）
+
+Googleボタンを置くだけでは**ログインが成立しない**。
+
+1. **`src/proxy.ts` が素通し**（`NextResponse.next({request})` のみ）。SDKのOAuth戻り処理 `exchangeOAuthToken` は middleware の中にしか存在せず、現状は一度も呼ばれない。Googleから戻っても未ログインのまま。
+2. **許可リストに `sign-in/social` が無い**（`src/app/api/auth/[...path]/route.ts`）。Googleログインの最初のリクエストが404になる。
+3. **`neonAuth.middleware()` をそのまま採用できない。** `skipRoutes` はSDK内の固定定数 `DEFAULT_AUTH_SKIP_ROUTES` で差し替え不可。採用すると `/`・`/events`・`/terms` などの公開ページが全部ログイン必須になる。
+
+OAuth戻りの判定条件（SDK `dist/server-b0OzGjXl.mjs` の `needsSessionVerification`）: 検索パラメータ `neon_auth_session_verifier` があり、**かつ** Cookie `__Secure-neon-auth.session_challenge`（旧綴り `...session_challange` も可）が存在すること。交換が成立すると保護判定より**前に** `redirect_oauth` を返して抜けるため、OAuth戻りのときだけ委譲すればログイン必須化は起きない。
+
+### 未確認のまま残す risk
+
+`completeProfileAction`（`src/app/member/profile/actions.ts`）が `user.emailVerified === true` を厳格に要求している（`!== true` で拒否）。Googleで作られたセッションがこれを満たすかは**未確認**。**先回りして緩めない**。実装後にユーザーが実際にGoogleログインを1回試し、規約同意まで進めれば変更不要、止まれば「Googleアカウント経由のセッションは検証済みとみなす」判定を足す。
+
 ### 規約の追加
 
 ユーザーから「非エンジニア向けのナビに徹しろ」と指示を受け、`AGENTS.md`に**§6「ユーザーへの説明は非エンジニア向けに徹する」**を新設した。外部サービスの設定案内で、画面名・ボタン名・入力値をそのまま示すこと、専門用語を裸で出さないこと、1返信で頼む操作を1区切りにすること、確定値を知らない項目は`【曖昧】`を付けて取得場所を示すこと、エラー画面は成否を先に判定して伝えること、ユーザー側の外部作業とこちら側のコード作業を毎回分けることを規約化した。
