@@ -12,13 +12,40 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新の実装コミット: `634a22f docs: 仕様書のhidden/auto_hidden用語矛盾を解消する(P23) (#36)`（`main`へマージ済み、squash）
+- 最新の実装コミット: `f899bf2 fix: アクセシビリティTier 4の現存11件を修正する(P24) (#38)`（`main`へマージ済み、squash）
+- **公開前に扱いを決める必要がある問題が7件ある。** `docs/OPERATION_SCENARIOS.md` の「❌」行と、下の「今回の作業（2026-09-09）」を参照
 - **画面とフローの設計図**: https://claude.ai/code/artifact/0de7067b-8736-4325-bf09-ebe7dab72830 （全21ページ、3つの導線。仕様書と実装の突き合わせ結果。掲載時点の不足11件はコード対応可能な分すべて解消済み、詳細は本ファイル該当セクション参照）
 - ビルド: `npm run build` が成功
 - 品質ゲート: `lint` / `typecheck` / `build` / Playwright 98件が GitHub Actions で PR ごとに必須実行され、緑
 - **CIのBuildは `NEXT_PUBLIC_NEON_AUTH_ENABLED=true` を付けて実行する。** 会員登録フォームのテストがフォームの有効な状態を見るため。認証基盤の接続情報は渡していないのでサーバー側は未設定のまま。手元で `npm test` を流すときも同じ値を付けてビルドすること
 - **正式URLは `https://aiueo.kouheikosehira.com`**（`src/lib/site.ts`）。`https://aiueo-lp.vercel.app` も同じ内容を返すが、canonical で前者に寄せている
 - **Vercel の Git 連携が接続済み。`main` への push で本番デプロイが自動で走る**（このセッションで接続前後を実測確認）
+
+## 今回の作業（2026-09-09 / 権限別の操作シナリオ作成、Claude Code on the web）
+
+P25（権限別の操作シナリオ100件）に対応。ブランチ`claude/checkin-6hrtds`（本番マージ待ち）。ドキュメントのみの追加で、コード・DB変更は無い。
+
+`docs/OPERATION_SCENARIOS.md` を新設し、権限6区分（未ログイン／プロフィール未完了／有効会員／停止・退会会員／管理者／システム）について、オーソドックスな操作50件と致命的な危険操作50件を、**すべて現行コードのガード条件に紐づけて**列挙した。各行に「自動テスト・本番実測で確認済み(✅)／コードにガードはあるが実DB未検証(⚠️)／ガードが無く現状成立する(❌)」の判定を付けた。
+
+### この作業で新しく見つかった問題（台帳に未記載だったもの）
+
+いずれも実コードで確認済み。**公開前に扱いを決める必要がある。**
+
+- **B-37 管理者の自己停止でロックアウトする（深刻度: 高）**: `/admin/members` は自分自身も一覧に出し、自己操作を禁じるガードが無い。状態の初期選択が `active` の会員に対して `suspended` になっているため、自分の行で理由を書いて押すだけで自分が停止される。管理者が1人の状態でこれをやると `requireAdmin()` が通らなくなる。**`role` を更新するコードがアプリ内に1箇所も存在しない**ため、復旧はDB直操作しかない。
+- **B-29 「終了」「中止」の誤操作から企画者が復帰できない（深刻度: 高）**: `/member/proposals/[id]` の開催状況フォームは「開催決定／参加者満席／終了／中止」の4ボタンが同じ見た目で横並び。確認ダイアログが無く、押した瞬間に `ended`/`cancelled` が確定する。この2状態は `EDITABLE_STATUSES` に無いため、企画者だけでは元に戻せない。
+- **B-46 DB断のときフォームが無言で失敗する（深刻度: 中）**: `setProposalEventStatusAction`・`sendMemberMessageAction`・`createReportAction` は `if (!db) return;` で何も表示せず終了する。会員登録フォームで実際に起きた「黙って固まる」事故（P13で修正）と同型。
+- **B-30 通報にレート制限が無い（深刻度: 中）**: 自前のレート制限は登録APIだけ。1企画への大量通報で `reports` と `audit_log` を膨らませられる。
+- **B-49 ログインにアプリ側のレート制限が無い（深刻度: 中）**: `/api/auth/sign-in/email` は許可リストを通る。パスワード総当たりの抑止は上流 Neon Auth の制限だけに依存している。
+- **B-26〜B-28 新規作成側に日時の妥当性ガードが無い（深刻度: 中）**: 編集側(`updateProposalAction`)には「公開期限が過去なら公開させない」があるが、新規作成側(`saveProposalAction`)には無い。過去日の公開期限・過去日の開催候補日・公開期限より後の開催日、いずれも公開できてしまう。日時の前後関係を見るDBのCHECK制約も無い。
+- **B-36 退会者の再登録を防げない（深刻度: 低）**: 別アドレスで登録し直せる。会員に本人確認情報を持たせない方針の裏返しで、運用でカバーする範囲。
+
+### 既知として台帳に記載済みの未達（再掲、シナリオ表にも収録）
+
+B-35（停止会員が企画詳細を読めない、必須設計5項の未達）、B-38（管理者MFA未実装、必須設計7項の未達）、B-45（通知メール未送信、不足#6）、B-47（セッション5分キャッシュ、X2で現状維持）、B-48（RLS不採用、2026-09-06に恒久決定）。
+
+### 検証
+
+ドキュメントのみの追加。記載した判定の根拠は、`src/lib/auth/dal.ts`、`src/app/member/profile/actions.ts`、`src/app/member/proposals/{new,[id]}/actions.ts`、`src/app/member/proposals/[id]/messages/actions.ts`、`src/app/events/actions.ts`、`src/app/admin/{actions.ts,statuses.ts,members/page.tsx}`、`src/app/api/{auth/[...path],membership/registration,cron/proposal-deadlines}/route.ts` を読んで確認した。`grep` で `role` を更新するコードが0件であること、`/admin/members` が自分自身を除外していないこと、開催状況フォームに確認処理が無いことも実際に確認している。
 
 ## 今回の作業（2026-09-07 その5 / チェックイン、Claude Code on the web）
 
