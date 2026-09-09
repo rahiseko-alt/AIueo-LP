@@ -41,16 +41,42 @@ for (const path of BLOCKED) {
   });
 }
 
-test('許可したパスは塞がれていない', async ({ request }) => {
+test('許可したパスは塞がれていない', async ({ request, baseURL }) => {
   // 認証基盤が未設定の環境では 503 になる。ここで確かめるのは
   // 「許可リストから漏れて 404 になっていないこと」だけ。
   // これが 404 になると Google ログインがボタンを押した瞬間に失敗する。
+  const res = await request.post('/api/auth/sign-in/social', {
+    headers: { 'Content-Type': 'application/json', Origin: baseURL ?? '' },
+    data: { provider: 'google' },
+  });
+
+  expect(res.status(), 'Google ログインの経路まで塞いでいる').not.toBe(404);
+  expect(res.status(), '自サイトからの送信を拒否している').not.toBe(403);
+});
+
+/**
+ * 状態を変える操作を、他サイトから叩けないこと。
+ *
+ * この Proxy は上流を呼ぶとき Origin を自分で付け直すため、ここで塞がないと
+ * 上流側の同一オリジン検証が意味を失う。削除した `/api/membership/registration`
+ * が持っていた検証を、残った書き込み経路へ移している。
+ */
+test('外部サイトからのログイン開始を拒否する', async ({ request }) => {
+  const res = await request.post('/api/auth/sign-in/social', {
+    headers: { 'Content-Type': 'application/json', Origin: 'https://example.com' },
+    data: { provider: 'google' },
+  });
+
+  expect(res.status(), '他サイトからログイン開始を叩ける').toBe(403);
+});
+
+test('Origin が無い送信を拒否する', async ({ request }) => {
   const res = await request.post('/api/auth/sign-in/social', {
     headers: { 'Content-Type': 'application/json' },
     data: { provider: 'google' },
   });
 
-  expect(res.status(), 'Google ログインの経路まで塞いでいる').not.toBe(404);
+  expect(res.status(), 'Origin を送らなければ素通しできる').toBe(403);
 });
 
 test('許可したパスでもメソッドが違えば通さない', async ({ request }) => {

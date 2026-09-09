@@ -1,74 +1,73 @@
 import { test, expect } from '@playwright/test';
-import { isOAuthReturn, OAUTH_VERIFIER_PARAM, OAUTH_CHALLENGE_COOKIES } from '../src/lib/auth/oauth-return';
+import { OAUTH_VERIFIER_PARAM } from '../src/lib/auth/oauth-return';
 
 /**
- * `src/proxy.ts` の分岐。
+ * Google ログインの戻り経路。
  *
- * Google から戻ってきた1リクエストだけは認証SDKのmiddlewareへ委譲し、
- * それ以外は素通しにする。この線引きが崩れる壊れ方は2通りあり、
- * どちらも画面には黙って現れる。
+ * 戻りの交換は認証SDKのクライアントが `getSession()` の中で行い、受け口は
+ * 許可済みの `GET /api/auth/get-session` である。middleware は使わない
+ * （理由は `src/proxy.ts` のコメント）。
  *
- * 1. 全リクエストを委譲してしまう → SDK の除外リストは固定で差し替えられないため、
- *    `/` や `/events` など公開ページが軒並みログイン必須になる。
- * 2. 条件を厳しくしすぎて委譲されない → Google から戻ってもセッションが確定せず、
- *    「押しても未ログインのまま」に戻る。
+ * ここで固定するのは3つ。
+ *   1. 公開ページが認証に依存していないこと（middleware を挟む実装へ戻していない）
+ *   2. 戻りを検知するパラメータ名が SDK の内部定数からずれていないこと
+ *   3. 戻り先ページに交換用のコードが載っていること
  *
- * ブラウザ越しの検証には限界がある。ローカルとCIには認証情報が無く middleware が
- * 無効化されるため、「素通し」と「委譲したが何も起きなかった」を画面から区別できない。
- * そこで判定条件そのものを純粋な関数へ切り出し、真理値表を直接固定する。
- * middleware を挟んだ実挙動（2 の側）は実アカウントが要るため、人が本番で確認する
- * （`HANDOFF.md` の手動確認手順）。
+ * 実際に Google のアカウントで通す確認は、実アカウントが要るため人が行う
+ * （`HANDOFF.md` の手動確認手順）。この環境には認証情報が無く、そこまでは踏めない。
  */
 
-test.describe('OAuth戻りの判定条件', () => {
-  const withCookie = (present: string[]) => (name: string) => present.includes(name);
-
-  test('パラメータとCookieが揃ったときだけ真になる', () => {
-    const params = new URLSearchParams(`${OAUTH_VERIFIER_PARAM}=token`);
-
-    expect(isOAuthReturn(params, withCookie([OAUTH_CHALLENGE_COOKIES[0]])), 'OAuth戻りを取りこぼしている').toBe(true);
-    expect(isOAuthReturn(params, withCookie([OAUTH_CHALLENGE_COOKIES[1]])), 'SDKに残る旧綴りを見ていない').toBe(true);
-  });
-
-  test('パラメータだけでは真にならない', () => {
-    const params = new URLSearchParams(`${OAUTH_VERIFIER_PARAM}=token`);
-
-    expect(isOAuthReturn(params, withCookie([])), 'URLを打つだけで認証経路へ引き込める').toBe(false);
-  });
-
-  test('Cookieだけでは真にならない', () => {
-    expect(
-      isOAuthReturn(new URLSearchParams(''), withCookie([OAUTH_CHALLENGE_COOKIES[0]])),
-      'Cookieが残っている間ずっと委譲してしまう',
-    ).toBe(false);
-  });
-
-  test('SDKが使う名前から変えていない', () => {
-    // ここが SDK 内部の定数とずれると Google ログインが黙って壊れる。
-    expect(OAUTH_VERIFIER_PARAM).toBe('neon_auth_session_verifier');
-    expect([...OAUTH_CHALLENGE_COOKIES]).toEqual([
-      '__Secure-neon-auth.session_challenge',
-      '__Secure-neon-auth.session_challange',
-    ]);
-  });
+test('戻りを検知するパラメータ名がSDKの内部定数と一致している', () => {
+  // ここがずれると、戻ってきても交換が始まらず「押しても未ログインのまま」に戻る。
+  expect(OAUTH_VERIFIER_PARAM).toBe('neon_auth_session_verifier');
 });
 
 const PUBLIC_PATHS = ['/', '/events', '/terms', '/register'];
 
 for (const path of PUBLIC_PATHS) {
-  test(`${path} は素通しのまま（認証を要求しない）`, async ({ page }) => {
+  test(`${path} は認証を要求しない`, async ({ page }) => {
     const response = await page.goto(path);
 
     expect(response?.status(), `${path} が認証で弾かれている`).toBe(200);
     expect(new URL(page.url()).pathname, `${path} からログイン画面へ飛ばされている`).toBe(path);
   });
+
+  test(`${path} は検証パラメータが付いても素通しする`, async ({ page }) => {
+    // middleware を挟む実装へ戻すと、交換の失敗時にここが /register へ飛ぶ。
+    const response = await page.goto(`${path}?${OAUTH_VERIFIER_PARAM}=not-a-real-token`);
+
+    expect(response?.status(), `${path} が検証パラメータで挙動を変えている`).toBe(200);
+    expect(new URL(page.url()).pathname, `${path} から飛ばされている`).toBe(path);
+  });
 }
 
-test('検証パラメータだけ付いていても、Cookieが無ければ素通しする', async ({ page }) => {
-  // OAuth の戻りは「パラメータ」と「challenge Cookie」が揃って初めて成立する。
-  // パラメータだけで委譲すると、URLを打つだけで公開ページの挙動を変えられる。
-  const response = await page.goto('/?neon_auth_session_verifier=not-a-real-token');
+/**
+ * 戻り先ページが、実際に交換リクエストを出すこと。
+ *
+ * 「待ち表示が出ていない」だけを見るテストは、実装が丸ごと無くても通ってしまう。
+ * 交換の受け口へリクエストが飛ぶかどうかを直接見る。
+ */
+test('戻り先ページは検証パラメータ付きで交換リクエストを出す', async ({ page }) => {
+  const exchanges: string[] = [];
+  page.on('request', (request) => {
+    if (request.url().includes('/api/auth/get-session')) exchanges.push(request.url());
+  });
 
-  expect(response?.status(), '検証パラメータだけで挙動が変わっている').toBe(200);
-  expect(new URL(page.url()).pathname).toBe('/');
+  await page.goto(`/member/profile?${OAUTH_VERIFIER_PARAM}=fake-token`);
+  await expect
+    .poll(() => exchanges.length, { message: '戻ってきても交換が始まらない（未ログインのままになる）' })
+    .toBeGreaterThan(0);
+
+  expect(exchanges[0], '検証パラメータが上流へ渡っていない').toContain(`${OAUTH_VERIFIER_PARAM}=fake-token`);
+});
+
+test('検証パラメータが無ければ交換リクエストを出さない', async ({ page }) => {
+  const exchanges: string[] = [];
+  page.on('request', (request) => {
+    if (request.url().includes('/api/auth/get-session')) exchanges.push(request.url());
+  });
+
+  await page.goto('/member/profile');
+  await expect(page.getByText('ログイン処理をしています', { exact: false })).toHaveCount(0);
+  expect(exchanges, '毎回の表示で交換を走らせている').toHaveLength(0);
 });

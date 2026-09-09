@@ -1,36 +1,24 @@
 import { type NextRequest, NextResponse } from 'next/server';
-import { neonAuth } from '@/lib/neon/auth';
-import { isOAuthReturn } from '@/lib/auth/oauth-return';
 
 /**
  * 公開ページは認証基盤に依存させない。保護はページ・Server Action・Route Handler
- * が個別に行う。ここで唯一の例外を作るのが、Google から戻ってきた1リクエストである。
+ * が個別に行う。
  *
- * Neon Auth の OAuth は「Google → Neon の callback → こちらへリダイレクト」で戻る。
- * 戻り先で `neon_auth_session_verifier` を交換して初めてセッションCookieがこちらの
- * ドメインへ載る。その交換処理は SDK の middleware の中にしか無いため、ここで呼ばない
- * 限り Google ログインは「押しても未ログインのまま」になる。
+ * Google ログインの戻り（`?neon_auth_session_verifier=…`）もここでは扱わない。
+ * 認証SDKのクライアントが `getSession()` の中で、キャッシュの回避・パラメータの
+ * 上流への転送・アドレスバーからの除去まで自前で行う
+ * （`@neondatabase/auth/dist/adapter-core-*.mjs` の `getSession` フック）。
+ * 受け口は許可済みの `GET /api/auth/get-session` で、Proxy が検索文字列をそのまま
+ * 上流へ渡し、返ってきた Set-Cookie をこちらのドメインへ載せる。実際に呼ぶのは
+ * `src/components/oauth-session-sync.tsx`。
  *
- * ただし `neonAuth.middleware()` をそのまま全リクエストに掛けてはいけない。素通しの
- * 対象は SDK 内の固定定数 `DEFAULT_AUTH_SKIP_ROUTES`（`/api/auth` や `/auth/sign-in`
- * など）だけで、設定から差し替えられない。掛けると `/`・`/events`・`/terms` まで
- * ログイン必須になる。
- *
- * そこで、OAuth の戻りと判別できたリクエストにだけ委譲する。SDK は交換が成立すると
- * 保護判定より前に OAuth 用のリダイレクトを返して抜けるので、この経路でログイン必須化は
- * 起きない。
+ * ここで `neonAuth.middleware()` を使ってはいけない。理由は2つある。
+ * 1. 素通しの対象がSDK内の固定定数で差し替えられず、`/` や `/events` まで
+ *    ログイン必須になる。
+ * 2. 交換に失敗したときは保護判定まで進み、公開ページが `/register` へ飛ばされる。
+ *    「戻りのときだけ委譲する」条件を足しても、この失敗経路は残る。
  */
-
-// 既定の `/auth/sign-in` はこのアプリに存在しないパスなので、会員登録画面へ寄せる。
-// 上記のとおりこの経路では保護判定へ到達しないため、実際には使われない保険である。
-const oauthMiddleware = neonAuth?.middleware({ loginUrl: '/register' });
-
 export function proxy(request: NextRequest) {
-  // 判定条件は `@/lib/auth/oauth-return` に切り出してテストで固定している。
-  if (oauthMiddleware && isOAuthReturn(request.nextUrl.searchParams, (name) => request.cookies.has(name))) {
-    return oauthMiddleware(request);
-  }
-
   return NextResponse.next({ request });
 }
 

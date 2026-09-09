@@ -33,6 +33,35 @@ const handler = neonAuth?.handler();
 const unavailable = () => new Response('Authentication is not configured.', { status: 503 });
 // 許可していないパスの存在有無を外から区別させない。
 const notFound = () => new Response('Not Found', { status: 404 });
+const forbidden = () => new Response('Forbidden', { status: 403 });
+
+/**
+ * 状態を変える操作は、この画面から出た送信だけに限る。
+ *
+ * この Proxy は上流を呼ぶとき Origin ヘッダを必ず自分で付け直す。呼び出し元が
+ * 何も送ってこなければ、こちらのオリジンを補って送る。つまり上流側の同一オリジン
+ * 検証は、ここを通った時点で意味を失う。塞がないと、他サイトのスクリプトから
+ * ログイン開始を無制限に叩けてしまう（上流にはそのたび状態が作られる）。
+ *
+ * 削除した `/api/membership/registration` が持っていた検証と同じものを、
+ * 残った書き込み経路へ移している。
+ */
+function isSameOrigin(request: NextRequest) {
+  const origin = request.headers.get('origin');
+  if (!origin) return false;
+
+  // `nextUrl.origin` と比べてはいけない。同じサイトでもホストの表記が違うだけで
+  // 弾く（`127.0.0.1` と `localhost` など）。ブラウザは Origin と Host を同じURLから
+  // 作るので、Host 側と突き合わせる。前段のプロキシがある場合は転送元を優先する。
+  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host');
+  if (!host) return false;
+
+  try {
+    return new URL(origin).host === host;
+  } catch {
+    return false;
+  }
+}
 
 function guard(method: 'GET' | 'POST') {
   return async (request: NextRequest, context: RouteContext) => {
@@ -41,6 +70,7 @@ function guard(method: 'GET' | 'POST') {
     const { path } = await context.params;
     const route = (path ?? []).join('/');
     if (!ALLOWED_ROUTES.get(route)?.has(method)) return notFound();
+    if (method === 'POST' && !isSameOrigin(request)) return forbidden();
     if (!handler) return unavailable();
     return handler[method](request, context);
   };
