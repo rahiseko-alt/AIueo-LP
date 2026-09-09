@@ -1,10 +1,7 @@
 'use client';
 
-import { FormEvent, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 import { createAuthClient } from '@neondatabase/auth/next';
-
-type Screen = 'credentials' | 'verify';
 
 /**
  * 画面に出す一言。
@@ -14,14 +11,20 @@ type Screen = 'credentials' | 'verify';
  */
 type Notice = { kind: 'error' | 'info'; text: string } | null;
 
-const NETWORK_MESSAGE = '通信できませんでした。電波の状況を確認して、もう一度お試しください。';
+/**
+ * 原因が特定できないときの文言。
+ *
+ * 「電波を確認して」と言い切らない。サーバー側の設定不備でもここに来るため、
+ * 利用者のせいにする文になってしまう（実際に認証未設定の環境で 503 が返ると
+ * この経路に入ることを実測で確認した）。
+ */
+const NETWORK_MESSAGE = 'ログインを開始できませんでした。少し時間をおいて、もう一度お試しください。繰り返す場合は、電波の状況をご確認のうえお問い合わせください。';
 
 /**
  * 例外や失敗応答から、画面に出せる一言を作る。
  *
  * 原因が分からないまま止まるのが一番困るので、判明している原因は括弧で添える。
- * ここに出るのは認証基盤が返す定型文（`Invalid OTP` など）で、
- * 「そのアドレスが登録済みかどうか」を明かすものは含まれない。
+ * ここに出るのは認証基盤が返す定型文で、個人の登録有無を明かすものは含まれない。
  */
 function withCause(base: string, cause: unknown) {
   const message =
@@ -32,129 +35,81 @@ function withCause(base: string, cause: unknown) {
 }
 
 export function RegisterForm() {
-  const router = useRouter();
   const configured = Boolean(process.env.NEXT_PUBLIC_NEON_AUTH_ENABLED === 'true');
-  const [screen, setScreen] = useState<Screen>('credentials');
-  const [intent, setIntent] = useState<'signup' | 'signin'>('signup');
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [code, setCode] = useState('');
   const [notice, setNotice] = useState<Notice>(null);
   const [isWorking, setIsWorking] = useState(false);
 
-  async function sendVerificationCode() {
-    if (!configured || !email) return false;
-    try {
-      const response = await fetch('/api/membership/registration', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'resend', email }),
-      });
-      const result = await response.json().catch(() => null) as { ok?: boolean; message?: string } | null;
-      if (!response.ok || !result?.ok) {
-        setNotice({ kind: 'error', text: result?.message ?? '確認コードを送信できませんでした。時間をおいて再送してください。' });
-        return false;
-      }
-      setNotice({ kind: 'info', text: '確認コードを送信しました。メールの受信トレイと迷惑メールを確認してください。' });
-      return true;
-    } catch (error) {
-      // fetch は通信そのものが失敗すると例外を投げる。受け止めないと、
-      // 呼び出し元が途中で止まって画面に何も出ない。
-      console.error('AIueo verification code request failed', error);
-      setNotice({ kind: 'error', text: NETWORK_MESSAGE });
-      return false;
-    }
-  }
+  // Google 側で中断・失敗したときは `?auth_error=1` を付けてここへ戻す。
+  // 何が起きたか分からないまま同じ画面に戻ると、利用者は操作を繰り返すしかない。
+  //
+  // 初期値をURLから決めるとサーバー側の描画と食い違うため、描画が落ち着いてから
+  // 切り替える（effect の中で同期的に setState しない）。
+  useEffect(() => {
+    if (!new URLSearchParams(window.location.search).has('auth_error')) return;
 
-  async function submitCredentials(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!configured || !email || password.length < 8) return;
+    let cancelled = false;
+    (async () => {
+      await Promise.resolve();
+      if (cancelled) return;
+      setNotice({
+        kind: 'error',
+        text: 'Googleでのログインが完了しませんでした。もう一度お試しください。',
+      });
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /**
+   * Google の同意画面へ送り出す。
+   *
+   * 失敗したときだけ `isWorking` を戻す。成功時に戻してはいけない。
+   * SDKは応答を受けたあと非同期に `window.location` を書き換えるため、
+   * ここで戻すと画面が切り替わるまでの間ボタンが再び押せてしまい、
+   * 二重にログインを開始できる。
+   *
+   * 例外で抜けた場合も必ず戻す。押せないまま無言で固まるのを防ぐ
+   * （2026-09-05 に実際に起きた不具合と同じ形）。
+   */
+  async function startGoogleSignIn() {
+    if (!configured) return;
     setIsWorking(true);
     setNotice(null);
     try {
-      if (intent === 'signin') {
-        const { error } = await createAuthClient().signIn.email({ email, password });
-        if (error) {
-          setNotice({ kind: 'error', text: withCause('ログインできませんでした', error) });
-          return;
-        }
-        router.push('/member/profile');
-        return;
-      }
-
-      const response = await fetch('/api/membership/registration', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'signup', email, password }),
+      // 戻り先は絶対URLで渡す。相対パスだと認証基盤（Neon）のドメインを基準に
+      // 解決され、こちらのサイトへ戻ってこない。
+      const origin = window.location.origin;
+      const { error } = await createAuthClient().signIn.social({
+        provider: 'google',
+        // 会員登録が未完了なら同意フォーム、完了済みなら登録内容が出る。
+        callbackURL: new URL('/member/profile', origin).toString(),
+        // 失敗時の戻り先。渡さないと、同意をキャンセルした利用者が
+        // 認証基盤側の英語のエラー画面に取り残される。
+        errorCallbackURL: new URL('/register?auth_error=1', origin).toString(),
       });
-      const result = await response.json().catch(() => null) as { ok?: boolean; message?: string } | null;
-      if (!response.ok || !result?.ok) {
-        setNotice({ kind: 'error', text: result?.message ?? '登録を開始できませんでした。時間をおいて再度お試しください。' });
-        return;
-      }
-      setScreen('verify');
-      // 登録済みかどうかで文言を変えない。変えると、任意のアドレスが会員かを
-      // 画面から判別できてしまう。
-      setNotice({ kind: 'info', text: 'このアドレスが利用できる場合、確認コードを送信しました。メールの受信トレイと迷惑メールを確認してください。' });
-    } catch (error) {
-      console.error('AIueo credential submission failed', error);
-      setNotice({ kind: 'error', text: NETWORK_MESSAGE });
-    } finally {
-      // 成功して画面遷移する場合も含め、必ず戻す。ここを通らない経路があると
-      // ボタンが押せないまま固まり、利用者には何が起きたか分からない。
-      setIsWorking(false);
-    }
-  }
-
-  async function verifyEmail(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    if (!configured || !email || !code) return;
-    setIsWorking(true);
-    setNotice(null);
-    try {
-      const { error } = await createAuthClient().emailOtp.verifyEmail({ email, otp: code });
       if (error) {
-        setNotice({ kind: 'error', text: withCause('確認できませんでした。最新のメールに届いたコードを入力してください', error) });
+        setNotice({ kind: 'error', text: withCause('Googleでの認証を開始できませんでした。', error) });
+        setIsWorking(false);
         return;
       }
-      router.push('/member/profile');
-    } catch (error) {
-      console.error('AIueo email verification failed', error);
-      setNotice({ kind: 'error', text: NETWORK_MESSAGE });
-    } finally {
-      setIsWorking(false);
-    }
-  }
-
-  async function resendVerificationCode() {
-    setIsWorking(true);
-    setNotice(null);
-    try {
-      await sendVerificationCode();
-    } finally {
+      setNotice({ kind: 'info', text: 'Googleの画面へ移動します。' });
+    } catch (cause) {
+      setNotice({ kind: 'error', text: withCause(NETWORK_MESSAGE, cause) });
       setIsWorking(false);
     }
   }
 
   return <div className="mt-8 space-y-5">
     {!configured && <p className="border border-[#c8a45a]/45 bg-[#c8a45a]/10 p-4 text-sm leading-7 text-[rgba(240,237,232,0.8)]">会員認証の接続を準備中です。公開前のため、現在は登録を開始できません。</p>}
-    {screen === 'credentials' ? <>
-      <form onSubmit={submitCredentials} className="space-y-4">
-        <label className="block font-mono text-xs tracking-[0.1em] text-[rgba(240,237,232,0.72)]" htmlFor="register-email">メールアドレス</label>
-        <input id="register-email" type="email" required value={email} onChange={(event) => setEmail(event.target.value)} placeholder="you@example.com" className="min-h-11 w-full border border-white/20 bg-black/20 px-3 text-base outline-none transition-colors placeholder:text-white/55 focus:border-[#c8a45a]" />
-        <label className="block font-mono text-xs tracking-[0.1em] text-[rgba(240,237,232,0.72)]" htmlFor="register-password">パスワード（8文字以上）</label>
-        <input id="register-password" type="password" required minLength={8} value={password} onChange={(event) => setPassword(event.target.value)} className="min-h-11 w-full border border-white/20 bg-black/20 px-3 text-base outline-none transition-colors focus:border-[#c8a45a]" />
-        <button type="submit" disabled={!configured || isWorking} className="btn-ghost w-full disabled:cursor-not-allowed disabled:opacity-45">{intent === 'signup' ? 'メールで登録する' : 'メールでログインする'}</button>
-      </form>
-      <button type="button" disabled={!configured || isWorking} onClick={() => { setIntent(intent === 'signup' ? 'signin' : 'signup'); setNotice(null); }} className="min-h-11 text-sm text-[#d7bd82] underline disabled:opacity-45">{intent === 'signup' ? 'すでに登録済みの方はこちら' : '初めて登録する方はこちら'}</button>
-    </> : <form onSubmit={verifyEmail} className="space-y-4">
-      <p className="text-sm leading-7 text-white/75"><span className="font-mono text-[#d7bd82]">{email}</span> に届いた確認コードを入力してください。</p>
-      <label className="block font-mono text-xs tracking-[0.1em] text-[rgba(240,237,232,0.72)]" htmlFor="register-code">確認コード</label>
-      <input id="register-code" type="text" inputMode="numeric" autoComplete="one-time-code" required value={code} onChange={(event) => setCode(event.target.value)} className="min-h-11 w-full border border-white/20 bg-black/20 px-3 font-mono text-lg tracking-[0.2em] outline-none transition-colors focus:border-[#c8a45a]" />
-      <button type="submit" disabled={!configured || isWorking} className="btn-solid w-full disabled:cursor-not-allowed disabled:opacity-45">メールアドレスを確認する</button>
-      <button type="button" disabled={!configured || isWorking} onClick={resendVerificationCode} className="min-h-11 text-sm text-[#d7bd82] underline disabled:opacity-45">確認コードを再送する</button>
-      <button type="button" disabled={isWorking} onClick={() => { setScreen('credentials'); setCode(''); setNotice(null); }} className="min-h-11 text-sm text-[#d7bd82] underline">戻る</button>
-    </form>}
+    <button
+      type="button"
+      disabled={!configured || isWorking}
+      onClick={startGoogleSignIn}
+      className="btn-solid w-full disabled:cursor-not-allowed disabled:opacity-45"
+    >Googleで続ける</button>
+    <p className="text-sm leading-7 text-[rgba(240,237,232,0.72)]">初めての方も、すでに登録済みの方も、同じボタンから入れます。AIueoはパスワードを預かりません。</p>
     {notice && <p
       role={notice.kind === 'error' ? 'alert' : 'status'}
       className={`text-sm leading-7 ${notice.kind === 'error' ? 'border border-[#e0796a]/60 bg-[#e0796a]/10 p-4 text-[#f4c8c0]' : 'text-[#d7bd82]'}`}

@@ -19,7 +19,7 @@ export default function RegisterPage() {
           <h1 className="mt-4 text-4xl font-light tracking-tight sm:text-5xl">会員登録</h1>
           <p className="mt-5 leading-8 text-[rgba(240,237,232,0.78)]">企画を掲載・管理する人だけが会員登録します。イベントに参加するだけなら登録は不要です。会費・利用料はかかりません。</p>
           <ol className="mt-7 space-y-3 border-l border-[#c8a45a]/60 pl-5 text-sm leading-7 text-[rgba(240,237,232,0.76)]">
-            <li><span className="mr-2 font-mono text-[#c8a45a]">01</span>外部認証でログイン</li>
+            <li><span className="mr-2 font-mono text-[#c8a45a]">01</span>Googleアカウントでログイン</li>
             <li><span className="mr-2 font-mono text-[#c8a45a]">02</span>公開名・協力したい内容・年齢確認を登録</li>
             <li><span className="mr-2 font-mono text-[#c8a45a]">03</span>規約に同意して、すぐに企画掲載を開始</li>
           </ol>

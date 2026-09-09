@@ -8,22 +8,22 @@ import { neonAuth } from '@/lib/neon/auth';
  * 再エクスポートは「上流APIの全面公開」と同じになる。実際に画面が使う操作
  * だけを通す。
  *
+ * 通すのは Google ログインに要る3つだけである。`sign-in/social` が Google への
+ * 出発点で、戻りは Neon 側の callback を経由するためこの Proxy を通らない。
+ *
  * ここで通さないもの:
- * - `sign-up/email` と `email-otp/send-verification-otp`
- *   登録と確認コード送信は `/api/membership/registration` に一本化している。
- *   そこには回数制限（1アドレス3回/時・1IP 10回/時）と、登録済みかどうかを
- *   漏らさない同一応答がある。この Proxy から素通しできると、その両方を
- *   迂回して上流の共有枠を食い潰せる。アプリ本体は上流をサーバー側から直接
- *   呼ぶので、ここを塞いでも登録導線は動く。
+ * - `sign-in/email` `sign-up/email` `email-otp/*` などメール認証の一式
+ *   2026-09-09 に認証を Google へ切り替え、AIueo はパスワードを預からない形に
+ *   した。上流の Neon Auth 側でもメールログインを無効にしている。経路を残すと
+ *   廃止したはずの登録・ログインが Proxy 経由だけ生き残る。
  * - `admin/*` などの管理系
  *   上流には利用者一覧・ロール変更・なりすましのAPIがある。通ってしまえば
  *   このアプリの `audit_log` には何も残らない。
  */
 const ALLOWED_ROUTES = new Map<string, ReadonlySet<string>>([
   ['get-session', new Set(['GET'])],
-  ['sign-in/email', new Set(['POST'])],
+  ['sign-in/social', new Set(['POST'])],
   ['sign-out', new Set(['POST'])],
-  ['email-otp/verify-email', new Set(['POST'])],
 ]);
 
 type RouteContext = { params: Promise<{ path: string[] }> };
@@ -33,6 +33,35 @@ const handler = neonAuth?.handler();
 const unavailable = () => new Response('Authentication is not configured.', { status: 503 });
 // 許可していないパスの存在有無を外から区別させない。
 const notFound = () => new Response('Not Found', { status: 404 });
+const forbidden = () => new Response('Forbidden', { status: 403 });
+
+/**
+ * 状態を変える操作は、この画面から出た送信だけに限る。
+ *
+ * この Proxy は上流を呼ぶとき Origin ヘッダを必ず自分で付け直す。呼び出し元が
+ * 何も送ってこなければ、こちらのオリジンを補って送る。つまり上流側の同一オリジン
+ * 検証は、ここを通った時点で意味を失う。塞がないと、他サイトのスクリプトから
+ * ログイン開始を無制限に叩けてしまう（上流にはそのたび状態が作られる）。
+ *
+ * 削除した `/api/membership/registration` が持っていた検証と同じものを、
+ * 残った書き込み経路へ移している。
+ */
+function isSameOrigin(request: NextRequest) {
+  const origin = request.headers.get('origin');
+  if (!origin) return false;
+
+  // `nextUrl.origin` と比べてはいけない。同じサイトでもホストの表記が違うだけで
+  // 弾く（`127.0.0.1` と `localhost` など）。ブラウザは Origin と Host を同じURLから
+  // 作るので、Host 側と突き合わせる。前段のプロキシがある場合は転送元を優先する。
+  const host = request.headers.get('x-forwarded-host') ?? request.headers.get('host');
+  if (!host) return false;
+
+  try {
+    return new URL(origin).host === host;
+  } catch {
+    return false;
+  }
+}
 
 function guard(method: 'GET' | 'POST') {
   return async (request: NextRequest, context: RouteContext) => {
@@ -41,6 +70,7 @@ function guard(method: 'GET' | 'POST') {
     const { path } = await context.params;
     const route = (path ?? []).join('/');
     if (!ALLOWED_ROUTES.get(route)?.has(method)) return notFound();
+    if (method === 'POST' && !isSameOrigin(request)) return forbidden();
     if (!handler) return unavailable();
     return handler[method](request, context);
   };

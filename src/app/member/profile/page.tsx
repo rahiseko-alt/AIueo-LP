@@ -2,13 +2,20 @@ import Link from 'next/link';
 import { getAuthContext } from '@/lib/auth/dal';
 import { db } from '@/lib/neon/db';
 import { ProfileCompletionForm } from '@/components/profile-completion-form';
+import { OAuthSessionSync } from '@/components/oauth-session-sync';
 
 export const dynamic = 'force-dynamic';
 
 type TermVersion = { id: string; document_type: 'terms' | 'disclaimer' | 'privacy'; version: string; effective_at: string };
 
+/**
+ * このページは Google ログインの戻り先（`callbackURL`）でもある。
+ * 戻ってきた直後はまだセッションCookieが無く、サーバー側は未ログインとして
+ * 描画する。`OAuthSessionSync` がクライアントで交換を済ませて描き直すため、
+ * 全分岐に共通の Shell へ置く。戻り以外のときは何も描画しない。
+ */
 function Shell({ children }: { children: React.ReactNode }) {
-  return <main className="min-h-screen bg-[#080808] px-4 py-8 text-[#f0ede8] sm:px-6 sm:py-12 md:px-10"><div className="mx-auto max-w-3xl"><Link href="/" className="inline-flex min-h-11 items-center font-mono text-xs font-semibold tracking-[0.16em] text-[#c8a45a] hover:text-white">← AIueoへ戻る</Link>{children}</div></main>;
+  return <main className="min-h-screen bg-[#080808] px-4 py-8 text-[#f0ede8] sm:px-6 sm:py-12 md:px-10"><div className="mx-auto max-w-3xl"><Link href="/" className="inline-flex min-h-11 items-center font-mono text-xs font-semibold tracking-[0.16em] text-[#c8a45a] hover:text-white">← AIueoへ戻る</Link><div className="mt-8"><OAuthSessionSync /></div>{children}</div></main>;
 }
 
 export default async function MemberProfilePage() {
