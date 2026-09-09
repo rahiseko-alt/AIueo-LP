@@ -93,7 +93,7 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 | P12 | 未使用コード・依存の削除（Tier 3） | P9 | 未参照コンポーネント10、`public/`8、依存4、未使用エクスポート・型 | 完了 |
 | P13 | 会員登録フォームの例外処理 | P3 | 通信失敗時に理由を表示し、ボタンが固まらないこと | 完了 |
 | P14 | 画面とフローの確定 | P9 | 仕様書と実装21ページの突き合わせ、3導線の確定、不足の列挙、見逃し防止の三重化 | 完了（設計図を公開） |
-| P15 | Google認証への切替 | P14 | `/register` をGoogle認証1タップにし、パスワードを預からない形にする | 実装中（2026-09-09。**外部設定は完了**: Google Cloudのクライアント作成・リダイレクトURI登録、Neonの自前鍵への切替、`Sign-in with Email`のオフ。**アプリ側は未着手**で、`src/proxy.ts`がOAuth戻りのセッション確立を行わない・許可リストに`sign-in/social`が無い・`/register`がメール方式のまま、の3点を修正する） |
+| P15 | Google認証への切替 | P14 | `/register` をGoogle認証1タップにし、パスワードを預からない形にする | 実装完了・**マージ待ち**（2026-09-09。外部設定（Google Cloudのクライアント作成・リダイレクトURI登録、Neonの自前鍵への切替、`Sign-in with Email`のオフ）とアプリ側の実装がともに完了。`/register`はGoogleボタン1つ、メール認証の一式は撤去。戻りのセッション確定は`src/components/oauth-session-sync.tsx`が`getSession()`で行い、`src/proxy.ts`は素通しのまま。lint/typecheck/build/Playwright 111件緑。**実Googleアカウントでの通し確認はユーザーの手動確認待ち**、`emailVerified`の可否も未確認） |
 | P16 | 台帳更新の強制（チェックアウト） | P14 | 終了時に`IMPLEMENTATION_PLAN.md`/`HANDOFF.md`の未更新を機械が指摘する | 完了 |
 | P17 | トップページのDB接続 | P14 | トップの「進行中の企画」を`/events`と同じ公開企画データへ接続し、即時反映する。0件時は非表示、タグ絞り込みは削除 | 完了（PR #24、`d34f539`で`main`へマージ・本番反映済み。実企画データでの見た目確認は未実施） |
 | P18 | ナビ/フッターの`/register`導線 | P14 | `navbar.tsx`/`footer.tsx`の「Join / Propose」を`#join`アンカーから`/register`への通常リンクに変更する | 完了（PR #26、`1564f88`で`main`へマージ・本番反映済み） |
