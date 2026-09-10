@@ -41,6 +41,17 @@ fi
 # 目次まで出すのは、「どこに何が決まっているか」を開かずに把握させるため。
 # ファイル名だけの案内では、結局読まずに設計を始める。
 echo
+# --- 失敗記録 -------------------------------------------------------------
+# 2026-09-10 追加。同じ失敗を繰り返していることをユーザーから指摘されたため、
+# 失敗記録を1か所（FAILURES.md）に集め、開始時に必ず画面へ出す。
+if [ -f FAILURES.md ]; then
+  echo "== 失敗記録（FAILURES.md。同じ失敗を繰り返さないために毎回読む） =="
+  grep -n '^## ' FAILURES.md 2>/dev/null | sed 's/^[0-9]*:## /  /'
+  echo ""
+  echo "  各件に「再発を止める手段」が書いてある。手段が効いているかを疑うこと。"
+  echo ""
+fi
+
 echo "== 決定事項の正本（作業前に必ず読む） =="
 for doc in MEMBERSHIP_FEATURE_SPEC.md IMPLEMENTATION_PLAN.md HANDOFF.md; do
   if [ -f "$doc" ]; then

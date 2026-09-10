@@ -143,7 +143,17 @@ test.describe('コンソールエラー・リクエスト失敗', () => {
         if (res.status() >= 400) problems.push(`HTTP ${res.status()}: ${res.url()}`);
       });
 
-      await page.goto(path, { waitUntil: 'networkidle' });
+      // `networkidle` で待ってはいけない。App Router は画面内のリンクを次々に RSC で
+      // プリフェッチするため、リンクが最も多い `/` では「500ms 通信が無い」状態に
+      // 到達しないことがある。2026-09-06 と 2026-09-10 に、文書だけを変えた PR で
+      // この行が30秒のタイムアウトで落ちた（どちらもアプリのコードは1行も触っていない）。
+      //
+      // このテストが見たいのは「遅れて出るコンソールエラーと失敗リクエストが無いこと」
+      // である。通信が完全に止まることは条件ではない。`load` まで待ち、そのあと
+      // 短く待って遅れて出る分を拾う。
+      await page.goto(path, { waitUntil: 'domcontentloaded' });
+      await page.waitForLoadState('load');
+      await page.waitForTimeout(1500);
       expect(problems).toEqual([]);
     });
   }

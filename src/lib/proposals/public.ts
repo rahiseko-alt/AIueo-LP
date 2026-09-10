@@ -29,3 +29,22 @@ export async function getPublicProposals(): Promise<PublicProposal[]> {
   );
   return result.rows as PublicProposal[];
 }
+
+/**
+ * 開催形式の表示名。
+ *
+ * DBには `offline` / `online` / `hybrid` が入る。企画フォームでは
+ * 「オフライン」等の日本語で選ばせているのに、公開ページはDBの英語値を
+ * そのまま出していた（2026-09-10、本番で「開催形式 offline」と出ているのを確認）。
+ * 未知の値が来たらそのまま返す。表示を落とさないため。
+ */
+export const EVENT_FORMAT_LABELS: Record<string, string> = {
+  offline: 'オフライン',
+  online: 'オンライン',
+  hybrid: 'ハイブリッド',
+};
+
+export function formatLabel(value: unknown): string {
+  const key = String(value ?? '');
+  return EVENT_FORMAT_LABELS[key] ?? key;
+}

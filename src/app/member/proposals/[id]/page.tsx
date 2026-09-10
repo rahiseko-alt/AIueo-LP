@@ -14,10 +14,17 @@ const LOCKED_STATUS_LABELS: Record<string, string> = {
   cancelled: '中止',
 };
 
+/**
+ * DBの日時を `datetime-local` 入力の表記（JSTの壁時計、分まで）へ変換する。
+ *
+ * **`Date` を受けられるようにしてある。** `timestamptz` の列は `pg` が
+ * 文字列ではなく `Date` で返すため、文字列だけを受ける実装では常に
+ * `undefined` になり、開催候補日時・募集期限・公開期限の3つの欄が
+ * 毎回空で表示されていた（2026-09-10、ユーザーが実際にこれで詰まった）。
+ */
 function toDatetimeLocal(value: unknown): string | undefined {
-  if (typeof value !== 'string' || !value) return undefined;
-  const date = new Date(value);
-  if (Number.isNaN(date.valueOf())) return undefined;
+  const date = value instanceof Date ? value : typeof value === 'string' && value ? new Date(value) : null;
+  if (!date || Number.isNaN(date.valueOf())) return undefined;
   const jst = new Date(date.getTime() + 9 * 60 * 60 * 1000);
   return jst.toISOString().slice(0, 16);
 }
