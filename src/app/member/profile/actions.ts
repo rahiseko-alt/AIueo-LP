@@ -73,7 +73,7 @@ export async function completeProfileAction(
     );
     await client.query(
       `insert into audit_log (actor_id, entity_type, entity_id, action, after_state)
-       values ($1, 'profile', $1, 'member_activated', jsonb_build_object('public_name', $2))`,
+       values ($1, 'profile', $1, 'member_activated', jsonb_build_object('public_name', $2::text))`,
       [user.id, parsed.data.publicName],
     );
     await client.query('commit');

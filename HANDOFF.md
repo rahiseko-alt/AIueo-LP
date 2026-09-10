@@ -12,8 +12,8 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新の実装コミット: `4f5a054 feat: 全ページ共通のログイン状態バッジを追加する(P26) (#48)`（`main`へマージ済み・**本番反映済み**）
-- **重大: ユーザーが実際にGoogleでログインし会員登録フォームを送信したところ、「登録を完了できませんでした。時間をおいて再度お試しください。」で失敗した（2026-09-10、実際のスクリーンショットで確認）。会員登録そのものが本番で一度も成功していない。** 原因不明（`completeProfileAction`のcatch節が理由をログに残していなかった）。ログ出力を追加する修正をP27として進行中。詳細は下の「今回の作業（2026-09-10）」参照
+- 最新の実装コミット: `83232b4 fix: 会員登録失敗の原因をログへ残す(P27) (#49)`（`main`へマージ済み・**本番反映済み**）
+- **P27の原因を特定し修正した（2026-09-10）。ユーザーがVercelのLogsタブから実際のエラーを貼ってくれたことで判明: `completeProfileAction`の監査ログ書き込みが`jsonb_build_object('public_name', $2)`の型推論エラー(`could not determine data type of parameter $2`)で毎回失敗し、トランザクション全体がロールバックしていた。会員登録がNeon移行後、一度も成功していなかった可能性が高い。** `$2::text`のキャストを追加して修正。使い捨てPostgresでエラーの再現とキャストによる解消を実測確認済み。ユーザーの実機での再確認待ち。詳細は下の「今回の作業（2026-09-10 その2）」参照
 - **本番の`/register`は「Googleで続ける」ボタン1つになった**（2026-09-09、本番HTMLを`curl`して実測。メール・パスワードの入力欄は0件）
 - 品質ゲート: Playwright **111件**（P15で13件追加）
 - **権限別の操作シナリオ100件**: 正本は `docs/OPERATION_SCENARIOS.md`（`main`、`74dafb5`）。権限6区分×オーソドックス50件・危険操作50件を、**実施できる手順書**として並べたもの。各行の「結果」欄は空（`—`）で、実施した人が書き込む。閲覧用の絞り込みできる版: https://claude.ai/code/artifact/3ad3f202-9c2a-4ebb-97d6-41deeb496876
@@ -24,6 +24,43 @@
 - **CIのBuildは `NEXT_PUBLIC_NEON_AUTH_ENABLED=true` を付けて実行する。** 会員登録フォームのテストがフォームの有効な状態を見るため。認証基盤の接続情報は渡していないのでサーバー側は未設定のまま。手元で `npm test` を流すときも同じ値を付けてビルドすること
 - **正式URLは `https://aiueo.kouheikosehira.com`**（`src/lib/site.ts`）。`https://aiueo-lp.vercel.app` も同じ内容を返すが、canonical で前者に寄せている
 - **Vercel の Git 連携が接続済み。`main` への push で本番デプロイが自動で走る**（このセッションで接続前後を実測確認）
+
+## 今回の作業（2026-09-10 その2 / P27 会員登録失敗の根本原因と修正、Claude Code on the web）
+
+前回セッションで追加したログ出力（`console.error('completeProfileAction failed', ...)`）が効き、ユーザーがVercelのLogsタブから実際のエラー行を貼ってくれた。
+
+```
+2026-09-10 11:07:37.381 [error] completeProfileAction failed could not determine data type of parameter $2
+```
+
+### 原因
+
+`src/app/member/profile/actions.ts`の監査ログ書き込み（`completeProfileAction`内、当時76行目）:
+
+```sql
+insert into audit_log (actor_id, entity_type, entity_id, action, after_state)
+values ($1, 'profile', $1, 'member_activated', jsonb_build_object('public_name', $2))
+```
+
+`jsonb_build_object`は`VARIADIC "any"`を受け取る関数で、バインドパラメータ`$2`を型キャスト無しで直接渡すと、PostgreSQLが`$2`の具体的な型を決定できず`could not determine data type of parameter $2`で失敗する。これはnode-pg（拡張クエリプロトコル）とPostgreSQLの組み合わせでよく知られた落とし穴で、`grep`で確認した限り`src/`全体でこの1箇所のみが該当パターンだった。
+
+この処理は`profiles`・`consents`への書き込みが成功した**あとの最後の1文**であり、失敗すると同一トランザクション内の全書き込みがロールバックする。つまり**この関数はNeon移行後、一度も会員登録を完了できていなかった可能性が高い**（過去のメール+パスワード登録会員2名がこの経路を通っていたかは未確認 — 旧Supabase時代の別実装を通っていた可能性がある）。
+
+### 修正
+
+`$2` を `$2::text` に明示キャストするだけの1行修正。
+
+```sql
+jsonb_build_object('public_name', $2::text)
+```
+
+### 検証
+
+使い捨てのPostgreSQL 16に本番と同じ3migrationを適用し、修正前のSQL（`$2`のみ）を実行して**本番と同一のエラーメッセージ「could not determine data type of parameter $2」を再現**した。同じ接続に対して`$2::text`版を実行し、**成功することを確認**した。`npm run lint`/`npm run typecheck`は0件。`CHROMIUM_PATH`指定でPlaywright全111件が緑（回帰なし）。**Google認証を使った実際のブラウザ操作での再確認はできていない**（この環境にはGoogleの認証情報が無いため）。
+
+### ユーザーへのお願い
+
+本修正の本番反映後、もう一度 `https://aiueo-lp.vercel.app/member/profile` で「同意して会員登録を完了する」を押してください。今度こそ`/member`に「こんにちは、〇〇さん」の会員ページが出るはずです。
 
 ## 今回の作業（2026-09-10 / P27 会員登録失敗の調査、Claude Code on the web）
 
