@@ -147,10 +147,29 @@
   color: var(--fg);
   font: inherit;
   outline: none;
+  /* 日付・時刻の欄はブラウザ内蔵のカレンダーで選べる。ただし color-scheme を
+     暗く指定しないと、カレンダーのアイコンが黒いまま暗い背景に描かれて
+     見えず、手で打つしかないように見える。ポップアップ自体も明るいテーマの
+     ままになる。2026-09-10、利用者から「日付はカレンダーから選べるように
+     しろ」と指摘を受けて追加した（機能は元からあり、見えていなかった）。 */
+  color-scheme: dark;
 }
 
 .form-control:focus {
   border-color: var(--gold);
+}
+
+/* カレンダーのアイコンを押しやすくする。既定は小さく端に寄っていて気づきにくい。 */
+.form-control::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.85;
+  padding-left: 0.5rem;
+  transform: scale(1.15);
+}
+
+.form-control::-webkit-calendar-picker-indicator:hover,
+.form-control::-webkit-calendar-picker-indicator:focus-visible {
+  opacity: 1;
 }
 
 /* Fluid Typography Utilities */

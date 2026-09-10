@@ -32,6 +32,24 @@ interface ProposalFormProps {
   proposalId?: string;
 }
 
+/**
+ * 日付・時刻の欄をクリックしたら、その場でカレンダーを開く。
+ *
+ * 既定では右端の小さなアイコンを押さないと開かない。欄のどこを押しても
+ * 開くようにして、「打つのではなく選ぶ」ことが分かるようにする。
+ * `showPicker` は利用者操作以外から呼ぶと例外になるので、失敗しても
+ * ブラウザ既定の動きに任せる。
+ */
+function openCalendar(event: React.MouseEvent<HTMLInputElement>) {
+  const field = event.currentTarget;
+  if (typeof field.showPicker !== 'function') return;
+  try {
+    field.showPicker();
+  } catch {
+    // 何もしない。アイコンからは従来どおり開ける。
+  }
+}
+
 export function ProposalForm({ action, defaultValues, proposalId }: ProposalFormProps) {
   const [state, formAction, isPending] = useActionState<ProposalActionState, FormData>(action, { error: null });
   // 検証に落ちたときは、DBの値ではなく「利用者が今書いた値」を出す。
@@ -48,9 +66,9 @@ export function ProposalForm({ action, defaultValues, proposalId }: ProposalForm
       <label className="sm:col-span-2"><span className="form-label">概要 *</span><textarea name="summary" required maxLength={5000} rows={6} defaultValue={values.summary} className="form-control" /></label>
       <label><span className="form-label">開催形式 *</span><select name="format" required defaultValue={values.format ?? 'offline'} className="form-control"><option value="offline">オフライン</option><option value="online">オンライン</option><option value="hybrid">ハイブリッド</option></select></label>
       <label><span className="form-label">公開範囲 *</span><select name="visibility" required defaultValue={values.visibility ?? 'public'} className="form-control"><option value="public">公開</option><option value="unlisted">限定公開</option></select></label>
-      <label><span className="form-label">開催候補日時（JST） *</span><input name="tentativeStartsAt" required type="datetime-local" defaultValue={values.tentativeStartsAt} className="form-control" /></label>
-      <label><span className="form-label">募集期限（任意）</span><input name="recruitmentDeadlineAt" type="datetime-local" defaultValue={values.recruitmentDeadlineAt} className="form-control" /></label>
-      <label><span className="form-label">公開期限 *</span><input name="publicExpiresAt" required type="datetime-local" defaultValue={values.publicExpiresAt} className="form-control" /></label>
+      <label><span className="form-label">開催候補日時（JST） *</span><span className="mt-1 block text-xs leading-6 text-white/50">欄をクリックするとカレンダーが開きます</span><input name="tentativeStartsAt" required type="datetime-local" onClick={openCalendar} defaultValue={values.tentativeStartsAt} className="form-control" /></label>
+      <label><span className="form-label">募集期限（任意）</span><input name="recruitmentDeadlineAt" type="datetime-local" onClick={openCalendar} defaultValue={values.recruitmentDeadlineAt} className="form-control" /></label>
+      <label><span className="form-label">公開期限 *</span><input name="publicExpiresAt" required type="datetime-local" onClick={openCalendar} defaultValue={values.publicExpiresAt} className="form-control" /></label>
       <label><span className="form-label">主催者表示名 *</span><input name="organizerName" required maxLength={120} defaultValue={values.organizerName} className="form-control" /></label>
       <label className="sm:col-span-2"><span className="form-label">参加方法 *</span><textarea name="participationMethod" required maxLength={2000} rows={3} defaultValue={values.participationMethod} className="form-control" placeholder="外部フォームURL、連絡方法、定員など" /></label>
     </div>
