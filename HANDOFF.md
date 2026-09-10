@@ -14,7 +14,8 @@
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
 - 最新の実装コミット: `e82e745 fix: 会員登録が完了できない型推論エラーを修正する(P27) (#50)`（`main`へマージ済み・**本番反映済み**）
 - **P27完了（2026-09-10）**: `completeProfileAction`の監査ログ書き込みが`jsonb_build_object('public_name', $2)`の型推論エラー(`could not determine data type of parameter $2`)で毎回失敗し、トランザクション全体がロールバックしていた。会員登録がNeon移行後、一度も成功していなかった可能性が高い。`$2::text`のキャストで修正し、使い捨てPostgresで再現・解消を実測確認。**`main`へマージ・本番反映済み**（PR #50、`e82e745`）
-- **新規・未解決（2026-09-10）: ユーザーがGoogle認証を行った際、Googleの汎用エラーページ「500. That's an error. There was an error. Please try again later. That's all we know.」が出たと報告があった。** どの操作（`/register`のボタン押下直後か、Google同意後の戻りか）・どのURL（`accounts.google.com`か`aiueo-lp.vercel.app`か）で発生したか確認中に、ユーザーが`/model`コマンドでセッションを中断し、詳細未回答のまま。**次セッションはまずこの2点をユーザーに聞き直すこと**（P27の教訓と同じく、想像で原因を決め打ちしない）。この文言はGoogle自体の汎用エラーページの体裁のため、AIueo側のコードではなくGoogle OAuthクライアント設定（リダイレクトURI、スコープ等）側の問題である可能性がある【曖昧】
+- **P28（Google認証500エラー）: 2026-09-10 その4のセッションで、実ブラウザ操作による経路の切り分けを実施した。** 入口（`/register`→Googleのログイン画面）と失敗時の戻り（キャンセル・コード無効→`/register?auth_error=1`の日本語エラー）は**操作で到達を確認済み**。500は再現しなかった。未検証区間は**Googleアカウント選択→同意→トークン交換→`/member/profile`**の1区間だけで、ユーザーが見た500はこの区間で起きている。詳細と証跡は本ファイル「今回の作業（2026-09-10 その4）」を参照
+- **P29（新規・未解決）: Googleのログイン画面の表示が「to continue to `neon.tech`」であり、`AIueo`ではない。** 2026-09-09の引継ぎは「自前の鍵に切替済み。Googleの画面に`AIueo`と表示されることを確認してほしい」としていたが、**本番の実操作ではAIueoと表示されない**（スクリーンショットで確認）。本番が使っている`client_id`は`1063997916405-quq0arh4eauiuv3rh0d071sigc5dhmj7.apps.googleusercontent.com`。これがNeonの共用クライアントなのか、自前クライアントの表示名が未設定でリダイレクト先ドメインへ落ちているのかは、この環境からは判別できない【曖昧】。P28の500と同じ設定に起因する可能性がある
 - **本番の`/register`は「Googleで続ける」ボタン1つになった**（2026-09-09、本番HTMLを`curl`して実測。メール・パスワードの入力欄は0件）
 - 品質ゲート: Playwright **111件**（P15で13件追加）
 - **権限別の操作シナリオ100件**: 正本は `docs/OPERATION_SCENARIOS.md`（`main`、`74dafb5`）。権限6区分×オーソドックス50件・危険操作50件を、**実施できる手順書**として並べたもの。各行の「結果」欄は空（`—`）で、実施した人が書き込む。閲覧用の絞り込みできる版: https://claude.ai/code/artifact/3ad3f202-9c2a-4ebb-97d6-41deeb496876
@@ -25,6 +26,47 @@
 - **CIのBuildは `NEXT_PUBLIC_NEON_AUTH_ENABLED=true` を付けて実行する。** 会員登録フォームのテストがフォームの有効な状態を見るため。認証基盤の接続情報は渡していないのでサーバー側は未設定のまま。手元で `npm test` を流すときも同じ値を付けてビルドすること
 - **正式URLは `https://aiueo.kouheikosehira.com`**（`src/lib/site.ts`）。`https://aiueo-lp.vercel.app` も同じ内容を返すが、canonical で前者に寄せている
 - **Vercel の Git 連携が接続済み。`main` への push で本番デプロイが自動で走る**（このセッションで接続前後を実測確認）
+
+## 今回の作業（2026-09-10 その4 / 実ブラウザ操作による経路の切り分け、Claude Code on the web）
+
+ユーザーの指示は「経路がつながっているか自分で操作して確かめろ。コードは見るな。画面操作とスクリーンショットだけで検証しろ」。実際にChromiumを起動し、本番URLに対して操作した。
+
+### この環境でブラウザを動かすときの注意（次セッションへの申し送り）
+
+Playwrightの既定設定では本番URLへ到達できない。3点そろえる必要がある。
+
+1. `executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome'`
+2. `proxy: { server: process.env.HTTPS_PROXY }`（Chromiumは環境変数を読まない）
+3. **`--ssl-version-max=tls1.2`** — これが無いと全HTTPSが`ERR_CONNECTION_RESET`になる。エージェントプロキシの状態APIで、ClientHelloを1825バイト送った直後に39バイト受信してトンネルが閉じることを確認した。TLS1.3の巨大なClientHelloが通らない
+
+`--disable-features=PostQuantumKyber,EncryptedClientHello,UseDnsHttpsSvcb` と `--disable-quic` だけでは解決しなかった。効いたのは`--ssl-version-max=tls1.2`である。
+
+### 操作して確認できたこと（スクリーンショットあり）
+
+| 区間 | 結果 |
+| --- | --- |
+| トップページ表示 | OK（`AI League AIueo`） |
+| `/events` | OK（200、「現在公開中の企画はありません」） |
+| `/member`・`/member/profile`（未ログイン） | OK（`/member/profile`の「ログインが必要です」へ着地） |
+| `/register` 表示 | OK（「GOOGLEで続ける」ボタン1つ、押せる状態） |
+| ボタン押下 → Google | **OK。`accounts.google.com`のログイン画面に到達した。500は再現しなかった** |
+| 戻り: 同意キャンセル相当（`error=access_denied`） | OK。`/register?auth_error=1&error=access_denied`へ戻り、赤枠で「Googleでのログインが完了しませんでした。」が出る |
+| 戻り: コードが無効（`code=無効値`） | OK。`/register?auth_error=1&error=invalid_code`へ戻り、同じ日本語エラーが出る |
+| Googleアカウント選択→同意→トークン交換→`/member/profile` | **未検証。この環境に実Googleアカウントの資格情報が無く、操作できない** |
+
+4xx/5xxの応答は、上記のどの操作でも1件も観測されなかった。すでにGoogleへログイン済みの人が直行する`accounts.google.com/signin/oauth/legacy/consent`へ直接navigateする操作も試したが、未ログインのため識別画面へ戻され、500は出なかった。
+
+### 見つけた食い違い（P29）
+
+Googleのログイン画面の表示が「**to continue to `neon.tech`**」で、`AIueo`ではない。2026-09-09の引継ぎが「自前の鍵に切替済み」「Googleの画面に`AIueo`と表示されることを確認」としていた前提と、実際の画面が食い違っている。使われている`client_id`は`1063997916405-quq0arh4eauiuv3rh0d071sigc5dhmj7.apps.googleusercontent.com`。
+
+Googleが「to continue to ○○」に出すのはOAuthクライアントのアプリ名である。したがって(a)本番がまだNeonの共用クライアントを使っている、(b)自前クライアントのアプリ名が未設定でリダイレクト先ドメイン（`neon.tech`）へ落ちている、のいずれかだが、**どちらかはこの環境から判別できない【曖昧】**。判別にはユーザーがGoogle Cloudの画面を見る必要がある。
+
+### 500の切り分け結果
+
+**入口と失敗の戻りは操作で到達を確認したので、500はそこではない。** 残るのは「Googleアカウントを選んだあと」の1区間だけである。次にユーザーへ聞くべきことは、当初の2問（どの操作か・どのURLか）から、次の1問に絞られた。
+
+- 500が出たとき、**Googleアカウントの選択（またはメールアドレス入力）は済んでいたか**。済んでいたなら、そのときアドレスバーは`accounts.google.com`のままだったか
 
 ## 今回の作業（2026-09-10 その3 / P27マージ完了の確認とGoogle認証500エラーの報告、未解決、Claude Code on the web）
 
