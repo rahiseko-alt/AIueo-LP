@@ -111,7 +111,54 @@ Google のログイン画面へ正常に遷移した。** こちら側は二重�
 | --- | --- | --- |
 | 5 | **こちら側は消えた。Google の画面上での二重クリックは制御できない** | 3回連続クリックで POST は1回。ただし Google の同意画面で「続行」を2回押す挙動はこちらから防げない。報告されている症状は「新規サインアップの失敗」で、500 のエラーページとは異なるため、そもそも弱い候補である |
 
-**残っているのは #4（既存セッションがある場合）・#5（Google画面上のみ）・#7・#8・#9 の5件。**
+### #9（500がGoogle以外だった）の判定 — ほぼ消えた
+
+ユーザーが見た文面は Google の GSE エラーページ（`<!-- GSE Default Error -->` の体裁）である。
+他の登場人物が同じ文面を出せるかを実際に叩いて確かめた。
+
+- **Neon Auth**: `state` が合わないとき、こちらのサイトへは戻さず自分のドメインへ飛ばし、
+  最終的に **生のJSONで404** を返す。文面はまったく違う
+
+      {"message":"Route GET:/?error=state_mismatch not found","error":"Not Found","statusCode":404}
+
+- **Vercel（このアプリ）**: Next.js のエラーページになる。GSE の文面にはならない
+
+そして **フローが実際に通る Google のエンドポイントから、同じ文面の兄弟エラーを再現できた。**
+既に許可済みの利用者が通る `accounts.google.com/signin/oauth/legacy/consent` を叩くと、
+
+      Error 400 (Bad Request)!!1
+      400. That's an error. The server cannot process the request because it is malformed.
+      It should not be retried. That's all we know.
+
+**ユーザーが見た「500. That's an error. ... That's all we know.」と同じ体裁である。**
+こちらはセッション無しで叩いたため 400（要求が処理できない）になり、ユーザーはセッション有りで
+500（処理中にサーバー側が失敗）になった、という関係で説明がつく。
+
+| # | 判定 | 根拠 |
+| --- | --- | --- |
+| 9 | **ほぼ消えた。500 は Google のドメインで起きている** | 文面は Google の GSE ページ。Neon は JSON の404、Vercel は Next.js のページで、どちらも別物。**同じ文面の兄弟エラーを、フローが通る Google のエンドポイントから実際に出せた** |
+
+**残っているのは #4（既存セッションがある場合）・#7・#8 の3件。**
+**最有力は #8** である。既に許可済みの利用者は同意画面を飛ばして
+`signin/oauth/legacy/consent` を通り、そこが GSE エラーを返す位置だと実測で確かめた。
+
+## 検証中に見つかった別の欠陥（500とは独立）
+
+**`state` が合わないと、利用者はこちらのサイトへ戻れず、Neon のドメインで生のJSONの404に
+取り残される。** `errorCallbackURL` は効かない（`error=access_denied` や無効な `code` では
+効くのに、`state_mismatch` では効かない）。
+
+さらに `state` を保持する Cookie は **`Max-Age=600`（10分）** である。つまり
+**Googleの画面でアカウント選択・パスワード入力・2段階認証に10分以上かかると、
+戻ってきた時点で必ずこの状態になる。** 実測で確認した経路は次のとおり。
+
+    /neondb/auth/callback/google?code=...&state=（不一致）
+      → /neondb/auth/error?error=state_mismatch
+      → /?error=state_mismatch
+      → 404 {"message":"Route GET:/?error=state_mismatch not found", ...}
+
+これは 500 の説明ではないが、**放置すれば別の利用者が同じ形で詰まる。** Neon 側の挙動であり
+こちらのコードからは直せないため、Neon への報告事項として記録する。
 **このうち #4・#5・#8 と、#9 の判別は、すべてユーザーのブラウザとGoogleアカウントの中でしか
 踏めない。** この環境からは到達できないことを、上のとおり実測で確かめた。
 
