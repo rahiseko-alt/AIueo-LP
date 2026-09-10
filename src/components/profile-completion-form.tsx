@@ -1,17 +1,32 @@
 'use client';
 
 import Link from 'next/link';
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { completeProfileAction, type ProfileActionState } from '@/app/member/profile/actions';
+import { collectMissingFields, RequiredFieldsNotice, type FieldLabels } from '@/components/required-fields-notice';
 
 type TermVersion = { id: string; document_type: 'terms' | 'disclaimer' | 'privacy'; version: string; effective_at: string };
 
 const labels = { terms: ['会員規約', '/terms'], disclaimer: ['免責事項', '/disclaimer'], privacy: ['プライバシーポリシー', '/privacy'] } as const;
 
+/** 未入力のときに画面へ出す、欄の日本語名。`name`属性と対応させる。 */
+const FIELD_LABELS: FieldLabels = {
+  publicName: '公開名',
+  collaborationInterest: '協力したい内容',
+  ageConfirmed: '18歳以上の確認（チェック）',
+  termsVersionId: '会員規約・免責事項・プライバシーポリシーへの同意（チェック）',
+};
+
 export function ProfileCompletionForm({ versions, defaultPublicName, defaultCollaborationInterest }: { versions: TermVersion[]; defaultPublicName?: string; defaultCollaborationInterest?: string }) {
   const [state, formAction, isPending] = useActionState<ProfileActionState, FormData>(completeProfileAction, { error: null });
   const byType = new Map(versions.map((version) => [version.document_type, version]));
   const isReady = (['terms', 'disclaimer', 'privacy'] as const).every((type) => byType.has(type));
+  // 空の必須欄があるとブラウザが送信を黙って止める。何が空なのかを画面に残す。
+  const [missing, setMissing] = useState<string[]>([]);
+  const checkBeforeSubmit = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const form = event.currentTarget.form;
+    if (form) setMissing(collectMissingFields(form, FIELD_LABELS));
+  };
 
   return (
     <form action={formAction} className="mt-8 space-y-6">
@@ -25,7 +40,8 @@ export function ProfileCompletionForm({ versions, defaultPublicName, defaultColl
       </fieldset>
       {!isReady && <p className="border border-[#c8a45a]/40 bg-[#c8a45a]/10 p-4 text-sm leading-7 text-white/75">最新の規約版を取得できるまで、会員有効化は開始できません。</p>}
       {state.error && <p role="alert" className="border border-red-300/40 bg-red-950/30 p-4 text-sm leading-7 text-red-100">{state.error}</p>}
-      <button type="submit" disabled={!isReady || isPending} className="btn-solid w-full disabled:cursor-not-allowed disabled:opacity-45">{isPending ? '登録中…' : '同意して会員登録を完了する'}</button>
+      <RequiredFieldsNotice items={missing} />
+      <button type="submit" onClick={checkBeforeSubmit} disabled={!isReady || isPending} className="btn-solid w-full disabled:cursor-not-allowed disabled:opacity-45">{isPending ? '登録中…' : '同意して会員登録を完了する'}</button>
       <p className="text-xs leading-6 text-white/55">会員登録は管理者の承認制ではありません。上記の確認と同意が完了した時点で有効化されます。</p>
     </form>
   );
