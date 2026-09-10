@@ -12,8 +12,9 @@
 
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
-- 最新の実装コミット: `83232b4 fix: 会員登録失敗の原因をログへ残す(P27) (#49)`（`main`へマージ済み・**本番反映済み**）
-- **P27の原因を特定し修正した（2026-09-10）。ユーザーがVercelのLogsタブから実際のエラーを貼ってくれたことで判明: `completeProfileAction`の監査ログ書き込みが`jsonb_build_object('public_name', $2)`の型推論エラー(`could not determine data type of parameter $2`)で毎回失敗し、トランザクション全体がロールバックしていた。会員登録がNeon移行後、一度も成功していなかった可能性が高い。** `$2::text`のキャストを追加して修正。使い捨てPostgresでエラーの再現とキャストによる解消を実測確認済み。ユーザーの実機での再確認待ち。詳細は下の「今回の作業（2026-09-10 その2）」参照
+- 最新の実装コミット: `e82e745 fix: 会員登録が完了できない型推論エラーを修正する(P27) (#50)`（`main`へマージ済み・**本番反映済み**）
+- **P27完了（2026-09-10）**: `completeProfileAction`の監査ログ書き込みが`jsonb_build_object('public_name', $2)`の型推論エラー(`could not determine data type of parameter $2`)で毎回失敗し、トランザクション全体がロールバックしていた。会員登録がNeon移行後、一度も成功していなかった可能性が高い。`$2::text`のキャストで修正し、使い捨てPostgresで再現・解消を実測確認。**`main`へマージ・本番反映済み**（PR #50、`e82e745`）
+- **新規・未解決（2026-09-10）: ユーザーがGoogle認証を行った際、Googleの汎用エラーページ「500. That's an error. There was an error. Please try again later. That's all we know.」が出たと報告があった。** どの操作（`/register`のボタン押下直後か、Google同意後の戻りか）・どのURL（`accounts.google.com`か`aiueo-lp.vercel.app`か）で発生したか確認中に、ユーザーが`/model`コマンドでセッションを中断し、詳細未回答のまま。**次セッションはまずこの2点をユーザーに聞き直すこと**（P27の教訓と同じく、想像で原因を決め打ちしない）。この文言はGoogle自体の汎用エラーページの体裁のため、AIueo側のコードではなくGoogle OAuthクライアント設定（リダイレクトURI、スコープ等）側の問題である可能性がある【曖昧】
 - **本番の`/register`は「Googleで続ける」ボタン1つになった**（2026-09-09、本番HTMLを`curl`して実測。メール・パスワードの入力欄は0件）
 - 品質ゲート: Playwright **111件**（P15で13件追加）
 - **権限別の操作シナリオ100件**: 正本は `docs/OPERATION_SCENARIOS.md`（`main`、`74dafb5`）。権限6区分×オーソドックス50件・危険操作50件を、**実施できる手順書**として並べたもの。各行の「結果」欄は空（`—`）で、実施した人が書き込む。閲覧用の絞り込みできる版: https://claude.ai/code/artifact/3ad3f202-9c2a-4ebb-97d6-41deeb496876
@@ -25,7 +26,33 @@
 - **正式URLは `https://aiueo.kouheikosehira.com`**（`src/lib/site.ts`）。`https://aiueo-lp.vercel.app` も同じ内容を返すが、canonical で前者に寄せている
 - **Vercel の Git 連携が接続済み。`main` への push で本番デプロイが自動で走る**（このセッションで接続前後を実測確認）
 
-## 今回の作業（2026-09-10 その2 / P27 会員登録失敗の根本原因と修正、Claude Code on the web）
+## 今回の作業（2026-09-10 その3 / P27マージ完了の確認とGoogle認証500エラーの報告、未解決、Claude Code on the web）
+
+### P27の仕上げ
+
+前回セッションが、`$2::text`の修正コミット（PR #50）をCI待ちのまま終えていた。今回、mainがPR #49のログ追加コミットまでしか進んでいないこと（肝心の型キャスト修正がまだ未マージ）に気づき、CI完了を確認したうえでdraft解除・マージした。**`main`（`e82e745`）・本番へ反映済み。**
+
+このセッション中に発生した、squash-merge由来のブランチ食い違い（ローカルブランチが旧mainを親に持ったままの状態からの再push）は、過去のセッションと同じ手順（`git reset --hard origin/main`→差分を再適用→再コミット→`--force-with-lease`）で解消した。この手順は本ファイル・`IMPLEMENTATION_PLAN.md`に別途明文化はしていないが、今後も同じ現象が起きたら同じ手順で対応してよい。
+
+### 新規・未解決: Google認証で500エラー
+
+ユーザーが実際にGoogle認証を行ったところ、下記のエラーが出たと報告があった。
+
+```
+500. That's an error.
+There was an error. Please try again later. That's all we know.
+```
+
+これはGoogle自身の汎用エラーページの文言・体裁に見える。**発生箇所を特定する前に、ユーザーが`/model`コマンドでセッションを中断し、詳細未回答のまま終わった。**
+
+次にやること（このセッションでは着手していない）:
+
+1. ユーザーに、①どの操作の直後に出たか（`/register`の「Googleで続ける」を押した直後か、Google側で同意したあと戻ってきた時か）、②表示されたときのブラウザのアドレスバーのURL（`accounts.google.com`系か`aiueo-lp.vercel.app`系か）を確認する。
+2. URLが`accounts.google.com`側なら、Google Cloud側のOAuthクライアント設定（承認済みリダイレクトURI、公開ステータス、テストユーザー登録の要否等）を疑う。AIueo側のコード不具合ではない可能性が高い。
+3. URLが`aiueo-lp.vercel.app`側（`/member/profile`等）なら、`src/components/oauth-session-sync.tsx`の交換処理か、Vercelのサーバーログ（`get-session`呼び出し周辺）を疑う。
+4. **P27の教訓を踏まえ、原因を確認する前に「Google側のせい」「コード側のせい」と決め打ちしない。**
+
+
 
 前回セッションで追加したログ出力（`console.error('completeProfileAction failed', ...)`）が効き、ユーザーがVercelのLogsタブから実際のエラー行を貼ってくれた。
 
