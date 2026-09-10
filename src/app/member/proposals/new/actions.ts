@@ -4,6 +4,9 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { requireActiveMember } from '@/lib/auth/dal';
 import { db } from '@/lib/neon/db';
+import { echoValues, type ProposalActionState } from '@/lib/proposals/form-values';
+
+export type { ProposalActionState } from '@/lib/proposals/form-values';
 
 const moneyTypes = ['none', 'fixed_fee', 'range_or_upper_limit', 'reimbursement', 'reward', 'donation', 'undecided'] as const;
 const eventFormats = ['offline', 'online', 'hybrid'] as const;
@@ -32,8 +35,6 @@ const proposalSchema = z.object({
   intent: z.enum(['draft', 'publish']),
 });
 
-export type ProposalActionState = { error: string | null };
-
 function toJstIso(value: string | undefined) {
   if (!value) return null;
   const withZone = value.includes('T') && !/[zZ]|[+-]\d\d:?\d\d$/.test(value) ? `${value}:00+09:00` : value;
@@ -56,22 +57,22 @@ function collectMoneyDetails(input: z.infer<typeof proposalSchema>) {
 }
 
 export async function saveProposalAction(_previousState: ProposalActionState, formData: FormData): Promise<ProposalActionState> {
-  if (!db) return { error: '会員・企画基盤が未接続です。時間をおいて再度お試しください。' };
+  if (!db) return { error: '会員・企画基盤が未接続です。時間をおいて再度お試しください。', values: echoValues(formData) };
   const raw = Object.fromEntries(formData.entries());
   const parsed = proposalSchema.safeParse(raw);
-  if (!parsed.success) return { error: '必須項目、日付、金銭条件、3つの掲載確認を確認してください。' };
+  if (!parsed.success) return { error: '必須項目、日付、金銭条件、3つの掲載確認を確認してください。', values: echoValues(formData) };
 
   const input = parsed.data;
   const tentativeStartsAt = toJstIso(input.tentativeStartsAt);
   const recruitmentDeadlineAt = toJstIso(input.recruitmentDeadlineAt);
   const publicExpiresAt = toJstIso(input.publicExpiresAt);
-  if (!tentativeStartsAt || !publicExpiresAt) return { error: '開催候補日時と公開期限を正しく入力してください。' };
-  if (input.moneyType === 'none' && !input.moneyLabel) return { error: '金銭がない場合は、金銭条件に「なし」と明記してください。' };
+  if (!tentativeStartsAt || !publicExpiresAt) return { error: '開催候補日時と公開期限を正しく入力してください。', values: echoValues(formData) };
+  if (input.moneyType === 'none' && !input.moneyLabel) return { error: '金銭がない場合は、金銭条件に「なし」と明記してください。', values: echoValues(formData) };
   if (input.moneyType !== 'none' && input.moneyType !== 'undecided' && (!input.moneyAmount || !input.moneyRecipient || !input.moneySettlement)) {
-    return { error: '金銭が発生する場合は、金額、支払先、精算方法を入力してください。' };
+    return { error: '金銭が発生する場合は、金額、支払先、精算方法を入力してください。', values: echoValues(formData) };
   }
   if (input.moneyType === 'undecided' && input.intent === 'publish') {
-    return { error: '金銭条件が未定のままでは公開できません。下書き保存のみ可能です。' };
+    return { error: '金銭条件が未定のままでは公開できません。下書き保存のみ可能です。', values: echoValues(formData) };
   }
 
   const payload = {
@@ -104,7 +105,7 @@ export async function saveProposalAction(_previousState: ProposalActionState, fo
     );
     if (Number(currentTerms.rows[0]?.count) !== 3) {
       await client.query('rollback');
-      return { error: '最新の会員規約・免責事項・プライバシーポリシーへの同意を確認できません。会員情報ページで再同意してください。' };
+      return { error: '最新の会員規約・免責事項・プライバシーポリシーへの同意を確認できません。会員情報ページで再同意してください。', values: echoValues(formData) };
     }
     const status = input.intent === 'publish' ? 'published' : 'draft';
     const inserted = await client.query(
@@ -142,7 +143,7 @@ export async function saveProposalAction(_previousState: ProposalActionState, fo
       // rollback に失敗したコネクションはトランザクションが開いたまま残りうる。
       broken = true;
     }
-    return { error: '企画を保存できませんでした。ログイン状態と入力内容を確認してください。' };
+    return { error: '企画を保存できませんでした。ログイン状態と入力内容を確認してください。', values: echoValues(formData) };
   } finally {
     client.release(broken);
   }

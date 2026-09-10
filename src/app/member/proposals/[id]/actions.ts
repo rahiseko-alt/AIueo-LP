@@ -4,7 +4,7 @@ import { redirect } from 'next/navigation';
 import { z } from 'zod';
 import { requireActiveMember } from '@/lib/auth/dal';
 import { db } from '@/lib/neon/db';
-import type { ProposalActionState } from '@/app/member/proposals/new/actions';
+import { echoValues, type ProposalActionState } from '@/lib/proposals/form-values';
 
 const stateSchema = z.enum(['planning', 'confirmed', 'full', 'cancelled', 'completed']);
 
@@ -110,25 +110,25 @@ export async function setProposalEventStatusAction(formData: FormData) {
 }
 
 export async function updateProposalAction(_previousState: ProposalActionState, formData: FormData): Promise<ProposalActionState> {
-  if (!db) return { error: '会員・企画基盤が未接続です。時間をおいて再度お試しください。' };
+  if (!db) return { error: '会員・企画基盤が未接続です。時間をおいて再度お試しください。', values: echoValues(formData) };
   const raw = Object.fromEntries(formData.entries());
   const parsed = updateProposalSchema.safeParse(raw);
-  if (!parsed.success) return { error: '必須項目、日付、金銭条件、3つの掲載確認を確認してください。' };
+  if (!parsed.success) return { error: '必須項目、日付、金銭条件、3つの掲載確認を確認してください。', values: echoValues(formData) };
 
   const input = parsed.data;
   const tentativeStartsAt = toJstIso(input.tentativeStartsAt);
   const recruitmentDeadlineAt = toJstIso(input.recruitmentDeadlineAt);
   const publicExpiresAt = toJstIso(input.publicExpiresAt);
-  if (!tentativeStartsAt || !publicExpiresAt) return { error: '開催候補日時と公開期限を正しく入力してください。' };
-  if (input.moneyType === 'none' && !input.moneyLabel) return { error: '金銭がない場合は、金銭条件に「なし」と明記してください。' };
+  if (!tentativeStartsAt || !publicExpiresAt) return { error: '開催候補日時と公開期限を正しく入力してください。', values: echoValues(formData) };
+  if (input.moneyType === 'none' && !input.moneyLabel) return { error: '金銭がない場合は、金銭条件に「なし」と明記してください。', values: echoValues(formData) };
   if (input.moneyType !== 'none' && input.moneyType !== 'undecided' && (!input.moneyAmount || !input.moneyRecipient || !input.moneySettlement)) {
-    return { error: '金銭が発生する場合は、金額、支払先、精算方法を入力してください。' };
+    return { error: '金銭が発生する場合は、金額、支払先、精算方法を入力してください。', values: echoValues(formData) };
   }
   if (input.moneyType === 'undecided' && input.intent === 'publish') {
-    return { error: '金銭条件が未定のままでは公開できません。下書き保存のみ可能です。' };
+    return { error: '金銭条件が未定のままでは公開できません。下書き保存のみ可能です。', values: echoValues(formData) };
   }
   if (input.intent === 'publish' && new Date(publicExpiresAt).valueOf() <= Date.now()) {
-    return { error: '公開するには、公開期限を将来の日時に更新してください。' };
+    return { error: '公開するには、公開期限を将来の日時に更新してください。', values: echoValues(formData) };
   }
 
   const member = await requireActiveMember();
@@ -145,16 +145,16 @@ export async function updateProposalAction(_previousState: ProposalActionState, 
     );
     if (Number(currentTerms.rows[0]?.count) !== 3) {
       await client.query('rollback');
-      return { error: '最新の会員規約・免責事項・プライバシーポリシーへの同意を確認できません。会員情報ページで再同意してください。' };
+      return { error: '最新の会員規約・免責事項・プライバシーポリシーへの同意を確認できません。会員情報ページで再同意してください。', values: echoValues(formData) };
     }
     const current = await client.query('select * from proposals where id = $1 and owner_id = $2 for update', [input.proposalId, member.userId]);
     if (current.rowCount !== 1) {
       await client.query('rollback');
-      return { error: '対象の企画が見つかりません。' };
+      return { error: '対象の企画が見つかりません。', values: echoValues(formData) };
     }
     if (!EDITABLE_STATUSES.has(current.rows[0].status)) {
       await client.query('rollback');
-      return { error: 'この企画は今は編集できません。管理者による措置、終了、または中止となっている企画は編集できません。' };
+      return { error: 'この企画は今は編集できません。管理者による措置、終了、または中止となっている企画は編集できません。', values: echoValues(formData) };
     }
     // auto_hiddenは「候補日3日前まで開催決定なし」で自動除外された状態。日時を
     // 据え置いたまま再公開すると、次回cron実行で即座に再びauto_hiddenへ戻る。
@@ -164,7 +164,7 @@ export async function updateProposalAction(_previousState: ProposalActionState, 
       new Date(tentativeStartsAt).valueOf() - Date.now() < 3 * 24 * 60 * 60 * 1000
     ) {
       await client.query('rollback');
-      return { error: '再掲載するには、開催候補日を3日より先の日時に更新してください。' };
+      return { error: '再掲載するには、開催候補日を3日より先の日時に更新してください。', values: echoValues(formData) };
     }
 
     const status = input.intent === 'publish' ? 'published' : 'draft';
@@ -197,7 +197,7 @@ export async function updateProposalAction(_previousState: ProposalActionState, 
     } catch {
       broken = true;
     }
-    return { error: '企画を保存できませんでした。ログイン状態と入力内容を確認してください。' };
+    return { error: '企画を保存できませんでした。ログイン状態と入力内容を確認してください。', values: echoValues(formData) };
   } finally {
     client.release(broken);
   }
