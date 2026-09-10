@@ -49,6 +49,8 @@ interface ProposalFormProps {
   action: ProposalFormAction;
   defaultValues?: ProposalDefaultValues;
   proposalId?: string;
+  /** 現在の掲載状態。`published` のときだけボタンの文言を「公開をやめる」側に変える。 */
+  currentStatus?: string;
 }
 
 /**
@@ -69,7 +71,7 @@ function openCalendar(event: React.MouseEvent<HTMLInputElement>) {
   }
 }
 
-export function ProposalForm({ action, defaultValues, proposalId }: ProposalFormProps) {
+export function ProposalForm({ action, defaultValues, proposalId, currentStatus }: ProposalFormProps) {
   const [state, formAction, isPending] = useActionState<ProposalActionState, FormData>(action, { error: null });
   // 検証に落ちたときは、DBの値ではなく「利用者が今書いた値」を出す。
   // これが無いと、送信のたびに書いた内容が消えて入力し直しになる。
@@ -80,6 +82,9 @@ export function ProposalForm({ action, defaultValues, proposalId }: ProposalForm
     state.values?.[name] === 'on';
   // 空の必須欄があるとブラウザが送信を黙って止める。何が空なのかを画面に残す。
   const [missing, setMissing] = useState<string[]>([]);
+  // 公開中の企画では、同じ「下書き保存」が公開の取り下げになる。押す前に
+  // 何が起きるかが分かるよう、ボタンの文言そのものを変える。
+  const isPublished = currentStatus === 'published';
   const checkBeforeSubmit = (event: React.MouseEvent<HTMLButtonElement>) => {
     const form = event.currentTarget.form;
     if (form) setMissing(collectMissingFields(form, FIELD_LABELS));
@@ -101,6 +106,7 @@ export function ProposalForm({ action, defaultValues, proposalId }: ProposalForm
     <fieldset className="space-y-4 border-t border-white/10 pt-7"><legend className="font-mono text-xs tracking-[0.15em] text-[#c8a45a]">公開前の確認 *</legend><label className="flex gap-3 text-sm leading-7"><input name="prohibitedConfirmed" type="checkbox" required defaultChecked={checked('prohibitedConfirmed')} className="mt-2 h-4 w-4 accent-[#c8a45a]" />禁止事項（マルチ等の勧誘、アダルト系、違法行為、場を乱す行為）に該当しないことを確認しました。</label><label className="flex gap-3 text-sm leading-7"><input name="rightsConfirmed" type="checkbox" required defaultChecked={checked('rightsConfirmed')} className="mt-2 h-4 w-4 accent-[#c8a45a]" />掲載する文章・画像・会場情報を掲載する権利と必要な同意があります。</label><label className="flex gap-3 text-sm leading-7"><input name="moneyConfirmed" type="checkbox" required defaultChecked={checked('moneyConfirmed')} className="mt-2 h-4 w-4 accent-[#c8a45a]" />AIueoは金銭を受け取らず、主催者と参加者が直接確認することを理解しました。</label></fieldset>
     {state.error && <p role="alert" className="border border-red-300/35 bg-red-950/30 p-4 text-sm leading-7 text-red-100">{state.error}</p>}
     <RequiredFieldsNotice items={missing} />
-    <div className="flex flex-col gap-3 sm:flex-row"><button name="intent" value="draft" type="submit" onClick={checkBeforeSubmit} disabled={isPending} className="btn-ghost flex-1 disabled:opacity-45">{isPending ? '保存中…' : '下書き保存'}</button><button name="intent" value="publish" type="submit" onClick={checkBeforeSubmit} disabled={isPending} className="btn-solid flex-1 disabled:opacity-45">公開する</button></div>
+    {isPublished && <p className="text-sm leading-7 text-white/70">この企画はいま公開中です。書き直した内容をそのまま公開し続けるなら「公開したまま保存」、公開を取り下げるなら「下書きとして保存（公開はやめます）」を押してください。</p>}
+    <div className="flex flex-col gap-3 sm:flex-row"><button name="intent" value="draft" type="submit" onClick={checkBeforeSubmit} disabled={isPending} className="btn-ghost flex-1 disabled:opacity-45">{isPending ? '保存中…' : isPublished ? '下書きとして保存（公開はやめます）' : '下書き保存'}</button><button name="intent" value="publish" type="submit" onClick={checkBeforeSubmit} disabled={isPending} className="btn-solid flex-1 disabled:opacity-45">{isPublished ? '公開したまま保存' : '公開する'}</button></div>
   </form>;
 }
