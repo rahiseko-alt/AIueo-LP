@@ -42,6 +42,17 @@ Neon公式のトラブルシューティングに次の記述があり、画面�
 | 9 | **ユーザーが見た500がGoogle以外（Vercel / Neon Auth）のものだった** | 同じ文面のGoogle風エラーページは複数の場所で出る。アプリ側のコールバック処理の例外が 500 として見えた実例 [chatwoot #9980](https://github.com/chatwoot/chatwoot/issues/9980)（`NoMethodError` が OAuth コールバックで 500 になった） | 500が出たときのアドレスバーのURLを確認する。**未確認のまま Google 側と決めつけている** |
 | 10 | **Googleクライアントの認証情報が再生成・削除された、あるいはプロジェクトの請求・API有効化の状態が変わった** | 認証情報の不一致は `invalid_client` 等になるのが通常だが、プロジェクト側の状態変化で認可エンドポイントが落ちる報告もある [Unipile: Common Google OAuth errors](https://www.unipile.com/google-oauth-gmail-api-errors/) | Google Cloud のクライアント一覧と、プロジェクトの状態を確認する |
 
+## #7 について、公式ドキュメントでは決着しなかった
+
+検索結果には「共用鍵を使うと同意画面に `Stack Development` と表示される」という記述が
+現れたが、**Neonの該当ページ（production checklist、best practices、setup OAuth）を
+直接読んでも、その記述は確認できなかった。** 共用鍵のときに何と表示されるかは、
+公式ドキュメントに書かれていない。
+
+したがって「`neon.tech` と表示されるから共用鍵」も、「`Stack Development` ではないから
+自前鍵」も、**どちらも根拠にならない**。#7 は `NEON_API_KEY` でプロバイダー設定を
+読む以外に判別する方法が無い。
+
 ## 切り分けの順序（コストの低い順）
 
 1. **500が出たときのURL**を確認する（#9 を潰す）。これが無いままでは Google 側かどうかも決まらない
