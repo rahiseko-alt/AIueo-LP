@@ -87,6 +87,16 @@
   `vercel`/`neonctl` CLI無し、`CLOUDSDK_AUTH_ACCESS_TOKEN`は401、Neon Authに
   プロバイダー設定を読む公開エンドポイントも無い）。**すべて実測で確認した**
 
+### 追加で自分で潰した仮説
+
+- **正式ドメイン（`https://aiueo.kouheikosehira.com`）でも入口・戻りとも同じに動く。**
+  `scripts/verify-oauth-entry.mjs --base https://aiueo.kouheikosehira.com` で入口を確認し、
+  戻り（`error=access_denied`）も `https://aiueo.kouheikosehira.com/register?auth_error=1&error=access_denied`
+  へ正しく返ることを実測した。`client_id`・`redirect_uri`・`scope` は `aiueo-lp.vercel.app` と完全に同一。
+  **「ユーザーが正式ドメインから入ったせいでNeonの許可ドメインに無く失敗した」という仮説は消えた。**
+- Googleの認可エンドポイント自体は生きている（authorize が正常に302を返し、
+  ログイン画面が描画される）。クライアントが完全に死んでいるわけではない。
+
 ### 残っている、こちらでは手が出せないこと
 
 Neon ConsoleのGoogleプロバイダー設定は画面操作でしか変えられず、この環境から到達できない。
