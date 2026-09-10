@@ -109,6 +109,60 @@ export async function setProposalEventStatusAction(formData: FormData) {
   redirect(`/member/proposals/${proposalId}`);
 }
 
+/**
+ * 公開中の企画を、内容を保ったまま公開から取り下げる（`draft` へ戻す）。
+ *
+ * 編集フォーム側の「下書きとして保存」でも同じことはできるが、そちらは
+ * 3つの掲載確認チェックを含むフォーム全体の入力が要る。**取り下げるだけなのに
+ * 掲載の確認を求めるのは筋が通らない**ので、単独のボタンとして分けてある。
+ * 取り下げても内容・`published_at`・企画別メッセージは残り、いつでも公開し直せる。
+ */
+export async function unpublishProposalAction(formData: FormData) {
+  if (!db) return;
+  const proposalId = formData.get('proposalId');
+  if (typeof proposalId !== 'string' || !z.string().uuid().safeParse(proposalId).success) return;
+  const member = await requireActiveMember();
+  const client = await db.$client.connect();
+  let broken = false;
+  try {
+    await client.query('begin');
+    const current = await client.query('select * from proposals where id = $1 and owner_id = $2 for update', [proposalId, member.userId]);
+    if (current.rowCount !== 1) {
+      await client.query('rollback');
+      return;
+    }
+    // 公開中のものだけを取り下げる。管理者の緊急非公開(hidden)や終了・中止は
+    // 企画者が触れる状態ではなく、下書きへ戻すと措置を打ち消すことになる。
+    if (current.rows[0].status !== 'published') {
+      await client.query('rollback');
+      return;
+    }
+    const updated = await client.query(
+      "update proposals set status = 'draft' where id = $1 and owner_id = $2 returning *",
+      [proposalId, member.userId],
+    );
+    await client.query(
+      'insert into proposal_versions (proposal_id, actor_id, reason_code, snapshot) values ($1, $2, $3, $4::jsonb)',
+      [proposalId, member.userId, 'organizer_unpublish', JSON.stringify(updated.rows[0])],
+    );
+    await client.query(
+      'insert into audit_log (actor_id, entity_type, entity_id, action, before_state, after_state) values ($1, $2, $3, $4, $5::jsonb, $6::jsonb)',
+      [member.userId, 'proposal', proposalId, 'organizer_unpublish', JSON.stringify(current.rows[0]), JSON.stringify(updated.rows[0])],
+    );
+    await client.query('commit');
+  } catch {
+    try {
+      await client.query('rollback');
+    } catch {
+      broken = true;
+    }
+    return;
+  } finally {
+    client.release(broken);
+  }
+  redirect(`/member/proposals/${proposalId}`);
+}
+
 export async function updateProposalAction(_previousState: ProposalActionState, formData: FormData): Promise<ProposalActionState> {
   if (!db) return { error: '会員・企画基盤が未接続です。時間をおいて再度お試しください。', values: echoValues(formData) };
   const raw = Object.fromEntries(formData.entries());
