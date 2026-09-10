@@ -77,7 +77,9 @@ export async function completeProfileAction(
       [user.id, parsed.data.publicName],
     );
     await client.query('commit');
-  } catch {
+  } catch (cause) {
+    // 個人情報(メールアドレス等)を含まない範囲で、原因究明のためログへ残す。
+    console.error('completeProfileAction failed', cause instanceof Error ? cause.message : cause);
     try {
       await client.query('rollback');
     } catch {
