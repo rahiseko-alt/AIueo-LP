@@ -56,7 +56,21 @@ Googleの認可エンドポイントに直接リクエストを投げて判定�
 | 6 | **確実に消えた** | 偽の `redirect_uri` は `redirect_uri_mismatch` で拒否され、本番の値は受け入れられた。**本番の `redirect_uri` は Google Cloud に登録済みである** |
 | 10 | **確実に消えた（認証情報の消失・無効化）** | `client_id` が生きていて有効（無効なら `invalid_client` が返る）。認可エンドポイントが正常に応答しているので、クライアント削除・再生成・プロジェクト無効化ではない |
 
-**残っているのは #3・#4・#5・#7・#8・#9 の6件。**
+### #3（Google側の障害）の判定
+
+公式の障害記録を2つ当たった。
+
+- [Google Cloud Status Dashboard](https://status.cloud.google.com/incidents.json)（JSONを直接取得）:
+  **2026-09-09・09-10 に作成された障害は1件も無い。** Identity / OAuth / Sign-In に
+  影響する記録も無い
+- [Google Workspace Status Dashboard](https://www.google.com/appsstatus/dashboard/summary):
+  同2日に掲載された障害は無く、**Google Sign-In は「No recent incidents reported」**
+
+| # | 判定 | 根拠 |
+| --- | --- | --- |
+| 3 | **広範囲の障害は消えた。単発の一時エラーは残る【曖昧】** | 公式2つの障害記録に該当なし。ただし1リクエスト単位の一時的な500は障害記録に載らないため、これだけでは消せない。**判別方法は「時間をおいて同じ操作をもう一度やる」以外に無い**（再現すれば #3 ではない） |
+
+**残っているのは #4・#5・#7・#8・#9 の5件（#3は広範囲障害の線だけ消えた）。**
 
 このうち「2026-09-10 07:21 に一度成功し、そのあとの試行で500」という時系列に最も合うのは
 **#8（既に許可済みのため2回目以降が `signin/oauth/legacy/consent` へ直行する経路）** である。
