@@ -1,7 +1,26 @@
 'use client';
 
-import { useActionState } from 'react';
+import { useActionState, useState } from 'react';
 import { type ProposalActionState } from '@/lib/proposals/form-values';
+import { collectMissingFields, RequiredFieldsNotice, type FieldLabels } from '@/components/required-fields-notice';
+
+/** 未入力のときに画面へ出す、欄の日本語名。`name`属性と対応させる。 */
+const FIELD_LABELS: FieldLabels = {
+  title: '企画名',
+  summary: '概要',
+  format: '開催形式',
+  visibility: '公開範囲',
+  tentativeStartsAt: '開催候補日時',
+  publicExpiresAt: '公開期限',
+  organizerName: '主催者表示名',
+  participationMethod: '参加方法',
+  moneyType: '金銭の種類',
+  moneyLabel: '金銭条件の説明',
+  moneySettlement: '精算方法',
+  prohibitedConfirmed: '禁止事項の確認（チェック）',
+  rightsConfirmed: '掲載権利の確認（チェック）',
+  moneyConfirmed: '金銭の取り扱いの確認（チェック）',
+};
 
 export type ProposalFormAction = (previousState: ProposalActionState, formData: FormData) => Promise<ProposalActionState>;
 
@@ -59,6 +78,12 @@ export function ProposalForm({ action, defaultValues, proposalId }: ProposalForm
   // なる、という繰り返しを避ける。
   const checked = (name: 'prohibitedConfirmed' | 'rightsConfirmed' | 'moneyConfirmed') =>
     state.values?.[name] === 'on';
+  // 空の必須欄があるとブラウザが送信を黙って止める。何が空なのかを画面に残す。
+  const [missing, setMissing] = useState<string[]>([]);
+  const checkBeforeSubmit = (event: React.MouseEvent<HTMLButtonElement>) => {
+    const form = event.currentTarget.form;
+    if (form) setMissing(collectMissingFields(form, FIELD_LABELS));
+  };
   return <form action={formAction} className="mt-8 space-y-8">
     {proposalId && <input type="hidden" name="proposalId" value={proposalId} />}
     <div className="grid gap-6 sm:grid-cols-2">
@@ -75,6 +100,7 @@ export function ProposalForm({ action, defaultValues, proposalId }: ProposalForm
     <fieldset className="space-y-4 border-t border-white/10 pt-7"><legend className="font-mono text-xs tracking-[0.15em] text-[#c8a45a]">金銭条件（公開前に必ず明記）</legend><label><span className="form-label">金銭の種類 *</span><select name="moneyType" required defaultValue={values.moneyType ?? 'none'} className="form-control"><option value="none">なし</option><option value="fixed_fee">固定参加費</option><option value="range_or_upper_limit">幅・上限あり</option><option value="reimbursement">実費精算</option><option value="reward">報酬</option><option value="donation">寄付・カンパ</option><option value="undecided">未定（公開不可）</option></select></label><div className="grid gap-4 sm:grid-cols-2"><label><span className="form-label">金銭条件の説明 *</span><input name="moneyLabel" required placeholder="なし / 参加費1,000円 など" defaultValue={values.moneyLabel} className="form-control" /></label><label><span className="form-label">金額・上限</span><input name="moneyAmount" defaultValue={values.moneyAmount} className="form-control" /></label><label><span className="form-label">通貨</span><input name="moneyCurrency" defaultValue={values.moneyCurrency ?? 'JPY'} className="form-control" /></label><label><span className="form-label">支払先</span><input name="moneyRecipient" defaultValue={values.moneyRecipient} className="form-control" /></label><label><span className="form-label">徴収方法</span><input name="moneyCollection" defaultValue={values.moneyCollection} className="form-control" /></label><label><span className="form-label">精算方法 *</span><input name="moneySettlement" required placeholder="なし / 当日現金 / 振込 など" defaultValue={values.moneySettlement} className="form-control" /></label><label><span className="form-label">返金・中止時の扱い</span><input name="moneyRefunds" defaultValue={values.moneyRefunds} className="form-control" /></label><label><span className="form-label">変更条件</span><input name="moneyChangeTerms" defaultValue={values.moneyChangeTerms} className="form-control" /></label></div></fieldset>
     <fieldset className="space-y-4 border-t border-white/10 pt-7"><legend className="font-mono text-xs tracking-[0.15em] text-[#c8a45a]">公開前の確認 *</legend><label className="flex gap-3 text-sm leading-7"><input name="prohibitedConfirmed" type="checkbox" required defaultChecked={checked('prohibitedConfirmed')} className="mt-2 h-4 w-4 accent-[#c8a45a]" />禁止事項（マルチ等の勧誘、アダルト系、違法行為、場を乱す行為）に該当しないことを確認しました。</label><label className="flex gap-3 text-sm leading-7"><input name="rightsConfirmed" type="checkbox" required defaultChecked={checked('rightsConfirmed')} className="mt-2 h-4 w-4 accent-[#c8a45a]" />掲載する文章・画像・会場情報を掲載する権利と必要な同意があります。</label><label className="flex gap-3 text-sm leading-7"><input name="moneyConfirmed" type="checkbox" required defaultChecked={checked('moneyConfirmed')} className="mt-2 h-4 w-4 accent-[#c8a45a]" />AIueoは金銭を受け取らず、主催者と参加者が直接確認することを理解しました。</label></fieldset>
     {state.error && <p role="alert" className="border border-red-300/35 bg-red-950/30 p-4 text-sm leading-7 text-red-100">{state.error}</p>}
-    <div className="flex flex-col gap-3 sm:flex-row"><button name="intent" value="draft" type="submit" disabled={isPending} className="btn-ghost flex-1 disabled:opacity-45">{isPending ? '保存中…' : '下書き保存'}</button><button name="intent" value="publish" type="submit" disabled={isPending} className="btn-solid flex-1 disabled:opacity-45">公開する</button></div>
+    <RequiredFieldsNotice items={missing} />
+    <div className="flex flex-col gap-3 sm:flex-row"><button name="intent" value="draft" type="submit" onClick={checkBeforeSubmit} disabled={isPending} className="btn-ghost flex-1 disabled:opacity-45">{isPending ? '保存中…' : '下書き保存'}</button><button name="intent" value="publish" type="submit" onClick={checkBeforeSubmit} disabled={isPending} className="btn-solid flex-1 disabled:opacity-45">公開する</button></div>
   </form>;
 }
