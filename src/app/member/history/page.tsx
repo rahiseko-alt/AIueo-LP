@@ -1,4 +1,5 @@
 import Link from 'next/link';
+import { eventStatusLabel, proposalStatusLabel } from '@/lib/proposals/labels';
 import { getAuthContext } from '@/lib/auth/dal';
 import { db } from '@/lib/neon/db';
 
@@ -85,8 +86,8 @@ export default async function MemberHistoryPage() {
               <span className="font-mono text-xs text-white/50">最終更新 {formatDate(proposal.updated_at)}</span>
             </div>
             <div className="mt-2 flex flex-wrap gap-3 text-xs font-mono tracking-[0.1em] text-white/60">
-              <span>掲載: {proposal.status}</span>
-              <span>開催: {proposal.event_status}</span>
+              <span>掲載: {proposalStatusLabel(proposal.status)}</span>
+              <span>開催: {eventStatusLabel(proposal.event_status)}</span>
             </div>
             {reason && <p className="mt-2 text-sm leading-6 text-white/70">理由: {reason.reason_text}（{formatDate(reason.created_at)}）</p>}
             {messages.length > 0 && <div className="mt-4 space-y-2 border-t border-white/10 pt-4">
