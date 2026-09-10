@@ -27,6 +27,41 @@ Neon公式のトラブルシューティングに次の記述があり、画面�
 - **2026-09-10 07:21 JST に Google のログインは一度成功している**（許可の通知メールが存在する）
 - 500が出たときのURLと、アカウント選択が済んでいたかは**未確認**
 
+## 上から順に潰した結果（2026-09-10、実測）
+
+Googleの認可エンドポイントに直接リクエストを投げて判定した。ブラウザもGoogleアカウントも
+使っていない。使った手は2つ。
+
+1. **`prompt=none` を付ける。** Googleは画面を出さず、クライアント設定を評価して
+   エラーコードだけを返す。結果は次のとおりで、**これは健全なときの応答である**。
+
+       error=interaction_required&error_subtype=access_denied
+
+   `invalid_client`、`admin_policy_enforced`、`org_internal`、500 のいずれでもない。
+
+2. **`redirect_uri` を1文字変えて送る。** 比較対象を作るため、わざと登録されていない値を送った。
+   こちらは次に飛ばされた。
+
+       https://accounts.google.com/signin/oauth/error?authError=...
+       （デコードすると redirect_uri_mismatch と
+        「You can't sign in to this app because it doesn't comply with Google's OAuth 2.0 policy.
+         If you're the app developer, register the redirect URI in the Google Cloud Console.」）
+
+つまり **Googleは本番の `redirect_uri` を受け入れ、偽の値は拒否した。**
+
+| # | 判定 | 根拠 |
+| --- | --- | --- |
+| 1 | **ほぼ消えた** | Testing公開ステータスの制限は「Access blocked: ... has not completed the Google verification process」という**400系の画面**で出る。500ではない。さらに**プロジェクト所有者本人は Testing でも通れる**うえ、実際に 2026-09-10 07:21 JST に成功した記録がある。所有者以外のGoogleアカウントで試した場合だけ残る【曖昧】 |
+| 2 | **ほぼ消えた** | legacy brand のポリシー違反ブロックは、上の手2で実際に出せた「doesn't comply with Google's OAuth 2.0 policy」の**400系の画面**である。本番の正しいリクエストではこの画面に**ならない**。認可段階でポリシー検証は通っている |
+| 6 | **確実に消えた** | 偽の `redirect_uri` は `redirect_uri_mismatch` で拒否され、本番の値は受け入れられた。**本番の `redirect_uri` は Google Cloud に登録済みである** |
+| 10 | **確実に消えた（認証情報の消失・無効化）** | `client_id` が生きていて有効（無効なら `invalid_client` が返る）。認可エンドポイントが正常に応答しているので、クライアント削除・再生成・プロジェクト無効化ではない |
+
+**残っているのは #3・#4・#5・#7・#8・#9 の6件。**
+
+このうち「2026-09-10 07:21 に一度成功し、そのあとの試行で500」という時系列に最も合うのは
+**#8（既に許可済みのため2回目以降が `signin/oauth/legacy/consent` へ直行する経路）** である。
+同種の「2回目のログインで500」の報告もある。次はこれを潰す。
+
 ## 候補（確度の高い順ではなく、切り分けやすい順）
 
 | # | 仮説 | 同種の事例・出典 | どう潰すか |
