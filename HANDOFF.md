@@ -97,11 +97,33 @@
 - Googleの認可エンドポイント自体は生きている（authorize が正常に302を返し、
   ログイン画面が描画される）。クライアントが完全に死んでいるわけではない。
 
+### 鍵の切替は画面操作ではなくAPIで行う（`scripts/set-google-oauth.mjs`）
+
+「Neon Consoleの画面でやった」という報告しか残らないやり方が F-02 の原因だった。
+調べ直したところ、**Neon APIでOAuthプロバイダーの鍵を設定できる**ことが分かった。
+
+    POST/PATCH https://console.neon.tech/api/v2/projects/{project_id}/auth/oauth_providers
+    { "provider": "google", "client_id": ..., "client_secret": ... }
+
+`scripts/set-google-oauth.mjs` を追加した。秘密値は環境変数で受け取り、**ディスクにも
+標準出力にも残さない**（client_idは末尾28文字のみ表示、client_secretは一切表示しない）。
+
+- 読み取りだけ: `NEON_API_KEY=xxx node scripts/set-google-oauth.mjs`
+  → 現在のプロバイダー設定を出す。`client_id`が空なら共用鍵が使われている
+- 切替: `NEON_API_KEY=xxx GOOGLE_CLIENT_ID=xxx GOOGLE_CLIENT_SECRET=xxx node scripts/set-google-oauth.mjs --apply`
+- 切替後の検証（必須）: `node scripts/verify-oauth-entry.mjs --expect-client-id "$GOOGLE_CLIENT_ID"`
+
+APIキー無しとダミーキーの両方で走らせ、前者は使い方を出し、後者は401を正しく報告することを実測した。
+
 ### 残っている、こちらでは手が出せないこと
 
-Neon ConsoleのGoogleプロバイダー設定は画面操作でしか変えられず、この環境から到達できない。
-ここだけはユーザーの手番である。**ただし「調べてください」ではない。何を押すかは確定している。**
-切替後の検証は`scripts/verify-oauth-entry.mjs --expect-client-id <新しい値>`で機械的に行う。
+要るのは3つの値だけである。いずれもユーザーのアカウントの中にしか存在しない。
+
+1. `NEON_API_KEY` — Neon Console → 右上のアカウントメニュー → Account settings → API keys → Create new API key
+2. `GOOGLE_CLIENT_ID` — Google Cloud → 左メニュー「クライアント」→ 作成済みのウェブアプリケーション用クライアント
+3. `GOOGLE_CLIENT_SECRET` — 同じ画面
+
+**受け取った値はコミットしない。** 環境変数として1回のAPI呼び出しに使うだけである。
 
 ## 今回の作業（2026-09-10 その4 / 実ブラウザ操作による経路の切り分け、Claude Code on the web）
 
