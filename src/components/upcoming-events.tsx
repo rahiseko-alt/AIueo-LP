@@ -41,6 +41,9 @@ export function UpcomingEvents({ activities }: UpcomingEventsProps) {
                   src={act.imageUrl}
                   alt={act.title}
                   fill
+                  // 企画者が添付した画像は `/api/...` から出る。画像最適化を通すと
+                  // 認証つきの動的経路を最適化器が取りに行くことになるので、素通しにする。
+                  unoptimized={act.imageUrl.startsWith('/api/')}
                   sizes="(max-width: 640px) 82vw, (max-width: 1024px) 22rem, 24rem"
                   className="object-cover transition-transform duration-500 group-hover:scale-105"
                 />

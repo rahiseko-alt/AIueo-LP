@@ -50,7 +50,9 @@ function toActivity(p: PublicProposal, index: number): Activity {
     status: 'UPCOMING',
     date: p.tentative_starts_at ?? p.published_at ?? new Date().toISOString(),
     displayDate: formatDisplayDate(p.tentative_starts_at),
-    imageUrl: FALLBACK_IMAGES[index % FALLBACK_IMAGES.length],
+    // 企画者が画像を添付していればそれを使う。無いときだけ既存の見本写真を
+    // 順番に割り当てる（カードだけ真っ黒になるのを避けるため）。
+    imageUrl: p.image_mime ? `/api/proposals/${p.id}/image` : FALLBACK_IMAGES[index % FALLBACK_IMAGES.length],
     actionUrl: `/events/${p.slug}`,
     actionLabel: '詳細を見る →',
   };

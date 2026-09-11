@@ -25,6 +25,8 @@ const ECHO_FIELDS = [
   'publicExpiresAt', 'organizerName', 'participationMethod', 'moneyType', 'moneyLabel',
   'moneyAmount', 'moneyCurrency', 'moneyRecipient', 'moneyCollection', 'moneySettlement',
   'moneyRefunds', 'moneyChangeTerms', 'prohibitedConfirmed', 'rightsConfirmed', 'moneyConfirmed',
+  // 選んだ画像も戻す。戻さないと、検証に落ちるたびに画像だけ選び直しになる。
+  'imageData', 'imageRemove',
 ] as const;
 
 /** 画面へ戻す入力値を作る。送られてきた文字列だけを拾い、それ以外の型は捨てる。 */

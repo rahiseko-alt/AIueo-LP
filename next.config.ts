@@ -22,6 +22,14 @@ const securityHeaders = [
 const nextConfig: NextConfig = {
   // 稼働中のスタックとバージョンを無償で開示しない。
   poweredByHeader: false,
+  experimental: {
+    // 企画に添付する画像は、送信前にブラウザ側で長辺1280pxへ縮めてから
+    // data URL として送る（`src/components/proposal-image-field.tsx`）。
+    // 縮小後は数百KBだが、既定の上限1MBだと横長の写真で当たりうる。
+    // 上限に当たると送信が黙って失敗するので、余裕を見て引き上げる。
+    // 保存してよい大きさの判定はサーバー側（`src/lib/proposals/image.ts`）で行う。
+    serverActions: { bodySizeLimit: '4mb' },
+  },
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },

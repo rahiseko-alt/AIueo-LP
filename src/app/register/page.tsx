@@ -1,6 +1,7 @@
 import type { Metadata } from 'next';
 import Link from 'next/link';
 import { RegisterForm } from '@/components/register-form';
+import { StandingGuide } from '@/components/standing-guide';
 
 export const metadata: Metadata = {
   title: '会員登録',
@@ -26,6 +27,10 @@ export default function RegisterPage() {
           <RegisterForm />
           <p className="mt-7 text-xs leading-6 text-[rgba(240,237,232,0.6)]">登録を進めることで、<Link className="text-[#d7bd82] underline hover:text-white" href="/terms">会員規約</Link>、<Link className="text-[#d7bd82] underline hover:text-white" href="/disclaimer">免責事項</Link>、<Link className="text-[#d7bd82] underline hover:text-white" href="/privacy">プライバシーポリシー</Link>を確認できます。最終同意はプロフィール完了画面で記録します。</p>
         </section>
+        <StandingGuide current="general" />
+        <p className="mt-8 text-sm leading-7 text-white/60">
+          参加するだけなら、この登録は要りません。<Link href="/events" className="text-[#d7bd82] underline">公開中の企画</Link>から、主催者へ直接ご連絡ください。
+        </p>
       </div>
     </main>
   );
