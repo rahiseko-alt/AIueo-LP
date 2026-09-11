@@ -6,6 +6,7 @@ import type { PoolClient } from 'pg';
 import { requireAdmin } from '@/lib/auth/dal';
 import { db } from '@/lib/neon/db';
 import { adminSelectableStatuses } from '@/app/admin/statuses';
+import { withoutImageData } from '@/lib/proposals/image';
 
 const statusSchema = z.enum(adminSelectableStatuses);
 const memberStatusSchema = z.enum(['active', 'suspended', 'withdrawn']);
@@ -89,7 +90,7 @@ export async function adminSetProposalStateAction(formData: FormData) {
     }
     const publishedAt = status.data === 'published' ? current.rows[0].published_at ?? new Date().toISOString() : current.rows[0].published_at;
     const updated = await client.query('update proposals set status = $1, published_at = $2 where id = $3 returning *', [status.data, publishedAt, proposalId.data]);
-    await client.query('insert into proposal_versions (proposal_id, actor_id, reason_code, reason_text, snapshot) values ($1, $2, $3, $4, $5::jsonb)', [proposalId.data, adminId, reason.data.reasonCode, reason.data.reasonText, JSON.stringify(updated.rows[0])]);
+    await client.query('insert into proposal_versions (proposal_id, actor_id, reason_code, reason_text, snapshot) values ($1, $2, $3, $4, $5::jsonb)', [proposalId.data, adminId, reason.data.reasonCode, reason.data.reasonText, JSON.stringify(withoutImageData(updated.rows[0]))]);
     await recordAdminChange(client, adminId, 'proposal', proposalId.data, 'admin_proposal_state_changed', reason.data.reasonCode, reason.data.reasonText, current.rows[0], updated.rows[0]);
     await client.query('insert into notifications (recipient_id, proposal_id, kind, body, dedupe_key) values ($1, $2, $3, $4, $5)', [current.rows[0].owner_id, proposalId.data, 'admin_proposal_state', `管理者が企画の掲載状態を「${status.data}」に変更しました。理由: ${reason.data.reasonText}`, `admin-state-${proposalId.data}-${crypto.randomUUID()}`]);
   });
@@ -177,7 +178,7 @@ export async function adminUpdateProposalAction(formData: FormData) {
     const current = await client.query('select * from proposals where id = $1 for update', [value.proposalId]);
     if (current.rowCount !== 1) throw new Error('proposal not found');
     const updated = await client.query(`update proposals set title = $1, summary = $2, format = $3, tentative_starts_at = $4, recruitment_deadline_at = $5, public_expires_at = $6, organizer_name = $7, participation_method = $8, visibility = $9, money_type = $10, money_details = $11::jsonb where id = $12 returning *`, [value.title, value.summary, value.format, tentative, deadline, expiry, value.organizerName, value.participationMethod, value.visibility, value.moneyType, JSON.stringify(moneyDetails), value.proposalId]);
-    await client.query('insert into proposal_versions (proposal_id, actor_id, reason_code, reason_text, snapshot) values ($1, $2, $3, $4, $5::jsonb)', [value.proposalId, adminId, value.reasonCode, value.reasonText, JSON.stringify(updated.rows[0])]);
+    await client.query('insert into proposal_versions (proposal_id, actor_id, reason_code, reason_text, snapshot) values ($1, $2, $3, $4, $5::jsonb)', [value.proposalId, adminId, value.reasonCode, value.reasonText, JSON.stringify(withoutImageData(updated.rows[0]))]);
     await recordAdminChange(client, adminId, 'proposal', value.proposalId, 'admin_proposal_edited', value.reasonCode, value.reasonText, current.rows[0], updated.rows[0]);
     await client.query('insert into notifications (recipient_id, proposal_id, kind, body, dedupe_key) values ($1, $2, $3, $4, $5)', [current.rows[0].owner_id, value.proposalId, 'admin_proposal_edit', `管理者が企画内容を変更しました。理由: ${value.reasonText}`, `admin-edit-${value.proposalId}-${crypto.randomUUID()}`]);
   });

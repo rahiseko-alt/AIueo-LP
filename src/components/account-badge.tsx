@@ -33,12 +33,16 @@ export async function AccountBadge() {
   const isActive = profile.status === 'active';
   const initial = (profile.public_name?.trim()?.[0] ?? 'A').toUpperCase();
   const label = isActive
-    ? `マイページ（${profile.public_name ?? '会員'}）`
+    ? `会員ページ（${profile.public_name ?? '会員'}）`
     : '会員状態を確認してください';
+  // 有効な会員は、プロフィールではなく会員ページ（企画の入口）へ送る。
+  // どのページからでも1回で自分の作業場所へ戻れることが、ここの役目である。
+  // 停止・退会中の人は操作する場所が無いので、状態を説明する画面へ送る。
+  const destination = isActive ? '/member' : '/member/profile';
 
   return (
     <Link
-      href="/member/profile"
+      href={destination}
       aria-label={label}
       title={label}
       className={`fixed right-3 top-20 z-[60] flex h-10 w-10 items-center justify-center rounded-full border-2 font-mono text-sm font-semibold shadow-[0_4px_14px_rgba(0,0,0,0.5)] transition-transform hover:scale-105 sm:right-5 ${

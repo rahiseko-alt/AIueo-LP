@@ -5,6 +5,7 @@ import { z } from 'zod';
 import { requireActiveMember } from '@/lib/auth/dal';
 import { db } from '@/lib/neon/db';
 import { echoValues, type ProposalActionState } from '@/lib/proposals/form-values';
+import { parseImageUpload } from '@/lib/proposals/image';
 
 export type { ProposalActionState } from '@/lib/proposals/form-values';
 
@@ -74,6 +75,8 @@ export async function saveProposalAction(_previousState: ProposalActionState, fo
   if (input.moneyType === 'undecided' && input.intent === 'publish') {
     return { error: '金銭条件が未定のままでは公開できません。下書き保存のみ可能です。', values: echoValues(formData) };
   }
+  const image = parseImageUpload(formData);
+  if (image.kind === 'invalid') return { error: image.error, values: echoValues(formData) };
 
   const payload = {
     slug: `proposal-${crypto.randomUUID()}`,
@@ -112,21 +115,27 @@ export async function saveProposalAction(_previousState: ProposalActionState, fo
       `insert into proposals (
         owner_id, slug, title, summary, format, tentative_starts_at, recruitment_deadline_at,
         public_expires_at, organizer_name, participation_method, visibility, money_type,
-        money_details, publishing_declarations, status, published_at
+        money_details, publishing_declarations, status, published_at,
+        image_data, image_mime, image_updated_at
       ) values (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,
-        $13::jsonb, $14::jsonb, $15, case when $15 = 'published' then now() else null end
+        $13::jsonb, $14::jsonb, $15, case when $15 = 'published' then now() else null end,
+        $16::bytea, $17::text, case when $17::text is null then null else now() end
       ) returning id`,
       [
         member.userId, payload.slug, payload.title, payload.summary, payload.format,
         payload.tentative_starts_at, payload.recruitment_deadline_at, payload.public_expires_at,
         payload.organizer_name, payload.participation_method, payload.visibility, payload.money_type,
         JSON.stringify(payload.money_details), JSON.stringify(payload.publishing_declarations), status,
+        image.kind === 'replace' ? image.data : null,
+        image.kind === 'replace' ? image.mime : null,
       ],
     );
     proposalId = inserted.rows[0]?.id ?? null;
     if (!proposalId) throw new Error('proposal creation failed');
-    const snapshot = { ...payload, id: proposalId, owner_id: member.userId, status, event_status: 'planning' };
+    // 画像の中身はスナップショットへ入れない。1件ごとに数百KBのbase64が
+    // 版履歴と監査ログへ二重に積み上がるため。付いているかどうかだけ残す。
+    const snapshot = { ...payload, id: proposalId, owner_id: member.userId, status, event_status: 'planning', has_image: image.kind === 'replace' };
     await client.query(
       'insert into proposal_versions (proposal_id, actor_id, reason_code, snapshot) values ($1, $2, $3, $4::jsonb)',
       [proposalId, member.userId, input.intent === 'publish' ? 'initial_publish' : 'initial_draft', JSON.stringify(snapshot)],

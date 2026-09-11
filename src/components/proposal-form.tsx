@@ -3,6 +3,7 @@
 import { useActionState, useState } from 'react';
 import { type ProposalActionState } from '@/lib/proposals/form-values';
 import { collectMissingFields, RequiredFieldsNotice, type FieldLabels } from '@/components/required-fields-notice';
+import { ProposalImageField } from '@/components/proposal-image-field';
 
 /** 未入力のときに画面へ出す、欄の日本語名。`name`属性と対応させる。 */
 const FIELD_LABELS: FieldLabels = {
@@ -51,6 +52,8 @@ interface ProposalFormProps {
   proposalId?: string;
   /** 現在の掲載状態。`published` のときだけボタンの文言を「公開をやめる」側に変える。 */
   currentStatus?: string;
+  /** すでに画像が付いているか。付いていれば確認用に表示し、外す選択肢も出す。 */
+  hasImage?: boolean;
 }
 
 /**
@@ -71,7 +74,7 @@ function openCalendar(event: React.MouseEvent<HTMLInputElement>) {
   }
 }
 
-export function ProposalForm({ action, defaultValues, proposalId, currentStatus }: ProposalFormProps) {
+export function ProposalForm({ action, defaultValues, proposalId, currentStatus, hasImage }: ProposalFormProps) {
   const [state, formAction, isPending] = useActionState<ProposalActionState, FormData>(action, { error: null });
   // 検証に落ちたときは、DBの値ではなく「利用者が今書いた値」を出す。
   // これが無いと、送信のたびに書いた内容が消えて入力し直しになる。
@@ -103,6 +106,7 @@ export function ProposalForm({ action, defaultValues, proposalId, currentStatus 
       <label className="sm:col-span-2"><span className="form-label">参加方法 *</span><textarea name="participationMethod" required maxLength={2000} rows={3} defaultValue={values.participationMethod} className="form-control" placeholder="外部フォームURL、連絡方法、定員など" /></label>
     </div>
     <fieldset className="space-y-4 border-t border-white/10 pt-7"><legend className="font-mono text-xs tracking-[0.15em] text-[#c8a45a]">金銭条件（公開前に必ず明記）</legend><label><span className="form-label">金銭の種類 *</span><select name="moneyType" required defaultValue={values.moneyType ?? 'none'} className="form-control"><option value="none">なし</option><option value="fixed_fee">固定参加費</option><option value="range_or_upper_limit">幅・上限あり</option><option value="reimbursement">実費精算</option><option value="reward">報酬</option><option value="donation">寄付・カンパ</option><option value="undecided">未定（公開不可）</option></select></label><div className="grid gap-4 sm:grid-cols-2"><label><span className="form-label">金銭条件の説明 *</span><input name="moneyLabel" required placeholder="なし / 参加費1,000円 など" defaultValue={values.moneyLabel} className="form-control" /></label><label><span className="form-label">金額・上限</span><input name="moneyAmount" defaultValue={values.moneyAmount} className="form-control" /></label><label><span className="form-label">通貨</span><input name="moneyCurrency" defaultValue={values.moneyCurrency ?? 'JPY'} className="form-control" /></label><label><span className="form-label">支払先</span><input name="moneyRecipient" defaultValue={values.moneyRecipient} className="form-control" /></label><label><span className="form-label">徴収方法</span><input name="moneyCollection" defaultValue={values.moneyCollection} className="form-control" /></label><label><span className="form-label">精算方法 *</span><input name="moneySettlement" required placeholder="なし / 当日現金 / 振込 など" defaultValue={values.moneySettlement} className="form-control" /></label><label><span className="form-label">返金・中止時の扱い</span><input name="moneyRefunds" defaultValue={values.moneyRefunds} className="form-control" /></label><label><span className="form-label">変更条件</span><input name="moneyChangeTerms" defaultValue={values.moneyChangeTerms} className="form-control" /></label></div></fieldset>
+    <ProposalImageField currentImageUrl={hasImage && proposalId ? `/api/proposals/${proposalId}/image` : undefined} defaultData={state.values?.imageData} />
     <fieldset className="space-y-4 border-t border-white/10 pt-7"><legend className="font-mono text-xs tracking-[0.15em] text-[#c8a45a]">公開前の確認 *</legend><label className="flex gap-3 text-sm leading-7"><input name="prohibitedConfirmed" type="checkbox" required defaultChecked={checked('prohibitedConfirmed')} className="mt-2 h-4 w-4 accent-[#c8a45a]" />禁止事項（マルチ等の勧誘、アダルト系、違法行為、場を乱す行為）に該当しないことを確認しました。</label><label className="flex gap-3 text-sm leading-7"><input name="rightsConfirmed" type="checkbox" required defaultChecked={checked('rightsConfirmed')} className="mt-2 h-4 w-4 accent-[#c8a45a]" />掲載する文章・画像・会場情報を掲載する権利と必要な同意があります。</label><label className="flex gap-3 text-sm leading-7"><input name="moneyConfirmed" type="checkbox" required defaultChecked={checked('moneyConfirmed')} className="mt-2 h-4 w-4 accent-[#c8a45a]" />AIueoは金銭を受け取らず、主催者と参加者が直接確認することを理解しました。</label></fieldset>
     {state.error && <p role="alert" className="border border-red-300/35 bg-red-950/30 p-4 text-sm leading-7 text-red-100">{state.error}</p>}
     <RequiredFieldsNotice items={missing} />
