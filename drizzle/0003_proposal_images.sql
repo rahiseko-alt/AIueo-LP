@@ -7,15 +7,24 @@
 --
 -- image_data と image_mime は必ず揃って入る／揃って消える（片方だけ残すと
 -- 配信側が「画像あり」と判断して空を返す）。
-alter table proposals
-  add column if not exists image_data bytea,
-  add column if not exists image_mime text,
-  add column if not exists image_updated_at timestamptz;
+--
+-- **全体を1つの do ブロックに入れてある。** VercelのQuery画面は命令を1度に1つしか
+-- 受け付けない（`cannot insert multiple commands into a prepared statement`）ので、
+-- 分けて書くと5回貼り付けることになる。これなら1回で済む。
+-- 何度流しても結果は同じになるようにしてある。
+do $do$
+begin
+  alter table proposals
+    add column if not exists image_data bytea,
+    add column if not exists image_mime text,
+    add column if not exists image_updated_at timestamptz;
 
-alter table proposals drop constraint if exists proposals_image_mime_check;
-alter table proposals add constraint proposals_image_mime_check
-  check (image_mime is null or image_mime in ('image/jpeg', 'image/png', 'image/webp'));
+  alter table proposals drop constraint if exists proposals_image_mime_check;
+  alter table proposals add constraint proposals_image_mime_check
+    check (image_mime is null or image_mime in ('image/jpeg', 'image/png', 'image/webp'));
 
-alter table proposals drop constraint if exists proposals_image_pair_check;
-alter table proposals add constraint proposals_image_pair_check
-  check ((image_data is null) = (image_mime is null));
+  alter table proposals drop constraint if exists proposals_image_pair_check;
+  alter table proposals add constraint proposals_image_pair_check
+    check ((image_data is null) = (image_mime is null));
+end
+$do$;
