@@ -129,13 +129,29 @@ DEFAULT_BRANCH="${DEFAULT_BRANCH:-main}"
 #  条件B: ブランチの HANDOFF.md の中身が main と実際に違う
 #    これだけだと、HANDOFF.md を触っていない古いブランチが、main 側の更新によって
 #    差分ありと判定され、片端から引っかかる。
+#
+#  条件C: .claude/handoff-verified.txt に先端のSHAが載っていない
+#    A・Bを満たしても、中身を突き合わせて「main に取り込み済み」と確認した
+#    ブランチは残り続ける。それを毎回警告に出すと、本物の未到達が埋もれる。
+#    確認したものだけを、**先端のコミットSHA**で明示的に落とす。ブランチ名では
+#    なくSHAを鍵にしているので、新しいコミットが積まれれば警告は復活する。
+#    （2026-09-11 追加。3ブランチの中身を main と突き合わせ、失われた引継ぎが
+#      無いことを確認したうえで登録した。経緯は HANDOFF.md「注意点」を参照）
+VERIFIED_FILE=".claude/handoff-verified.txt"
 STRANDED=""
+VERIFIED_SKIPPED=""
 for ref in $(git for-each-ref --format='%(refname:short)' refs/remotes/origin 2>/dev/null); do
   case "$ref" in
     "origin/$DEFAULT_BRANCH"|origin/HEAD) continue ;;
   esac
   [ -z "$(git log --format=%H "origin/$DEFAULT_BRANCH..$ref" -- HANDOFF.md 2>/dev/null)" ] && continue
   git diff --quiet "origin/$DEFAULT_BRANCH" "$ref" -- HANDOFF.md 2>/dev/null && continue
+  # 条件C: 突き合わせ済みとして登録された先端SHAなら落とす（コメント行と空行は無視）
+  TIP=$(git rev-parse "$ref" 2>/dev/null)
+  if [ -n "$TIP" ] && [ -f "$VERIFIED_FILE" ] && grep -v '^[[:space:]]*#' "$VERIFIED_FILE" | grep -q "^$TIP[[:space:]]"; then
+    VERIFIED_SKIPPED="$VERIFIED_SKIPPED $ref"
+    continue
+  fi
   STRANDED="$STRANDED $ref"
 done
 
@@ -150,7 +166,14 @@ if [ -n "$STRANDED" ]; then
   echo "  未マージのPRがないかをユーザーに確認すること。"
   echo "  詳細は AGENTS.md「引継ぎは main に到達して初めて完了とする」を参照。"
 else
-  echo "  ✅ HANDOFF.md を変更した未マージのブランチは無い"
+  echo "  ✅ HANDOFF.md を変更した未到達のブランチは無い"
+fi
+
+# 落とした分は黙って消さず、件数だけ出す。「無視している」ことが見えていないと、
+# 登録が間違っていても誰も気付けない。
+if [ -n "$VERIFIED_SKIPPED" ]; then
+  COUNT=$(echo $VERIFIED_SKIPPED | wc -w)
+  echo "  （$COUNT 件は突き合わせ済みとして除外。内訳は $VERIFIED_FILE）"
 fi
 
 # 最終更新日を出し、古すぎる引継ぎに気付けるようにする。

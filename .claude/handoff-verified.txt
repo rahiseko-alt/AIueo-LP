@@ -1,0 +1,18 @@
+# 引継ぎの到達確認で「確認済み」として無視するブランチ先端のコミット。
+#
+# セッション開始フック(.claude/hooks/session-start.sh)が読む。
+# squash マージのため元コミットが main の祖先にならず、内容は main にあるのに
+# 「未到達」と警告され続けるブランチを、ここで1件ずつ明示的に落とす。
+#
+# **コミットSHAで書くこと。** ブランチ名ではなく先端のSHAを鍵にしているので、
+# そのブランチへ新しいコミットが積まれたらSHAが変わり、警告が復活する。
+# 「一度無視したら永久に無視」にならないための作りである。
+#
+# 書き方: <先端のコミットSHA> <ブランチ名> # 突き合わせた日付と根拠
+# 追加するときは、必ず中身を main と突き合わせてから書く。
+# 突き合わせ方: git show <branch>:HANDOFF.md と git show origin/main:HANDOFF.md を
+# 見出し単位・本文行単位で comm にかけ、失われた記述が無いことを確認する。
+
+652cba548b2b40ee5078280b40ca9e266b0c563d claude/checkin-6hrtds # 2026-09-11確認。P15の台帳反映。mainに無い本文は1行のみでP15の記録はmainにある
+1e2e1abe1a3b029e07a4ba7972719f3fc8d47222 claude/dazzling-babbage-yxplec # 2026-09-11確認。mainに無い見出し0件。フック類もCLAUDE.mdの@参照もmainに存在する
+a2d25c8945d948785778c1f290e95d6a59cfdeec docs/handoff-session # 2026-09-11確認。mainに無い26行はP9の全行監査より前の暫定リストで、確定リストがmainにある
