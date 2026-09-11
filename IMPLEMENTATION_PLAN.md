@@ -211,6 +211,8 @@ Gate 1（受け入れ条件・敵対検証・ユーザー承認）
 
 | 2026-09-11 | P32: 画面に出ていた英語の状態名を日本語へ統一。`src/lib/proposals/labels.ts`を新設して表示用の対応表を1か所に集め、言葉を操作ボタンと揃えた。会員3画面・管理3画面に適用し、`/member/proposals/[id]`が個別に持っていた`LOCKED_STATUS_LABELS`も共通表へ寄せた | 未検証区間: 本番で実ログイン状態での表示 | **実測**: ローカルPostgreSQL 16＋本番と同じ3migrationで`published`/`draft`/`hidden`/`auto_hidden`/`ended`の5件を作り、実Chromiumで6画面を確認。期待した日本語がすべて出て、英語の状態名は画面に1つも残らない（exit 0）。管理画面は権限を`admin`にして選択肢まで確認。一覧の1か所を元に戻すと検証が落ちる。`lint`/`typecheck`0件、`NEXT_PUBLIC_NEON_AUTH_ENABLED=true build`成功、Playwright全111件緑 |
 
+| 2026-09-11 | チェックアウト: セッション開始フックが毎回警告する未マージ3ブランチ（`claude/checkin-6hrtds`・`claude/dazzling-babbage-yxplec`・`docs/handoff-session`）の中身を`main`と突き合わせ、**いずれも取り込み済みで失われた引継ぎは無い**ことを確認した。結果と突き合わせ方法を`HANDOFF.md`「注意点」へ記録し、次セッション以降が同じ調査を繰り返さないようにした | 調査のみ。コード変更なし。ブランチの削除はユーザー判断のため未実施 | `git show origin/<branch>:HANDOFF.md`と`main`版を見出し単位・本文行単位で`comm`比較。`dazzling-babbage-yxplec`は`main`に無い見出し0件、`checkin-6hrtds`は本文1行のみ、`docs/handoff-session`の26行はP9の全行監査前の暫定リストで、確定リストが`main`にある |
+
 ## セッション終了チェック
 
 - [ ] `HANDOFF.md`を更新した
