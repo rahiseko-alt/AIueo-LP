@@ -91,7 +91,7 @@ export default async function EventDetailPage({
   if (!db) notFound();
   const result = await db.$client.query(
     `select id, owner_id, slug, title, summary, format, tentative_starts_at, recruitment_deadline_at,
-      organizer_name, participation_method, visibility, money_type, money_details, published_at, image_mime
+      organizer_name, participation_method, application_url, visibility, money_type, money_details, published_at, image_mime
      from proposals
      where slug = $1 and status = 'published' and visibility = 'public' and public_expires_at > now()
      limit 1`,
@@ -139,6 +139,24 @@ export default async function EventDetailPage({
             <div><dt className="form-label">金銭条件</dt><MoneyConditions moneyType={data.money_type} moneyDetails={data.money_details} /></div>
             <div className="sm:col-span-2"><dt className="form-label">参加方法</dt><dd className="mt-2 whitespace-pre-line leading-7 text-white/75">{String(data.participation_method)}</dd></div>
           </dl>
+
+          {typeof data.application_url === 'string' && data.application_url.length > 0 && (
+            <section className="mt-8 border-t border-white/10 pt-7">
+              <h2 className="text-xl font-light">この企画に参加を申し込む</h2>
+              <p className="mt-2 text-sm leading-7 text-white/65">
+                主催者が用意した申し込みフォームが開きます。<strong className="font-normal text-[#e4d2a6]">AIueoの外にあるページ</strong>で、
+                申し込んだ内容や連絡先はAIueoには届きません。
+              </p>
+              <a
+                href={String(data.application_url)}
+                target="_blank"
+                rel="noopener noreferrer nofollow"
+                className="btn-solid mt-5 inline-flex"
+              >
+                参加を申し込む（外部サイトが開きます）
+              </a>
+            </section>
+          )}
 
           <p className="mt-8 border-l-2 border-[#c8a45a] pl-4 text-sm leading-7 text-white/70">
             <strong className="font-normal text-[#e4d2a6]">参加するのに会員登録は要りません。</strong>

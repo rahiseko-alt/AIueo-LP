@@ -6,6 +6,7 @@ import { requireActiveMember } from '@/lib/auth/dal';
 import { db } from '@/lib/neon/db';
 import { echoValues, type ProposalActionState } from '@/lib/proposals/form-values';
 import { parseImageUpload } from '@/lib/proposals/image';
+import { parseApplicationUrl } from '@/lib/proposals/application-url';
 
 export type { ProposalActionState } from '@/lib/proposals/form-values';
 
@@ -77,6 +78,8 @@ export async function saveProposalAction(_previousState: ProposalActionState, fo
   }
   const image = parseImageUpload(formData);
   if (image.kind === 'invalid') return { error: image.error, values: echoValues(formData) };
+  const applicationUrl = parseApplicationUrl(formData.get('applicationUrl'));
+  if (!applicationUrl.ok) return { error: applicationUrl.error, values: echoValues(formData) };
 
   const payload = {
     slug: `proposal-${crypto.randomUUID()}`,
@@ -88,6 +91,7 @@ export async function saveProposalAction(_previousState: ProposalActionState, fo
     public_expires_at: publicExpiresAt,
     organizer_name: input.organizerName,
     participation_method: input.participationMethod,
+    application_url: applicationUrl.value,
     visibility: input.visibility,
     money_type: input.moneyType,
     money_details: collectMoneyDetails(input),
@@ -116,11 +120,11 @@ export async function saveProposalAction(_previousState: ProposalActionState, fo
         owner_id, slug, title, summary, format, tentative_starts_at, recruitment_deadline_at,
         public_expires_at, organizer_name, participation_method, visibility, money_type,
         money_details, publishing_declarations, status, published_at,
-        image_data, image_mime, image_updated_at
+        image_data, image_mime, image_updated_at, application_url
       ) values (
         $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12,
         $13::jsonb, $14::jsonb, $15, case when $15 = 'published' then now() else null end,
-        $16::bytea, $17::text, case when $17::text is null then null else now() end
+        $16::bytea, $17::text, case when $17::text is null then null else now() end, $18::text
       ) returning id`,
       [
         member.userId, payload.slug, payload.title, payload.summary, payload.format,
@@ -129,6 +133,7 @@ export async function saveProposalAction(_previousState: ProposalActionState, fo
         JSON.stringify(payload.money_details), JSON.stringify(payload.publishing_declarations), status,
         image.kind === 'replace' ? image.data : null,
         image.kind === 'replace' ? image.mime : null,
+        applicationUrl.value,
       ],
     );
     proposalId = inserted.rows[0]?.id ?? null;

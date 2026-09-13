@@ -125,5 +125,9 @@ echo "############ 画像添付の検証 ############"
 node scripts/verify-proposal-image.mjs || FAIL=1
 
 echo
+echo "############ 参加申し込みURLの検証 ############"
+node scripts/verify-application-url.mjs || FAIL=1
+
+echo
 if [ "$FAIL" = "0" ]; then echo "===== 全体判定: OK ====="; else echo "===== 全体判定: NG ====="; fi
 exit $FAIL
