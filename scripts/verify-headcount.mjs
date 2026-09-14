@@ -50,9 +50,9 @@ const textAt = async (path) => {
 await page.goto(editUrl, { waitUntil: 'domcontentloaded' });
 await page.waitForTimeout(900);
 const fields = await page.locator('input[name="capacity"], input[name="participantCount"]').count();
-rec('H-01', '企画編集画面に「定員」「いまの参加人数」の欄がある', `${fields}個`, fields === 2);
-const note = await page.locator('text=/企画の一覧に「参加 3 \\/ 10人」と出ます/').count();
-rec('H-02', '何のための欄かが画面に書いてある', `${note}個`, note === 1);
+rec('H-01', '企画編集画面に「定員」「参加人数」の欄がある', `${fields}個`, fields === 2);
+const note = await page.locator('text=/主催者を含めた人数です。/').count();
+rec('H-02', '主催者を含めた数だと企画者の画面に書いてある', `${note}個`, note === 1);
 
 // --- H-03 保存されるか ---
 const err1 = await saveWith('10', '3');
@@ -62,26 +62,29 @@ rec('H-03', 'DBへ保存された', `capacity=${saved.capacity} participant_coun
 
 // --- H-04〜06 企画の中に入る前に出るか ---
 const list = await textAt('/events');
-rec('H-04', '企画の一覧カードに人数が出る（企画の中に入る前）', list.includes('参加 3 / 10人（残り7）') ? '「参加 3 / 10人（残り7）」' : list.slice(0, 160), list.includes('参加 3 / 10人（残り7）'));
+rec('H-04', '企画の一覧カードに人数が出る（企画の中に入る前）', list.includes('参加人数 3 / 10人（残り7）') ? '「参加人数 3 / 10人（残り7）」' : list.slice(0, 160), list.includes('参加人数 3 / 10人（残り7）'));
 const top = await textAt('/');
-rec('H-05', 'トップページのカードにも出る', top.includes('参加 3 / 10人（残り7）') ? '「参加 3 / 10人（残り7）」' : top.slice(0, 160), top.includes('参加 3 / 10人（残り7）'));
+rec('H-05', 'トップページのカードにも出る', top.includes('参加人数 3 / 10人（残り7）') ? '「参加人数 3 / 10人（残り7）」' : top.slice(0, 160), top.includes('参加人数 3 / 10人（残り7）'));
 const detail = await textAt(`/events/${proposal.slug}`);
-rec('H-06', '企画詳細にも同じ数が出る', detail.includes('参加 3 / 10人（残り7）') ? 'あり' : 'なし', detail.includes('参加 3 / 10人（残り7）'));
+rec('H-06', '企画詳細にも同じ数が出る', detail.includes('参加人数 3 / 10人（残り7）') ? 'あり' : 'なし', detail.includes('参加人数 3 / 10人（残り7）'));
+
+// --- H-06b 見る側にも「主催者を含む」と書いてあるか ---
+rec('H-06b', '企画詳細に「主催者を含めた人数です」と書いてある', detail.includes('主催者を含めた人数です') ? 'あり' : 'なし', detail.includes('主催者を含めた人数です'));
 
 // --- H-07 満席 ---
 await saveWith('10', '10');
 const full = await textAt('/events');
-rec('H-07', '定員まで埋まると「満席」と出る', full.includes('参加 10 / 10人（満席）') ? '「参加 10 / 10人（満席）」' : full.slice(0, 160), full.includes('参加 10 / 10人（満席）'));
+rec('H-07', '定員まで埋まると「満席」と出る', full.includes('参加人数 10 / 10人（満席）') ? '「参加人数 10 / 10人（満席）」' : full.slice(0, 160), full.includes('参加人数 10 / 10人（満席）'));
 
 // --- H-08 定員なし ---
 await saveWith('', '4');
 const noCap = await textAt('/events');
-rec('H-08', '定員が空欄なら「参加 4人」だけ出る', noCap.includes('参加 4人') && !noCap.includes('/ '), noCap.includes('参加 4人'));
+rec('H-08', '定員が空欄なら「参加人数 4人」だけ出る', noCap.includes('参加人数 4人') && !noCap.includes('/ '), noCap.includes('参加人数 4人'));
 
 // --- H-09 どちらも空なら行が出ない ---
 await saveWith('', '');
 const empty = await textAt('/events');
-rec('H-09', '定員も人数も空なら、人数の行自体が出ない', empty.includes('参加 ') ? `出てしまった: ${empty.slice(0, 120)}` : '出ていない', !empty.includes('参加 '));
+rec('H-09', '定員も人数も空なら、人数の行自体が出ない', empty.includes('参加人数') ? `出てしまった: ${empty.slice(0, 120)}` : '出ていない', !empty.includes('参加人数'));
 
 // --- H-10 おかしな値は弾く ---
 // 全角や記号は入力欄の種類（数字専用）がブラウザ側で受け付けない。実測済み。
@@ -117,5 +120,5 @@ rec('H-12', 'おかしな値は判定で拒み、正しい値は通す', `${guar
 
 await browser.close();
 await pool.end();
-console.log(ng === 0 ? '\n判定: OK（参加人数の表示 12項目）' : `\n判定: NG（${ng}件）`);
+console.log(ng === 0 ? '\n判定: OK（参加人数の表示 13項目）' : `\n判定: NG（${ng}件）`);
 process.exit(ng === 0 ? 0 : 1);

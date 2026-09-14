@@ -1,5 +1,10 @@
 /**
- * 企画の「定員」と「いまの参加人数」。
+ * 企画の「定員」と「参加人数」。
+ *
+ * **参加人数は主催者を含めた数である。** 1なら主催者だけ、2なら主催者ともう1人。
+ * 「参加者」と書くと、主催者だけなのか別に参加者がいるのか読み手に分からないため、
+ * 画面の言葉も数え方もここに合わせている（2026-09-14、ユーザーの指示）。
+ * 定員も同じく、主催者を含めた上限として扱う。
  *
  * 企画の一覧カード（企画の中に入る前）で、何人集まっているかを見せるための値である。
  * **応募者の氏名・連絡先はAIueoに保存しない**（`MEMBERSHIP_FEATURE_SPEC.md` 実装前提）。
@@ -32,10 +37,10 @@ export function parseHeadcount(rawCapacity: unknown, rawParticipantCount: unknow
   }
 
   const count = parseOptionalInteger(rawParticipantCount);
-  if (count === 'invalid') return { ok: false, error: 'いまの参加人数は半角の数字で入力してください（空欄なら0人になります）。' };
+  if (count === 'invalid') return { ok: false, error: '参加人数は半角の数字で入力してください（空欄なら出しません）。' };
   const participantCount = count ?? 0;
   if (participantCount > MAX_HEADCOUNT) {
-    return { ok: false, error: `いまの参加人数は${MAX_HEADCOUNT.toLocaleString('ja-JP')}人までで入力してください。` };
+    return { ok: false, error: `参加人数は${MAX_HEADCOUNT.toLocaleString('ja-JP')}人までで入力してください。` };
   }
 
   return { ok: true, capacity, participantCount };
@@ -48,15 +53,25 @@ function toCount(value: unknown): number | null {
 }
 
 /**
- * 一覧カードに出す1行。出すものが無いときは `null` を返す（空の行を作らない）。
+ * 数の部分だけを返す。見出しで「参加人数」と既に書いてある場所（企画詳細）で使う。
+ * 出すものが無いときは `null` を返す（空の行を作らない）。
  *
- * - 定員あり … 「参加 3 / 10人（残り7）」。埋まっていれば「満席」
- * - 定員なし … 「参加 3人」。0人なら何も出さない（まだ誰も入れていないだけなので）
+ * - 定員あり … 「3 / 10人（残り7）」。埋まっていれば「満席」
+ * - 定員なし … 「3人」。0人なら何も出さない（まだ誰も入れていないだけなので）
  */
-export function headcountLabel(rawCapacity: unknown, rawParticipantCount: unknown): string | null {
+export function headcountText(rawCapacity: unknown, rawParticipantCount: unknown): string | null {
   const capacity = toCount(rawCapacity);
   const count = toCount(rawParticipantCount) ?? 0;
-  if (capacity === null) return count > 0 ? `参加 ${count}人` : null;
+  if (capacity === null) return count > 0 ? `${count}人` : null;
   const remaining = capacity - count;
-  return remaining > 0 ? `参加 ${count} / ${capacity}人（残り${remaining}）` : `参加 ${count} / ${capacity}人（満席）`;
+  return remaining > 0 ? `${count} / ${capacity}人（残り${remaining}）` : `${count} / ${capacity}人（満席）`;
+}
+
+/**
+ * 一覧カードに出す1行。見出しが無い場所で使うので「参加人数」を頭に付ける。
+ * 「参加者」ではなく「参加人数」とするのは、主催者を含めた数だと分かるようにするため。
+ */
+export function headcountLabel(rawCapacity: unknown, rawParticipantCount: unknown): string | null {
+  const text = headcountText(rawCapacity, rawParticipantCount);
+  return text === null ? null : `参加人数 ${text}`;
 }
