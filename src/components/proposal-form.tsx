@@ -15,6 +15,8 @@ const FIELD_LABELS: FieldLabels = {
   publicExpiresAt: '公開期限',
   organizerName: '主催者表示名',
   participationMethod: '参加方法',
+  capacity: '定員',
+  participantCount: 'いまの参加人数',
   moneyType: '金銭の種類',
   moneyLabel: '金銭条件の説明',
   moneySettlement: '精算方法',
@@ -36,6 +38,8 @@ export type ProposalDefaultValues = {
   organizerName?: string;
   participationMethod?: string;
   applicationUrl?: string;
+  capacity?: string;
+  participantCount?: string;
   moneyType?: string;
   moneyLabel?: string;
   moneyAmount?: string;
@@ -105,7 +109,7 @@ export function ProposalForm({ action, defaultValues, proposalId, currentStatus,
       <label><span className="form-label">公開期限 *</span><input name="publicExpiresAt" required type="datetime-local" onClick={openCalendar} defaultValue={values.publicExpiresAt} className="form-control" /></label>
       <label><span className="form-label">主催者表示名 *</span><input name="organizerName" required maxLength={120} defaultValue={values.organizerName} className="form-control" /></label>
       <label className="sm:col-span-2"><span className="form-label">参加方法 *</span><textarea name="participationMethod" required maxLength={2000} rows={3} defaultValue={values.participationMethod} className="form-control" placeholder="メールでご連絡ください / 当日直接お越しください / 定員20名 など" /></label>
-      <label className="sm:col-span-2"><span className="form-label">参加申し込みフォームのURL（任意）</span><span className="mt-1 block text-xs leading-6 text-white/50">Googleフォームなど、ご自分で用意した申し込みページのURLを貼ると、企画ページに「参加を申し込む」ボタンが出ます。申し込んだ人の名前や連絡先はAIueoには届きません。空欄でもかまいません。</span><input name="applicationUrl" type="url" inputMode="url" maxLength={2000} defaultValue={values.applicationUrl} className="form-control" placeholder="https://forms.gle/xxxxxxxx" /></label>
+      <label><span className="form-label">定員（任意）</span><span className="mt-1 block text-xs leading-6 text-white/50">空欄なら「上限なし」。半角の数字で入れてください。</span><input name="capacity" type="number" inputMode="numeric" min={1} max={100000} step={1} defaultValue={values.capacity} className="form-control" placeholder="10" /></label><label><span className="form-label">いまの参加人数（任意）</span><span className="mt-1 block text-xs leading-6 text-white/50">企画の一覧に「参加 3 / 10人」と出ます。集まったらご自分で書き換えてください。空欄なら0人です。</span><input name="participantCount" type="number" inputMode="numeric" min={0} max={100000} step={1} defaultValue={values.participantCount} className="form-control" placeholder="0" /></label><label className="sm:col-span-2"><span className="form-label">参加申し込みフォームのURL（任意）</span><span className="mt-1 block text-xs leading-6 text-white/50">Googleフォームなど、ご自分で用意した申し込みページのURLを貼ると、企画ページに「参加を申し込む」ボタンが出ます。申し込んだ人の名前や連絡先はAIueoには届きません。空欄でもかまいません。</span><input name="applicationUrl" type="url" inputMode="url" maxLength={2000} defaultValue={values.applicationUrl} className="form-control" placeholder="https://forms.gle/xxxxxxxx" /></label>
     </div>
     <fieldset className="space-y-4 border-t border-white/10 pt-7"><legend className="font-mono text-xs tracking-[0.15em] text-[#c8a45a]">金銭条件（公開前に必ず明記）</legend><label><span className="form-label">金銭の種類 *</span><select name="moneyType" required defaultValue={values.moneyType ?? 'none'} className="form-control"><option value="none">なし</option><option value="fixed_fee">固定参加費</option><option value="range_or_upper_limit">幅・上限あり</option><option value="reimbursement">実費精算</option><option value="reward">報酬</option><option value="donation">寄付・カンパ</option><option value="undecided">未定（公開不可）</option></select></label><div className="grid gap-4 sm:grid-cols-2"><label><span className="form-label">金銭条件の説明 *</span><input name="moneyLabel" required placeholder="なし / 参加費1,000円 など" defaultValue={values.moneyLabel} className="form-control" /></label><label><span className="form-label">金額・上限</span><input name="moneyAmount" defaultValue={values.moneyAmount} className="form-control" /></label><label><span className="form-label">通貨</span><input name="moneyCurrency" defaultValue={values.moneyCurrency ?? 'JPY'} className="form-control" /></label><label><span className="form-label">支払先</span><input name="moneyRecipient" defaultValue={values.moneyRecipient} className="form-control" /></label><label><span className="form-label">徴収方法</span><input name="moneyCollection" defaultValue={values.moneyCollection} className="form-control" /></label><label><span className="form-label">精算方法 *</span><input name="moneySettlement" required placeholder="なし / 当日現金 / 振込 など" defaultValue={values.moneySettlement} className="form-control" /></label><label><span className="form-label">返金・中止時の扱い</span><input name="moneyRefunds" defaultValue={values.moneyRefunds} className="form-control" /></label><label><span className="form-label">変更条件</span><input name="moneyChangeTerms" defaultValue={values.moneyChangeTerms} className="form-control" /></label></div></fieldset>
     <ProposalImageField currentImageUrl={hasImage && proposalId ? `/api/proposals/${proposalId}/image` : undefined} defaultData={state.values?.imageData} />

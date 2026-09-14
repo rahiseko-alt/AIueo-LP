@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation';
 import { db } from '@/lib/neon/db';
 import { getAuthContext } from '@/lib/auth/dal';
 import { formatLabel } from '@/lib/proposals/public';
+import { headcountLabel } from '@/lib/proposals/headcount';
 import { ProposalImage } from '@/components/proposal-image';
 
 export const dynamic = 'force-dynamic';
@@ -91,7 +92,8 @@ export default async function EventDetailPage({
   if (!db) notFound();
   const result = await db.$client.query(
     `select id, owner_id, slug, title, summary, format, tentative_starts_at, recruitment_deadline_at,
-      organizer_name, participation_method, application_url, visibility, money_type, money_details, published_at, image_mime
+      organizer_name, participation_method, application_url, visibility, money_type, money_details, published_at, image_mime,
+      capacity, participant_count
      from proposals
      where slug = $1 and status = 'published' and visibility = 'public' and public_expires_at > now()
      limit 1`,
@@ -136,7 +138,7 @@ export default async function EventDetailPage({
             <div><dt className="form-label">開催形式</dt><dd className="mt-2">{formatLabel(data.format)}</dd></div>
             <div><dt className="form-label">主催者</dt><dd className="mt-2">{String(data.organizer_name)}</dd></div>
             <div><dt className="form-label">候補日時</dt><dd className="mt-2">{data.tentative_starts_at ? new Date(String(data.tentative_starts_at)).toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' }) : '未定'}</dd></div>
-            <div><dt className="form-label">金銭条件</dt><MoneyConditions moneyType={data.money_type} moneyDetails={data.money_details} /></div>
+            {headcountLabel(data.capacity, data.participant_count) && <div><dt className="form-label">参加人数</dt><dd className="mt-2">{headcountLabel(data.capacity, data.participant_count)}<span className="mt-1 block text-xs leading-6 text-white/50">主催者が入力した数です。最新かどうかは主催者へご確認ください。</span></dd></div>}<div><dt className="form-label">金銭条件</dt><MoneyConditions moneyType={data.money_type} moneyDetails={data.money_details} /></div>
             <div className="sm:col-span-2"><dt className="form-label">参加方法</dt><dd className="mt-2 whitespace-pre-line leading-7 text-white/75">{String(data.participation_method)}</dd></div>
           </dl>
 
