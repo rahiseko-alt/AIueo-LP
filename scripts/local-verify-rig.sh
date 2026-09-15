@@ -129,9 +129,5 @@ echo "############ 参加申し込みURLの検証 ############"
 node scripts/verify-application-url.mjs || FAIL=1
 
 echo
-echo "############ 参加人数の表示の検証 ############"
-node --experimental-strip-types --no-warnings scripts/verify-headcount.mjs || FAIL=1
-
-echo
 if [ "$FAIL" = "0" ]; then echo "===== 全体判定: OK ====="; else echo "===== 全体判定: NG ====="; fi
 exit $FAIL

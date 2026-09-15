@@ -40,8 +40,6 @@ function toProposalDefaults(data: Record<string, unknown>): ProposalDefaultValue
     organizerName: String(data.organizer_name ?? ''),
     participationMethod: String(data.participation_method ?? ''),
     applicationUrl: data.application_url ? String(data.application_url) : '',
-    capacity: data.capacity == null ? '' : String(data.capacity),
-    participantCount: data.participant_count == null ? '' : String(data.participant_count),
     moneyType: String(data.money_type ?? ''),
     moneyLabel: String(money.label ?? ''),
     moneyAmount: String(money.amount ?? ''),
@@ -60,7 +58,7 @@ export default async function MemberProposalPage({ params }: { params: Promise<{
   if (!db) notFound();
   const result = await db.$client.query(
     `select id, slug, owner_id, title, summary, status, event_status, format, tentative_starts_at,
-      recruitment_deadline_at, public_expires_at, organizer_name, participation_method, application_url, capacity, participant_count,
+      recruitment_deadline_at, public_expires_at, organizer_name, participation_method, application_url,
       visibility, money_type, money_details, published_at, updated_at, image_mime
      from proposals where id = $1 and owner_id = $2 limit 1`,
     [id, member.userId],

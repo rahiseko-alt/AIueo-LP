@@ -7,7 +7,6 @@ import { db } from '@/lib/neon/db';
 import { echoValues, type ProposalActionState } from '@/lib/proposals/form-values';
 import { parseImageUpload, withoutImageData } from '@/lib/proposals/image';
 import { parseApplicationUrl } from '@/lib/proposals/application-url';
-import { parseHeadcount } from '@/lib/proposals/headcount';
 
 const stateSchema = z.enum(['planning', 'confirmed', 'full', 'cancelled', 'completed']);
 
@@ -193,8 +192,6 @@ export async function updateProposalAction(_previousState: ProposalActionState, 
   if (image.kind === 'invalid') return { error: image.error, values: echoValues(formData) };
   const applicationUrl = parseApplicationUrl(formData.get('applicationUrl'));
   if (!applicationUrl.ok) return { error: applicationUrl.error, values: echoValues(formData) };
-  const headcount = parseHeadcount(formData.get('capacity'), formData.get('participantCount'));
-  if (!headcount.ok) return { error: headcount.error, values: echoValues(formData) };
 
   const member = await requireActiveMember();
   const client = await db.$client.connect();
@@ -237,7 +234,7 @@ export async function updateProposalAction(_previousState: ProposalActionState, 
     const moneyDetails = collectMoneyDetails(input);
     const imageClause =
       image.kind === 'replace'
-        ? ', image_data = $19::bytea, image_mime = $20::text, image_updated_at = now()'
+        ? ', image_data = $17::bytea, image_mime = $18::text, image_updated_at = now()'
         : image.kind === 'remove'
           ? ', image_data = null, image_mime = null, image_updated_at = null'
           : '';
@@ -245,15 +242,13 @@ export async function updateProposalAction(_previousState: ProposalActionState, 
       `update proposals set title = $1, summary = $2, format = $3, tentative_starts_at = $4,
         recruitment_deadline_at = $5, public_expires_at = $6, organizer_name = $7, participation_method = $8,
         visibility = $9, money_type = $10, money_details = $11::jsonb, status = $12, published_at = $13,
-        application_url = $16::text, capacity = $17::integer, participant_count = $18::integer${imageClause}
+        application_url = $16::text${imageClause}
        where id = $14 and owner_id = $15 returning *`,
       [
         input.title, input.summary, input.format, tentativeStartsAt, recruitmentDeadlineAt, publicExpiresAt,
         input.organizerName, input.participationMethod, input.visibility, input.moneyType,
         JSON.stringify(moneyDetails), status, publishedAt, input.proposalId, member.userId,
         applicationUrl.value,
-        headcount.capacity,
-        headcount.participantCount,
         ...(image.kind === 'replace' ? [image.data, image.mime] : []),
       ],
     );
