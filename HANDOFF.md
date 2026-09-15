@@ -10,6 +10,25 @@
 
 ## 現在の状態
 
+- **2026-09-15、本番を2分30秒落とした（私の判断ミス）。復旧済み。** PR #64（P37 参加人数）を
+  `main` へマージしたが、`drizzle/0005_proposal_headcount.sql` を本番Neonへ**適用しないまま**
+  その2列を読むコードを出したため、公開ページ4つがすべて500になった。PR #65（`af03509`）で
+  revert し復旧した。**マージ前に適用が要ることは、PR本文・状態欄・この引継ぎの3か所に自分で
+  書いてあった。** 失敗記録は `FAILURES.md` の F-11。
+  - 実測: マージ直後 10:35:34 UTC に4ページとも500 → revert反映後 10:38:08 UTC に4ページとも200
+  - revert の中身が直前の正常な本番 `a593312` と完全に一致することを `git diff` 0行で確認
+- **再発防止として `/api/health/schema` を新設した（P38）。** マイグレーションが足す列が本番に
+  有るか無いかを、**外から1回のHTTPで**確かめられる。この窓口は**新しい列そのものを読まない**
+  （`information_schema` を見るだけ）ので、未適用の状態でも安全に動く。
+
+      curl -s https://aiueo-lp.vercel.app/api/health/schema
+
+  `pendingMissing` が空になってから、その列を使うコードをマージする。窓口自体が未適用を
+  見抜けることは `bash scripts/verify-schema-health.sh` で確かめられる（肯定・適用後・否定の3方向）。
+- **P37（参加人数）は未反映に戻っている。** 実装は実ブラウザ13項目で実測済みで、`4b0e9a7` に
+  残っている。入れ直す手順は下の「次にやること」を参照。
+
+
 - 本番URL: https://aiueo-lp.vercel.app/
 - Vercelプロジェクト: `rahisekos-projects/aiueo-lp`
 - 最新の実装コミット: `48e7edc feat: 参加申し込みフォームのURLを足し、監査記録への画像混入を直す(P35/P36) (#62)`（`main`へマージ済み・**本番反映済み**。`drizzle/0004`も本番適用済みで、適用をこちらで機械的に確かめた）
@@ -1309,6 +1328,23 @@ CI もテストも無く、`npm run lint` が exit 1 のまま放置され、`ne
 - ユーザー指示によりメンバー紹介をホームへ復帰（4名表示を本番確認済み）。
 
 ## 次にやること
+
+### 最優先: P37（参加人数）を安全に入れ直す
+
+順番を守ること。**この順番を崩したのが 2026-09-15 の事故である。**
+
+1. **ユーザーの手番**: `drizzle/0005_proposal_headcount.sql`（内容は `git show 4b0e9a7:drizzle/0005_proposal_headcount.sql`）を
+   本番Neonへ適用する。Vercel → 対象プロジェクト → Storage → Neon → Query（右上の `Read-only` をオフ）へ
+   貼って実行する。全体が1つの `do` ブロックなので1回貼るだけで済み、何度流しても結果は変わらない。
+2. **こちらの手番**: `curl -s https://aiueo-lp.vercel.app/api/health/schema` を叩き、
+   `pendingMissing` が `[]` になったことを確かめる。**ユーザーの報告だけを根拠にしない**（F-02）。
+3. **こちらの手番**: `git revert af03509`（revertのrevert）でP37を戻し、PRを作ってCIを通してマージする。
+   同時に `src/app/api/health/schema/route.ts` の `0005_proposal_headcount` の2行を
+   `status: 'pending'` から `'required'` へ移す。
+4. **こちらの手番**: 本番でトップ・企画一覧・企画詳細が200であることを確かめる。
+
+### そのほか
+
 
 ### 待ちの整理（コードで進められる作業は、いま無い）
 
