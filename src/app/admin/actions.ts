@@ -8,7 +8,6 @@ import { db } from '@/lib/neon/db';
 import { adminSelectableStatuses } from '@/app/admin/statuses';
 import { withoutImageData } from '@/lib/proposals/image';
 import { parseApplicationUrl } from '@/lib/proposals/application-url';
-import { parseHeadcount } from '@/lib/proposals/headcount';
 
 const statusSchema = z.enum(adminSelectableStatuses);
 const memberStatusSchema = z.enum(['active', 'suspended', 'withdrawn']);
@@ -151,7 +150,7 @@ export async function sendAdminMessageAction(formData: FormData) {
   finish(path, transaction);
 }
 
-const editSchema = z.object({ proposalId: z.string().uuid(), title: z.string().trim().min(1).max(140), summary: z.string().trim().min(1).max(5000), format: z.enum(['offline', 'online', 'hybrid']), tentativeStartsAt: z.string().min(1), recruitmentDeadlineAt: z.string(), publicExpiresAt: z.string().min(1), organizerName: z.string().trim().min(1).max(120), participationMethod: z.string().trim().min(1).max(2000), applicationUrl: z.string().optional(), capacity: z.string().optional(), participantCount: z.string().optional(), visibility: z.enum(['public', 'unlisted']), moneyType: moneyTypeSchema, moneyDetails: z.string(), reasonCode: z.string().trim().min(1).max(80), reasonText: z.string().trim().min(1).max(2000) });
+const editSchema = z.object({ proposalId: z.string().uuid(), title: z.string().trim().min(1).max(140), summary: z.string().trim().min(1).max(5000), format: z.enum(['offline', 'online', 'hybrid']), tentativeStartsAt: z.string().min(1), recruitmentDeadlineAt: z.string(), publicExpiresAt: z.string().min(1), organizerName: z.string().trim().min(1).max(120), participationMethod: z.string().trim().min(1).max(2000), applicationUrl: z.string().optional(), visibility: z.enum(['public', 'unlisted']), moneyType: moneyTypeSchema, moneyDetails: z.string(), reasonCode: z.string().trim().min(1).max(80), reasonText: z.string().trim().min(1).max(2000) });
 function toIso(value: string) { const date = new Date(value.includes('T') && !/[zZ]|[+-]\d\d:?\d\d$/.test(value) ? `${value}:00+09:00` : value); return Number.isNaN(date.valueOf()) ? null : date.toISOString(); }
 
 /** `money_details` は必ずオブジェクト。配列や数値が入ると公開ページの金銭条件表示が壊れる。 */
@@ -177,13 +176,11 @@ export async function adminUpdateProposalAction(formData: FormData) {
   if (!moneyDetails) finish(path, fail('input'));
   const applicationUrl = parseApplicationUrl(value.applicationUrl);
   if (!applicationUrl.ok) finish(path, fail('input'));
-  const headcount = parseHeadcount(value.capacity, value.participantCount);
-  if (!headcount.ok) finish(path, fail('input'));
 
   const transaction = await withAdminTransaction('proposal_edit', async (client, adminId) => {
     const current = await client.query('select * from proposals where id = $1 for update', [value.proposalId]);
     if (current.rowCount !== 1) throw new Error('proposal not found');
-    const updated = await client.query(`update proposals set title = $1, summary = $2, format = $3, tentative_starts_at = $4, recruitment_deadline_at = $5, public_expires_at = $6, organizer_name = $7, participation_method = $8, visibility = $9, money_type = $10, money_details = $11::jsonb, application_url = $13::text, capacity = $14::integer, participant_count = $15::integer where id = $12 returning *`, [value.title, value.summary, value.format, tentative, deadline, expiry, value.organizerName, value.participationMethod, value.visibility, value.moneyType, JSON.stringify(moneyDetails), value.proposalId, applicationUrl.ok ? applicationUrl.value : null, headcount.ok ? headcount.capacity : null, headcount.ok ? headcount.participantCount : 0]);
+    const updated = await client.query(`update proposals set title = $1, summary = $2, format = $3, tentative_starts_at = $4, recruitment_deadline_at = $5, public_expires_at = $6, organizer_name = $7, participation_method = $8, visibility = $9, money_type = $10, money_details = $11::jsonb, application_url = $13::text where id = $12 returning *`, [value.title, value.summary, value.format, tentative, deadline, expiry, value.organizerName, value.participationMethod, value.visibility, value.moneyType, JSON.stringify(moneyDetails), value.proposalId, applicationUrl.ok ? applicationUrl.value : null]);
     await client.query('insert into proposal_versions (proposal_id, actor_id, reason_code, reason_text, snapshot) values ($1, $2, $3, $4, $5::jsonb)', [value.proposalId, adminId, value.reasonCode, value.reasonText, JSON.stringify(withoutImageData(updated.rows[0]))]);
     await recordAdminChange(client, adminId, 'proposal', value.proposalId, 'admin_proposal_edited', value.reasonCode, value.reasonText, withoutImageData(current.rows[0]), withoutImageData(updated.rows[0]));
     await client.query('insert into notifications (recipient_id, proposal_id, kind, body, dedupe_key) values ($1, $2, $3, $4, $5)', [current.rows[0].owner_id, value.proposalId, 'admin_proposal_edit', `管理者が企画内容を変更しました。理由: ${value.reasonText}`, `admin-edit-${value.proposalId}-${crypto.randomUUID()}`]);
