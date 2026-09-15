@@ -22,7 +22,7 @@ export type ProposalActionState = { error: string | null; values?: ProposalRawVa
 /** 戻す対象の入力欄。3つの掲載確認も含める（外れたことに気づかず再送信するのを防ぐ）。 */
 const ECHO_FIELDS = [
   'title', 'summary', 'format', 'visibility', 'tentativeStartsAt', 'recruitmentDeadlineAt',
-  'publicExpiresAt', 'organizerName', 'participationMethod', 'applicationUrl', 'moneyType', 'moneyLabel',
+  'publicExpiresAt', 'organizerName', 'participationMethod', 'applicationUrl', 'capacity', 'participantCount', 'moneyType', 'moneyLabel',
   'moneyAmount', 'moneyCurrency', 'moneyRecipient', 'moneyCollection', 'moneySettlement',
   'moneyRefunds', 'moneyChangeTerms', 'prohibitedConfirmed', 'rightsConfirmed', 'moneyConfirmed',
   // 選んだ画像も戻す。戻さないと、検証に落ちるたびに画像だけ選び直しになる。
