@@ -16,6 +16,7 @@ import {
 } from '@/data/mock';
 import { getPublicProposals, type PublicProposal } from '@/lib/proposals/public';
 import type { Activity } from '@/types';
+import { headcountLabel } from '@/lib/proposals/headcount';
 
 export const dynamic = 'force-dynamic';
 
@@ -53,6 +54,8 @@ function toActivity(p: PublicProposal, index: number): Activity {
     // 企画者が画像を添付していればそれを使う。無いときだけ既存の見本写真を
     // 順番に割り当てる（カードだけ真っ黒になるのを避けるため）。
     imageUrl: p.image_mime ? `/api/proposals/${p.id}/image` : FALLBACK_IMAGES[index % FALLBACK_IMAGES.length],
+    // 人数はカードの `spots` 欄（既存）へ流し込む。企画者が入れていなければ出ない。
+    spots: headcountLabel(p.capacity, p.participant_count) ?? undefined,
     actionUrl: `/events/${p.slug}`,
     actionLabel: '詳細を見る →',
   };

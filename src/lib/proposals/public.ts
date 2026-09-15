@@ -18,13 +18,18 @@ export type PublicProposal = {
   published_at: string | null;
   /** 添付画像の種類。画像の中身はここでは引かない（一覧で数百KB×件数を読むため）。 */
   image_mime: string | null;
+  /** 定員。未設定（上限なし）なら null。 */
+  capacity: number | null;
+  /** いまの参加人数。企画者が自分で入れた数で、AIueoが数えたものではない。 */
+  participant_count: number;
 };
 
 export async function getPublicProposals(): Promise<PublicProposal[]> {
   if (!db) return [];
   const result = await db.$client.query(
     `select id, slug, title, summary, format, tentative_starts_at, organizer_name,
-      participation_method, visibility, money_type, money_details, published_at, image_mime
+      participation_method, visibility, money_type, money_details, published_at, image_mime,
+      capacity, participant_count
      from proposals
      where status = 'published' and visibility = 'public' and public_expires_at > now()
      order by tentative_starts_at asc`,

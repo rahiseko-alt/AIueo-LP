@@ -38,9 +38,9 @@ const EXPECTED_COLUMNS: ReadonlyArray<Expectation> = [
   { migration: '0003_proposal_images', table: 'proposals', column: 'image_mime', status: 'required' },
   { migration: '0003_proposal_images', table: 'proposals', column: 'image_updated_at', status: 'required' },
   { migration: '0004_proposal_application_url', table: 'proposals', column: 'application_url', status: 'required' },
-  // P37（参加人数）。本番へ適用され、ここが present になってから、利用する側のコードを出す。
-  { migration: '0005_proposal_headcount', table: 'proposals', column: 'capacity', status: 'pending' },
-  { migration: '0005_proposal_headcount', table: 'proposals', column: 'participant_count', status: 'pending' },
+  // P37（参加人数）。2026-09-15に本番へ適用され、この窓口で present を確認したうえでコードを出した。
+  { migration: '0005_proposal_headcount', table: 'proposals', column: 'capacity', status: 'required' },
+  { migration: '0005_proposal_headcount', table: 'proposals', column: 'participant_count', status: 'required' },
 ];
 
 export async function GET() {

@@ -55,7 +55,7 @@ export function RequiredFieldsNotice({ items }: { items: string[] }) {
   if (items.length === 0) return null;
   return (
     <p role="alert" className="border border-red-300/35 bg-red-950/30 p-4 text-sm leading-7 text-red-100">
-      次の項目が空のため、まだ保存していません。入力してから、もう一度ボタンを押してください。
+      次の項目が空、または入力が正しくないため、まだ保存していません。直してから、もう一度ボタンを押してください。
       <span className="mt-2 block font-semibold">{items.join(' / ')}</span>
     </p>
   );
