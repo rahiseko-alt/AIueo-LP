@@ -19,6 +19,12 @@ export interface Person {
   role: string;
   avatarUrl: string;
   activityIds: string[];
+  /**
+   * 本人の紹介文。入っている場合はカード下部にこれを出し、
+   * 「Collaborated on」の一覧は出さない（見本の活動名を本人の実績のように
+   * 見せないため）。
+   */
+  bio?: string;
 }
 
 export interface Activity {

@@ -16,3 +16,4 @@
 652cba548b2b40ee5078280b40ca9e266b0c563d claude/checkin-6hrtds # 2026-09-11確認。P15の台帳反映。mainに無い本文は1行のみでP15の記録はmainにある
 1e2e1abe1a3b029e07a4ba7972719f3fc8d47222 claude/dazzling-babbage-yxplec # 2026-09-11確認。mainに無い見出し0件。フック類もCLAUDE.mdの@参照もmainに存在する
 a2d25c8945d948785778c1f290e95d6a59cfdeec docs/handoff-session # 2026-09-11確認。mainに無い26行はP9の全行監査より前の暫定リストで、確定リストがmainにある
+850c47fd5b36ffc8d2040beb5be325241070b443 revert/p37-headcount # 2026-09-17確認。PR #65としてmainへマージ済み(af03509)。mainに無い本文は1行のみで、それは「最新の実装コミット」欄の古い版(mainは同じ行を更新済み)
