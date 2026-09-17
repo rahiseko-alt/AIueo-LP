@@ -71,7 +71,7 @@ export function Navbar() {
     { label: 'About', href: '#about' },
     { label: 'How It Works', href: '#philosophy' },
     { label: 'Events', href: '/events' },
-    { label: 'Our Work', href: '#recent' },
+    { label: 'Activity Log', href: '#recent' },
   ];
 
   return (

@@ -21,16 +21,13 @@ export function RecentLog({ activities, people }: RecentLogProps) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 md:px-10">
         <div className="flex flex-col sm:flex-row sm:items-baseline justify-between gap-3 border-b border-[rgba(240,237,232,0.08)] pb-6">
           <div>
-            <div className="sec-eyebrow">03 / WORK BY OUR ORGANIZER</div>
-            <h2 className="sec-title text-[#f0ede8]">What We Actually Built</h2>
-            {/* 主宰個人の受託実績であり、AIueoの企画ではない。読んだ人が取り違えないよう明記する。 */}
-            <p className="mt-3 max-w-2xl font-sans text-xs sm:text-sm font-light leading-relaxed text-[rgba(240,237,232,0.75)]">
-              主宰・小齊平恒平が実際に納品した仕組みです。AIueoの企画ではなく、
-              どんなことができるかの参考として載せています。
-            </p>
+            <div className="sec-eyebrow">03 / LOGS & WHAT WE DID</div>
+            <h2 className="sec-title text-[#f0ede8]">Recent Activities</h2>
+            {/* 主宰個人の受託実績であり、AIueoの企画ではない。混同しないよう、
+                掲載するものを増やすときは出どころを確かめること。 */}
           </div>
           <span className="font-mono text-xs text-[rgba(240,237,232,0.6)] tracking-wider">
-            ORGANIZER&apos;S WORK
+            ACTIVITY ARCHIVE
           </span>
         </div>
 
