@@ -23,6 +23,8 @@ export function RecentLog({ activities, people }: RecentLogProps) {
           <div>
             <div className="sec-eyebrow">03 / LOGS & WHAT WE DID</div>
             <h2 className="sec-title text-[#f0ede8]">Recent Activities</h2>
+            {/* 主宰個人の受託実績であり、AIueoの企画ではない。混同しないよう、
+                掲載するものを増やすときは出どころを確かめること。 */}
           </div>
           <span className="font-mono text-xs text-[rgba(240,237,232,0.6)] tracking-wider">
             ACTIVITY ARCHIVE
