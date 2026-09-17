@@ -10,9 +10,9 @@ export const mockPeople: Person[] = [
   },
   {
     id: 'person-2',
-    name: 'Yuka Takahashi',
-    role: 'Life & Family AI Lecturer',
-    avatarUrl: '/images/japanese/avatar-2.png',
+    name: '伊藤良二',
+    role: 'AI顧問',
+    avatarUrl: '/images/japanese/avatar-2-v2.png',
     activityIds: ['act-next-1', 'act-1'],
   },
   {
