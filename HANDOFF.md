@@ -1579,10 +1579,11 @@ Tier 1（セキュリティ・確実なバグ）は実施済み。**Tier 2〜4 �
 
 - **引継ぎは `main` へマージするまで完了ではない。** 2026-09-05、引継ぎ更新を未マージのPR #10 に置いたままセッションを終えたため、次のセッションが8月31日時点の`HANDOFF.md`を読み、P9ではなく古い未解決事項を報告した。規約を `AGENTS.md`「引継ぎは main に到達して初めて完了とする」へ追記し、`.claude/hooks/session-start.sh` がセッション開始時に同じ状態を検出するようにした。**引継ぎ更新を最後の独立PRにしない。**
 - セッション開始フックが「引継ぎが main に到達していない可能性がある」と警告した場合、名指しされたブランチの`HANDOFF.md`を先に読むこと。`main`の内容は古い。
-- **ただし、次の3ブランチについては2026-09-11に中身を突き合わせ、`main`に取り込み済みであることを確認した。** **確認済みとして`.claude/handoff-verified.txt`へ登録したので、開始時の警告には出ない**（代わりに「3件は突き合わせ済みとして除外」と件数だけ出る）。ブランチ自体は残っている。こちらのGitHub権限では削除できず（`git push --delete`が3回とも403）、消すならユーザーが https://github.com/rahiseko-alt/AIueo-LP/branches のゴミ箱アイコンから行う。
+- **ただし、次の4ブランチについては中身を突き合わせ、`main`に取り込み済みであることを確認した**（3件は2026-09-11、`revert/p37-headcount`は2026-09-17）。**確認済みとして`.claude/handoff-verified.txt`へ登録したので、開始時の警告には出ない**（代わりに「4件は突き合わせ済みとして除外」と件数だけ出る）。ブランチ自体は残っている。こちらのGitHub権限では削除できず（`git push --delete`が3回とも403）、消すならユーザーが https://github.com/rahiseko-alt/AIueo-LP/branches のゴミ箱アイコンから行う。
   - `origin/claude/checkin-6hrtds`（2026-09-09、P15の台帳反映）— 本文で`main`に無い行は1行のみ。P15の記録は`main`にある
   - `origin/claude/dazzling-babbage-yxplec`（2026-09-06、見逃し防止の三重化とチェックアウトのフック）— `main`に無い見出しは0件。`.claude/hooks/session-start.sh`・`session-end.sh`・`CLAUDE.md`の`@`参照とも`main`に存在する
   - `origin/docs/handoff-session`（2026-09-05）— `main`に無い26行は、すべてP9の全行監査**前**の暫定リストである。P9で読み切った「確定した問題リスト」が`main`にあり、Tier 1〜4も完了済みなので、内容は古い方が残っているだけで失われていない
+  - `origin/revert/p37-headcount`（2026-09-15、F-11のrevert）— PR #65として`main`へマージ済み（`af03509`）。squashマージのため元コミットが`main`の祖先にならず警告に出ていた。`main`に無い本文は1行だけで、それは「最新の実装コミット」欄の古い版である（`main`は同じ行を更新済み）。**登録の前後で、フックの出力が消えること・1行外すと戻ることの両方を実測した**
   突き合わせ方法: `git show origin/<branch>:HANDOFF.md` と `git show origin/main:HANDOFF.md` を見出し単位・本文行単位で`comm`にかけた。
 - **`.claude/handoff-verified.txt` は先端のコミットSHAで書く。** ブランチ名ではなくSHAを鍵にしているので、そのブランチへ新しいコミットが積まれればSHAが変わり、警告が復活する。「一度無視したら永久に無視」にならないための作りである。**登録する前に必ず中身を`main`と突き合わせること。** 除外した件数は毎回画面に出るので、無視していること自体は隠れない。
 - **`drizzle/0001_rate_limits.sql` は本番Neonへ適用済み**（2026-09-05、`neon-pink-bucket` / branch `main` / database `neondb`）。今後マイグレーションを追加する場合は、**必ず本番DBへ適用してからマージする**。逆順にすると、テーブル不在で該当エンドポイントが例外になる。
