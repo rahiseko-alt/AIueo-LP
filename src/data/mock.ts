@@ -3,40 +3,27 @@ import { Activity, Person } from '@/types';
 export const mockPeople: Person[] = [
   {
     id: 'person-1',
-    name: 'Kouhei Kosehira',
-    role: 'Alliance Founder / Organizer',
+    name: '小齊平 恒平',
+    role: '主宰 / 業務改善・自動化・AI活用支援',
     avatarUrl: '/images/japanese/kosehirakouhei-profile.png',
-    activityIds: ['act-hero', 'act-next-1', 'act-1'],
+    // 見本の活動名を本人の実績として並べないため空にする。
+    activityIds: [],
+    bio: '中小企業や店舗のAI導入を支援しています。課題整理から業務フロー設計、試作、導入、教育までを一貫して担当。現場に立つ人が無理なく使い続けられるかを、判断の基準にしています。',
   },
   {
     id: 'person-2',
     name: '伊藤良二',
     role: 'AI顧問',
     avatarUrl: '/images/japanese/avatar-2-v2.png',
-    // 見本の活動名を本人の実績として並べないため空にする。
     activityIds: [],
     bio: '子どもにも仕事にもAI活用をやさしく伴走します。小中学生と保護者が安心してAIを学べるプログラムと、仕事にAIを取り入れたい方への初回無料相談を準備しています。',
-  },
-  {
-    id: 'person-3',
-    name: 'Taro Yamada',
-    role: 'Client Work & Tech Lead',
-    avatarUrl: '/images/japanese/avatar-3.png',
-    activityIds: ['act-hero', 'act-next-3', 'act-2'],
-  },
-  {
-    id: 'person-4',
-    name: 'Kenichi Suzuki',
-    role: 'Kids AI Mentor / Local Organizer',
-    avatarUrl: '/images/japanese/avatar-4.png',
-    activityIds: ['act-next-2', 'act-3'],
   },
 ];
 
 export const mockHeroActivity: Activity = {
   id: 'act-hero',
   title: '「こういうのやるんですけど、一緒にどうですか？」',
-  summary: '主婦向けAIセミナー、地域の子ども向けAI教室、受注開発チームの結成、深夜の熱狂LT会まで。ジャンルは問わない。AIに関わる人が自分のやりたい企画を実際に立ち上げ、仲間を巻き込む草AI同盟。',
+  summary: 'AIに関わる人が、自分のやりたい企画を実際に立ち上げ、仲間を巻き込む場です。ジャンルは問いません。参加するのに会員登録は要りません。',
   category: 'EVENT',
   tags: ['COMMUNITY', 'AI', 'DEVELOPMENT', 'EDUCATION'],
   status: 'UPCOMING',
@@ -50,113 +37,62 @@ export const mockHeroActivity: Activity = {
   isHero: true,
 };
 
-export const mockUpcomingActivities: Activity[] = [
-  {
-    id: 'act-next-1',
-    title: '主婦・シニア向け「暮らしと家事がラクになるChatGPT活用セミナー」',
-    summary: '献立作成、旅行計画、学校のお便り整理など、生活に直結するAIの使い方をハンズオンで教える企画。共催・アシスタント募集中。',
-    category: 'EVENT',
-    tags: ['EDUCATION', 'AI'],
-    status: 'UPCOMING',
-    date: '2026-10-04',
-    displayDate: '10.04 SAT 10:30',
-    imageUrl: '/images/japanese/seminar.png',
-    location: 'Setagaya Community Hall / Online',
-    spots: '参加 15名 / 運営サポーター募集中',
-    actionUrl: '#join',
-    actionLabel: '参加・サポートする',
-  },
-  {
-    id: 'act-next-2',
-    title: '地域の子ども向け「AIで動くオリジナル絵本を作ろう！ワークショップ」',
-    summary: '画像生成AIと音声AIを使って、小学生が自分の物語を1本のデジタル絵本にする体験イベント。地元公民館と連携開催。',
-    category: 'EVENT',
-    tags: ['COMMUNITY', 'CREATIVE', 'AI'],
-    status: 'UPCOMING',
-    date: '2026-10-18',
-    displayDate: '10.18 SUN 13:00',
-    imageUrl: '/images/japanese/workshop.png',
-    location: 'Kamakura Local Hub',
-    spots: '親子10組限定 (メンター募集中)',
-    actionUrl: '#join',
-    actionLabel: '詳細・メンター参加',
-  },
-  {
-    id: 'act-next-3',
-    title: '自治体・地元店舗向けAI導入受託プロジェクト（チームメンバー募集）',
-    summary: '地域商店街の多言語AI案内ボットと販促画像自動化を受注開発。デザイン・フロントエンド・プロンプト実装者を募集。',
-    category: 'PROJECT',
-    tags: ['DEVELOPMENT', 'LOCAL', 'AI'],
-    status: 'UPCOMING',
-    date: '2026-10-25',
-    displayDate: '10.25 KICKOFF',
-    imageUrl: '/images/japanese/development.png',
-    location: 'Shibuya Office / Discord',
-    spots: '開発メンバー 3名募集',
-    actionUrl: '#join',
-    actionLabel: '開発チームに応募',
-  },
-  {
-    id: 'act-next-4',
-    title: '第6回 AIオタク集結！なんでもありの5分即興LTナイト',
-    summary: 'ローカルLLM、最新画像生成、自動化ボットなど、自分が最近試して面白かったAIの実験結果を持ち寄り発表するLT会。',
-    category: 'EVENT',
-    tags: ['COMMUNITY', 'DEVELOPMENT', 'AI'],
-    status: 'UPCOMING',
-    date: '2026-11-07',
-    displayDate: '11.07 SAT 18:00',
-    imageUrl: '/images/japanese/meetup.png',
-    location: 'Shibuya Space & YouTube Live',
-    spots: '登壇者8名 / 観覧自由',
-    actionUrl: '#join',
-    actionLabel: '登壇・観覧エントリー',
-  },
-];
-
+/**
+ * 主宰・小齊平恒平が実際に納品した仕組み。出典は本人のサイト
+ * https://kouheikosehira.com/ の「主な開発事例」である。
+ * **AIueoの企画ではない**ので、画面側にもその旨を書いてある。
+ * 参加人数・共同メンバーは持たない（捏造しやすい欄なので出さない）。
+ * 写真は用意のある素材を当てているだけで、案件そのものの写真ではない。
+ */
 export const mockRecentActivities: Activity[] = [
   {
     id: 'act-1',
-    title: '主婦向け「今日から使えるChatGPT家事時短セミナー」',
-    summary: '世田谷の地域コミュニティで24名の主婦が参加。献立提案やプリント整理の実演を行い大好評。',
-    category: 'EVENT',
-    tags: ['EDUCATION', 'AI'],
+    title: 'SNS運用の自動化',
+    summary:
+      '投稿文の生成、自動投稿、反応の分析にもとづく修正までをひとつながりにした。媒体ごとのアルゴリズムとBAN対策も含む。',
+    category: 'PROJECT',
+    tags: ['AI', 'DEVELOPMENT'],
     status: 'COMPLETED',
     date: '2026-08-15',
-    displayDate: '2026.08.15',
-    imageUrl: '/images/japanese/seminar.png',
-    participantCount: 24,
-    partnerIds: ['person-2', 'person-1'],
+    displayDate: '投稿の途絶がなくなった',
+    imageUrl: '/images/japanese/meetup.png',
   },
   {
     id: 'act-2',
-    title: '地元商店街の多言語AIマッププロトタイプ共同納品',
-    summary: '同盟内のエンジニアとデザイナー3名でチームを組み、外国人観光客向けAI案内システムを受託開発・納品。',
+    title: 'AIチャットボット',
+    summary:
+      '自社資料だけを根拠に答える一次対応。回答には必ず出どころを示し、判断が必要なものは人へ回す。',
     category: 'PROJECT',
-    tags: ['DEVELOPMENT', 'AI'],
+    tags: ['AI', 'LLM'],
     status: 'COMPLETED',
     date: '2026-07-28',
-    displayDate: '2026.07.28',
+    displayDate: '定型の問い合わせを自動処理',
     imageUrl: '/images/japanese/development.png',
-    participantCount: 3,
-    partnerIds: ['person-1', 'person-3'],
   },
   {
     id: 'act-3',
-    title: '夏休み小学生向け「AIお絵描きプログラミング教室」',
-    summary: '鎌倉の学童クラブで18名の子どもたちと生成AIを活用したオリジナルカードゲーム制作を実施。',
-    category: 'EVENT',
-    tags: ['COMMUNITY', 'CREATIVE'],
+    title: '音声カルテ作成アプリ（ペット業界向け）',
+    summary:
+      '診察中に片手で音声入力し、記録を業務と同時進行にした。あとからの転記をなくすことを狙った。',
+    category: 'PROJECT',
+    tags: ['AI', 'PROTOTYPE'],
     status: 'COMPLETED',
     date: '2026-06-10',
-    displayDate: '2026.06.10',
+    displayDate: '1日約2時間の事務作業を削減',
     imageUrl: '/images/japanese/workshop.png',
-    participantCount: 18,
-    partnerIds: ['person-4', 'person-1'],
+  },
+  {
+    id: 'act-4',
+    title: '書類業務の半自動化アプリ（飲食業向け）',
+    summary:
+      '作業しながらの片手入力から書式変換、本部提出までを一気通貫に。現場で使い続けられることを最優先に設計した。',
+    category: 'PROJECT',
+    tags: ['AI', 'LOCAL'],
+    status: 'COMPLETED',
+    date: '2026-05-20',
+    displayDate: '月50時間相当を削減',
+    imageUrl: '/images/japanese/seminar.png',
   },
 ];
 
-export const mockAllActivities: Activity[] = [
-  mockHeroActivity,
-  ...mockUpcomingActivities,
-  ...mockRecentActivities,
-];
+export const mockAllActivities: Activity[] = [mockHeroActivity, ...mockRecentActivities];
