@@ -46,22 +46,30 @@ export function TeamMembers({ people, activities }: TeamMembersProps) {
                     {person.name}
                   </h3>
 
-                  <div className="mt-5 border-t border-[rgba(240,237,232,0.08)] pt-4">
-                    <span className="font-mono text-[10px] tracking-wider text-[rgba(240,237,232,0.6)] uppercase">
-                      Collaborated on:
-                    </span>
-                    <ul className="mt-2 space-y-1.5 font-sans text-xs text-[rgba(240,237,232,0.7)]">
-                      {person.activityIds.map((actId) => {
-                        const title = getActivityTitle(actId);
-                        if (!title) return null;
-                        return (
-                          <li key={actId} className="line-clamp-1">
-                            → {title}
-                          </li>
-                        );
-                      })}
-                    </ul>
-                  </div>
+                  {person.bio ? (
+                    <div className="mt-5 border-t border-[rgba(240,237,232,0.08)] pt-4">
+                      <p className="font-sans text-xs leading-relaxed text-[rgba(240,237,232,0.7)]">
+                        {person.bio}
+                      </p>
+                    </div>
+                  ) : (
+                    <div className="mt-5 border-t border-[rgba(240,237,232,0.08)] pt-4">
+                      <span className="font-mono text-[10px] tracking-wider text-[rgba(240,237,232,0.6)] uppercase">
+                        Collaborated on:
+                      </span>
+                      <ul className="mt-2 space-y-1.5 font-sans text-xs text-[rgba(240,237,232,0.7)]">
+                        {person.activityIds.map((actId) => {
+                          const title = getActivityTitle(actId);
+                          if (!title) return null;
+                          return (
+                            <li key={actId} className="line-clamp-1">
+                              → {title}
+                            </li>
+                          );
+                        })}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>

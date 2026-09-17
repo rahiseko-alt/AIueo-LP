@@ -13,7 +13,9 @@ export const mockPeople: Person[] = [
     name: '伊藤良二',
     role: 'AI顧問',
     avatarUrl: '/images/japanese/avatar-2-v2.png',
-    activityIds: ['act-next-1', 'act-1'],
+    // 見本の活動名を本人の実績として並べないため空にする。
+    activityIds: [],
+    bio: '子どもにも仕事にもAI活用をやさしく伴走します。小中学生と保護者が安心してAIを学べるプログラムと、仕事にAIを取り入れたい方への初回無料相談を準備しています。',
   },
   {
     id: 'person-3',
