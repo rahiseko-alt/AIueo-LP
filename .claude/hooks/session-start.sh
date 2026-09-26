@@ -114,6 +114,15 @@ git fetch origin --quiet 2>/dev/null || {
   exit 0
 }
 
+# クラウド環境のクローンは履歴が浅い（既定50コミット）。浅いままだと、境界より前の
+# main のコミットが「main に無い」ものとして数えられ、取り込み済みのブランチが
+# 片端から警告に出る（2026-09-26、7件の誤警報をこれで実測した）。先に全履歴を取る。
+if [ "$(git rev-parse --is-shallow-repository 2>/dev/null)" = "true" ]; then
+  git fetch --unshallow origin --quiet 2>/dev/null || {
+    echo "  ⚠ 履歴が浅いクローンで、全履歴を取得できなかった。以下の判定は誤警報を含みうる"
+  }
+fi
+
 DEFAULT_BRANCH=$(git symbolic-ref --quiet refs/remotes/origin/HEAD 2>/dev/null | sed 's|refs/remotes/origin/||')
 DEFAULT_BRANCH="${DEFAULT_BRANCH:-main}"
 

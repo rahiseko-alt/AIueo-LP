@@ -10,6 +10,16 @@
 
 ## 現在の状態
 
+- **2026-09-26: 開始フックが旧ブランチ7件を「未到達」と警告していたのは誤警報だった（P39）。**
+  原因はクラウド環境のクローンが浅い（直近50コミット）ことで、境界より前の `main` のコミットが
+  「`main` に無い」と数えられていた。7件（`feat/registration-rate-limit` `fix/auth-bypass-and-headers`
+  `fix/handoff-hook-false-positives` `fix/user-enumeration` `integrate/local-plus-gates`
+  `local/deployed-203b541` `verify/wiring`）はいずれも中身が `main` にある。
+  `local/deployed-203b541` は `main` の祖先、残り6件は `git cherry` で未取り込みのコミット0件。
+  `HANDOFF.md` の差分は、いずれも後のセッションで更新済みの古い記述だけだった。
+  フックは浅いクローンを検知すると全履歴を取ってから判定するようにした。
+  浅いクローンで修正前7件→修正後0件、本物の未到達ブランチは修正後も検出されることを実測した。
+
 - **2026-09-17: メンバー紹介の左から2番目の写真を差し替えた。** ユーザー提供の写真。
   **ファイル名も変えている**（`avatar-2.png` → `avatar-2-v2.png`、`src/data/mock.ts` の参照も更新）。
   同じURLのまま中身だけ替えると Next の画像最適化が前の写真を返し続けうるためで、これは
