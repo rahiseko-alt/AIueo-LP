@@ -33,6 +33,8 @@ export CHROMIUM_PATH="${CHROMIUM_PATH:-/opt/pw-browsers/chromium-1194/chrome-lin
 # 別オリジン扱いでJSを403にし、画面がハイドレートされない（＝操作できない）。
 export BASE_URL="http://localhost:$PORT"
 export DATABASE_URL="$DB_URL"
+# 自動処理（期限・3日前）の窓口を叩くための、検証用の合言葉。本番の値ではない。
+export CRON_SECRET="local-verify-cron"
 
 cleanup() {
   git checkout -- src/lib/auth/dal.ts 2>/dev/null
@@ -106,6 +108,7 @@ cat > "$ROOT/.env.local" <<EOF
 DATABASE_URL=$DB_URL
 NEXT_PUBLIC_NEON_AUTH_ENABLED=true
 __LOCAL_REPRO=1
+CRON_SECRET=$CRON_SECRET
 EOF
 
 echo "== 5. 画面を立ち上げる =="
@@ -131,6 +134,10 @@ node scripts/verify-application-url.mjs || FAIL=1
 echo
 echo "############ 参加人数の表示の検証 ############"
 node --experimental-strip-types --no-warnings scripts/verify-headcount.mjs || FAIL=1
+
+echo
+echo "############ 企画登録の短縮（P40）の検証 ############"
+node scripts/verify-quick-proposal.mjs || FAIL=1
 
 echo
 if [ "$FAIL" = "0" ]; then echo "===== 全体判定: OK ====="; else echo "===== 全体判定: NG ====="; fi

@@ -19,12 +19,17 @@ export type ProposalRawValues = Record<string, string>;
  */
 export type ProposalActionState = { error: string | null; values?: ProposalRawValues };
 
-/** 戻す対象の入力欄。3つの掲載確認も含める（外れたことに気づかず再送信するのを防ぐ）。 */
+/**
+ * 戻す対象の入力欄。**送られてきた生の値だけを戻す。** サーバーが補った既定値
+ * （主催者名や「なし」）は混ぜない。本人が入れていない値を、入れた値として見せないため。
+ */
 const ECHO_FIELDS = [
   'title', 'summary', 'format', 'visibility', 'tentativeStartsAt', 'recruitmentDeadlineAt',
   'publicExpiresAt', 'organizerName', 'participationMethod', 'applicationUrl', 'capacity', 'participantCount', 'moneyType', 'moneyLabel',
   'moneyAmount', 'moneyCurrency', 'moneyRecipient', 'moneyCollection', 'moneySettlement',
-  'moneyRefunds', 'moneyChangeTerms', 'prohibitedConfirmed', 'rightsConfirmed', 'moneyConfirmed',
+  'moneyRefunds', 'moneyChangeTerms',
+  // 短い登録画面（P40）の欄。本文・開催日・時刻が消えると最初から書き直しになる。
+  'body', 'tentativeDate', 'tentativeTime', 'publicExpiresDate', 'hasMoney',
   // 選んだ画像も戻す。戻さないと、検証に落ちるたびに画像だけ選び直しになる。
   'imageData', 'imageRemove',
 ] as const;

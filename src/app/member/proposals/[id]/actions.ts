@@ -8,6 +8,8 @@ import { echoValues, type ProposalActionState } from '@/lib/proposals/form-value
 import { parseImageUpload, withoutImageData } from '@/lib/proposals/image';
 import { parseApplicationUrl } from '@/lib/proposals/application-url';
 import { parseHeadcount } from '@/lib/proposals/headcount';
+import { checkPublishSchedule, combineJstDateTime } from '@/lib/proposals/publish-rules';
+import { buildPublishDeclaration } from '@/lib/proposals/publish-declaration';
 
 const stateSchema = z.enum(['planning', 'confirmed', 'full', 'cancelled', 'completed']);
 
@@ -21,8 +23,10 @@ const updateProposalSchema = z.object({
   proposalId: z.string().uuid(),
   title: z.string().trim().min(1).max(140),
   summary: z.string().trim().min(1).max(5000),
-  format: z.enum(eventFormats),
-  tentativeStartsAt: z.string().min(1),
+  // 空は「選ばない」。保存上は offline とし、format_specified=false で表示を止める。
+  format: z.union([z.enum(eventFormats), z.literal('')]),
+  tentativeDate: z.string().min(1),
+  tentativeTime: z.string().optional().default(''),
   recruitmentDeadlineAt: z.string().optional(),
   publicExpiresAt: z.string().min(1),
   organizerName: z.string().trim().min(1).max(120),
@@ -37,9 +41,6 @@ const updateProposalSchema = z.object({
   moneySettlement: z.string().trim().max(500),
   moneyRefunds: z.string().trim().max(500),
   moneyChangeTerms: z.string().trim().max(500),
-  prohibitedConfirmed: z.literal('on'),
-  rightsConfirmed: z.literal('on'),
-  moneyConfirmed: z.literal('on'),
   intent: z.enum(['draft', 'publish']),
 });
 
@@ -170,10 +171,11 @@ export async function updateProposalAction(_previousState: ProposalActionState, 
   if (!db) return { error: '会員・企画基盤が未接続です。時間をおいて再度お試しください。', values: echoValues(formData) };
   const raw = Object.fromEntries(formData.entries());
   const parsed = updateProposalSchema.safeParse(raw);
-  if (!parsed.success) return { error: '必須項目、日付、金銭条件、3つの掲載確認を確認してください。', values: echoValues(formData) };
+  if (!parsed.success) return { error: '必須項目、日付、金銭条件を確認してください。', values: echoValues(formData) };
 
   const input = parsed.data;
-  const tentativeStartsAt = toJstIso(input.tentativeStartsAt);
+  const starts = combineJstDateTime(input.tentativeDate, input.tentativeTime);
+  const tentativeStartsAt = starts?.iso ?? null;
   const recruitmentDeadlineAt = toJstIso(input.recruitmentDeadlineAt);
   const publicExpiresAt = toJstIso(input.publicExpiresAt);
   if (!tentativeStartsAt || !publicExpiresAt) return { error: '開催候補日時と公開期限を正しく入力してください。', values: echoValues(formData) };
@@ -183,9 +185,6 @@ export async function updateProposalAction(_previousState: ProposalActionState, 
   }
   if (input.moneyType === 'undecided' && input.intent === 'publish') {
     return { error: '金銭条件が未定のままでは公開できません。下書き保存のみ可能です。', values: echoValues(formData) };
-  }
-  if (input.intent === 'publish' && new Date(publicExpiresAt).valueOf() <= Date.now()) {
-    return { error: '公開するには、公開期限を将来の日時に更新してください。', values: echoValues(formData) };
   }
   // 画像を選ばずに保存したときは、いま付いている画像をそのまま残す（unchanged）。
   // 選び直せば差し替え、「外す」にチェックすれば削除する。
@@ -221,23 +220,33 @@ export async function updateProposalAction(_previousState: ProposalActionState, 
       await client.query('rollback');
       return { error: 'この企画は今は編集できません。管理者による措置、終了、または中止となっている企画は編集できません。', values: echoValues(formData) };
     }
-    // auto_hiddenは「候補日3日前まで開催決定なし」で自動除外された状態。日時を
-    // 据え置いたまま再公開すると、次回cron実行で即座に再びauto_hiddenへ戻る。
-    if (
-      input.intent === 'publish' &&
-      current.rows[0].status === 'auto_hidden' &&
-      new Date(tentativeStartsAt).valueOf() - Date.now() < 3 * 24 * 60 * 60 * 1000
-    ) {
-      await client.query('rollback');
-      return { error: '再掲載するには、開催候補日を3日より先の日時に更新してください。', values: echoValues(formData) };
+    // 公開するときは、新規作成と同じ決まりで日程を確かめる（過去日・過去の公開期限・
+    // 3日以内の「調整中」を通さない）。3日以内の調整中を通すと、翌朝の自動処理で
+    // 即座に公開から外れる（auto_hidden からの再掲載で起きていた「ヨーヨー」もこれで止まる）。
+    if (input.intent === 'publish') {
+      const scheduleError = checkPublishSchedule({
+        startsAt: tentativeStartsAt,
+        publicExpiresAt,
+        recruitmentDeadlineAt,
+        eventStatus: String(current.rows[0].event_status),
+      });
+      if (scheduleError) {
+        await client.query('rollback');
+        return { error: scheduleError, values: echoValues(formData) };
+      }
     }
 
     const status = input.intent === 'publish' ? 'published' : 'draft';
     const publishedAt = status === 'published' ? current.rows[0].published_at ?? new Date().toISOString() : current.rows[0].published_at;
     const moneyDetails = collectMoneyDetails(input);
+    // 公開するたびに、押した時点の確認文の版を記録し直す。下書きへ戻すときは消す
+    // （確認していない状態を「確認済み」として残さない）。
+    const declarations = status === 'published'
+      ? buildPublishDeclaration(member.userId, { organizerName: input.organizerName, moneyType: input.moneyType })
+      : {};
     const imageClause =
       image.kind === 'replace'
-        ? ', image_data = $19::bytea, image_mime = $20::text, image_updated_at = now()'
+        ? ', image_data = $22::bytea, image_mime = $23::text, image_updated_at = now()'
         : image.kind === 'remove'
           ? ', image_data = null, image_mime = null, image_updated_at = null'
           : '';
@@ -245,15 +254,19 @@ export async function updateProposalAction(_previousState: ProposalActionState, 
       `update proposals set title = $1, summary = $2, format = $3, tentative_starts_at = $4,
         recruitment_deadline_at = $5, public_expires_at = $6, organizer_name = $7, participation_method = $8,
         visibility = $9, money_type = $10, money_details = $11::jsonb, status = $12, published_at = $13,
-        application_url = $16::text, capacity = $17::integer, participant_count = $18::integer${imageClause}
+        application_url = $16::text, capacity = $17::integer, participant_count = $18::integer,
+        publishing_declarations = $19::jsonb, tentative_time_specified = $20::boolean, format_specified = $21::boolean${imageClause}
        where id = $14 and owner_id = $15 returning *`,
       [
-        input.title, input.summary, input.format, tentativeStartsAt, recruitmentDeadlineAt, publicExpiresAt,
+        input.title, input.summary, input.format || 'offline', tentativeStartsAt, recruitmentDeadlineAt, publicExpiresAt,
         input.organizerName, input.participationMethod, input.visibility, input.moneyType,
         JSON.stringify(moneyDetails), status, publishedAt, input.proposalId, member.userId,
         applicationUrl.value,
         headcount.capacity,
         headcount.participantCount,
+        JSON.stringify(declarations),
+        starts?.timeSpecified ?? true,
+        input.format !== '',
         ...(image.kind === 'replace' ? [image.data, image.mime] : []),
       ],
     );
