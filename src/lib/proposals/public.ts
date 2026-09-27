@@ -10,6 +10,10 @@ export type PublicProposal = {
   summary: string;
   format: string;
   tentative_starts_at: string | null;
+  /** 時刻を指定したか。false なら日付だけを表示する（時刻は 00:00 JST で保存している）。 */
+  tentative_time_specified: boolean;
+  /** 開催形式を選んだか。false なら形式を断定して表示しない。 */
+  format_specified: boolean;
   organizer_name: string;
   participation_method: string;
   visibility: string;
@@ -27,7 +31,7 @@ export type PublicProposal = {
 export async function getPublicProposals(): Promise<PublicProposal[]> {
   if (!db) return [];
   const result = await db.$client.query(
-    `select id, slug, title, summary, format, tentative_starts_at, organizer_name,
+    `select id, slug, title, summary, format, tentative_starts_at, tentative_time_specified, format_specified, organizer_name,
       participation_method, visibility, money_type, money_details, published_at, image_mime,
       capacity, participant_count
      from proposals
@@ -51,7 +55,9 @@ export const EVENT_FORMAT_LABELS: Record<string, string> = {
   hybrid: 'ハイブリッド',
 };
 
-export function formatLabel(value: unknown): string {
+export function formatLabel(value: unknown, specified: unknown = true): string {
+  // 選ばずに公開した企画は、既定値の「オフライン」を断定して出さない（P40）。
+  if (specified === false) return '本文参照';
   const key = String(value ?? '');
   return EVENT_FORMAT_LABELS[key] ?? key;
 }

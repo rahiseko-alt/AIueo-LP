@@ -4,6 +4,7 @@ import { useActionState, useState } from 'react';
 import { type ProposalActionState } from '@/lib/proposals/form-values';
 import { collectMissingFields, RequiredFieldsNotice, type FieldLabels } from '@/components/required-fields-notice';
 import { ProposalImageField } from '@/components/proposal-image-field';
+import { PUBLISH_STATEMENT_LINES } from '@/lib/proposals/publish-rules';
 
 /** 未入力のときに画面へ出す、欄の日本語名。`name`属性と対応させる。 */
 const FIELD_LABELS: FieldLabels = {
@@ -11,7 +12,8 @@ const FIELD_LABELS: FieldLabels = {
   summary: '概要',
   format: '開催形式',
   visibility: '公開範囲',
-  tentativeStartsAt: '開催候補日時',
+  tentativeDate: '開催日',
+  tentativeTime: '開始時刻',
   publicExpiresAt: '公開期限',
   organizerName: '主催者表示名',
   participationMethod: '参加方法',
@@ -20,9 +22,6 @@ const FIELD_LABELS: FieldLabels = {
   moneyType: '金銭の種類',
   moneyLabel: '金銭条件の説明',
   moneySettlement: '精算方法',
-  prohibitedConfirmed: '禁止事項の確認（チェック）',
-  rightsConfirmed: '掲載権利の確認（チェック）',
-  moneyConfirmed: '金銭の取り扱いの確認（チェック）',
 };
 
 export type ProposalFormAction = (previousState: ProposalActionState, formData: FormData) => Promise<ProposalActionState>;
@@ -32,7 +31,8 @@ export type ProposalDefaultValues = {
   summary?: string;
   format?: string;
   visibility?: string;
-  tentativeStartsAt?: string;
+  tentativeDate?: string;
+  tentativeTime?: string;
   recruitmentDeadlineAt?: string;
   publicExpiresAt?: string;
   organizerName?: string;
@@ -84,10 +84,6 @@ export function ProposalForm({ action, defaultValues, proposalId, currentStatus,
   // 検証に落ちたときは、DBの値ではなく「利用者が今書いた値」を出す。
   // これが無いと、送信のたびに書いた内容が消えて入力し直しになる。
   const values: ProposalDefaultValues = { ...defaultValues, ...(state.values ?? {}) };
-  // 3つの掲載確認も戻す。チェックが外れたことに気づかず再送信して同じエラーに
-  // なる、という繰り返しを避ける。
-  const checked = (name: 'prohibitedConfirmed' | 'rightsConfirmed' | 'moneyConfirmed') =>
-    state.values?.[name] === 'on';
   // 空の必須欄があるとブラウザが送信を黙って止める。何が空なのかを画面に残す。
   const [missing, setMissing] = useState<string[]>([]);
   // 公開中の企画では、同じ「下書き保存」が公開の取り下げになる。押す前に
@@ -102,21 +98,21 @@ export function ProposalForm({ action, defaultValues, proposalId, currentStatus,
     <div className="grid gap-6 sm:grid-cols-2">
       <label className="sm:col-span-2"><span className="form-label">企画名 *</span><input name="title" required maxLength={140} defaultValue={values.title} className="form-control" /></label>
       <label className="sm:col-span-2"><span className="form-label">概要 *</span><textarea name="summary" required maxLength={5000} rows={6} defaultValue={values.summary} className="form-control" /></label>
-      <label><span className="form-label">開催形式 *</span><select name="format" required defaultValue={values.format ?? 'offline'} className="form-control"><option value="offline">オフライン</option><option value="online">オンライン</option><option value="hybrid">ハイブリッド</option></select></label>
+      <label><span className="form-label">開催形式</span><select name="format" defaultValue={values.format ?? ''} className="form-control"><option value="">選ばない（本文参照）</option><option value="offline">オフライン</option><option value="online">オンライン</option><option value="hybrid">ハイブリッド</option></select></label>
       <label><span className="form-label">公開範囲 *</span><select name="visibility" required defaultValue={values.visibility ?? 'public'} className="form-control"><option value="public">公開</option><option value="unlisted">限定公開</option></select></label>
-      <label><span className="form-label">開催候補日時（JST） *</span><span className="mt-1 block text-xs leading-6 text-white/50">欄をクリックするとカレンダーが開きます</span><input name="tentativeStartsAt" required type="datetime-local" onClick={openCalendar} defaultValue={values.tentativeStartsAt} className="form-control" /></label>
+      <label><span className="form-label">開催日 *</span><span className="mt-1 block text-xs leading-6 text-white/50">欄をクリックするとカレンダーが開きます</span><input name="tentativeDate" required type="date" onClick={openCalendar} defaultValue={values.tentativeDate} className="form-control" /></label><label><span className="form-label">開始時刻（任意）</span><span className="mt-1 block text-xs leading-6 text-white/50">空欄なら日付だけを表示します</span><input name="tentativeTime" type="time" defaultValue={values.tentativeTime} className="form-control" /></label>
       <label><span className="form-label">募集期限（任意）</span><input name="recruitmentDeadlineAt" type="datetime-local" onClick={openCalendar} defaultValue={values.recruitmentDeadlineAt} className="form-control" /></label>
       <label><span className="form-label">公開期限 *</span><input name="publicExpiresAt" required type="datetime-local" onClick={openCalendar} defaultValue={values.publicExpiresAt} className="form-control" /></label>
       <label><span className="form-label">主催者表示名 *</span><input name="organizerName" required maxLength={120} defaultValue={values.organizerName} className="form-control" /></label>
       <label className="sm:col-span-2"><span className="form-label">参加方法 *</span><textarea name="participationMethod" required maxLength={2000} rows={3} defaultValue={values.participationMethod} className="form-control" placeholder="メールでご連絡ください / 当日直接お越しください / 定員20名 など" /></label>
       <label><span className="form-label">定員（任意）</span><span className="mt-1 block text-xs leading-6 text-white/50">主催者を含めた上限です。空欄なら「上限なし」。半角の数字で入れてください。</span><input name="capacity" type="number" inputMode="numeric" min={1} max={100000} step={1} defaultValue={values.capacity} className="form-control" placeholder="10" /></label><label><span className="form-label">参加人数（任意）</span><span className="mt-1 block text-xs leading-6 text-white/50"><strong className="font-normal text-[#e4d2a6]">主催者を含めた人数です。</strong>1なら主催者だけ、2なら主催者ともう1人。企画の一覧に「参加人数 3 / 10人」と出ます。集まったらご自分で書き換えてください。空欄なら出しません。</span><input name="participantCount" type="number" inputMode="numeric" min={0} max={100000} step={1} defaultValue={values.participantCount} className="form-control" placeholder="1" /></label><label className="sm:col-span-2"><span className="form-label">参加申し込みフォームのURL（任意）</span><span className="mt-1 block text-xs leading-6 text-white/50">Googleフォームなど、ご自分で用意した申し込みページのURLを貼ると、企画ページに「参加を申し込む」ボタンが出ます。申し込んだ人の名前や連絡先はAIueoには届きません。空欄でもかまいません。</span><input name="applicationUrl" type="url" inputMode="url" maxLength={2000} defaultValue={values.applicationUrl} className="form-control" placeholder="https://forms.gle/xxxxxxxx" /></label>
     </div>
-    <fieldset className="space-y-4 border-t border-white/10 pt-7"><legend className="font-mono text-xs tracking-[0.15em] text-[#c8a45a]">金銭条件（公開前に必ず明記）</legend><label><span className="form-label">金銭の種類 *</span><select name="moneyType" required defaultValue={values.moneyType ?? 'none'} className="form-control"><option value="none">なし</option><option value="fixed_fee">固定参加費</option><option value="range_or_upper_limit">幅・上限あり</option><option value="reimbursement">実費精算</option><option value="reward">報酬</option><option value="donation">寄付・カンパ</option><option value="undecided">未定（公開不可）</option></select></label><div className="grid gap-4 sm:grid-cols-2"><label><span className="form-label">金銭条件の説明 *</span><input name="moneyLabel" required placeholder="なし / 参加費1,000円 など" defaultValue={values.moneyLabel} className="form-control" /></label><label><span className="form-label">金額・上限</span><input name="moneyAmount" defaultValue={values.moneyAmount} className="form-control" /></label><label><span className="form-label">通貨</span><input name="moneyCurrency" defaultValue={values.moneyCurrency ?? 'JPY'} className="form-control" /></label><label><span className="form-label">支払先</span><input name="moneyRecipient" defaultValue={values.moneyRecipient} className="form-control" /></label><label><span className="form-label">徴収方法</span><input name="moneyCollection" defaultValue={values.moneyCollection} className="form-control" /></label><label><span className="form-label">精算方法 *</span><input name="moneySettlement" required placeholder="なし / 当日現金 / 振込 など" defaultValue={values.moneySettlement} className="form-control" /></label><label><span className="form-label">返金・中止時の扱い</span><input name="moneyRefunds" defaultValue={values.moneyRefunds} className="form-control" /></label><label><span className="form-label">変更条件</span><input name="moneyChangeTerms" defaultValue={values.moneyChangeTerms} className="form-control" /></label></div></fieldset>
+    <fieldset className="space-y-4 border-t border-white/10 pt-7"><legend className="font-mono text-xs tracking-[0.15em] text-[#c8a45a]">金銭条件（公開前に必ず明記）</legend><label><span className="form-label">金銭の種類 *</span><select name="moneyType" required defaultValue={values.moneyType ?? 'none'} className="form-control"><option value="none">なし</option><option value="fixed_fee">固定参加費</option><option value="range_or_upper_limit">幅・上限あり</option><option value="reimbursement">実費精算</option><option value="reward">報酬</option><option value="donation">寄付・カンパ</option><option value="undecided">未定（公開不可）</option></select></label><div className="grid gap-4 sm:grid-cols-2"><label><span className="form-label">金銭条件の説明 *</span><input name="moneyLabel" required placeholder="なし / 参加費1,000円 など" defaultValue={values.moneyLabel} className="form-control" /></label><label><span className="form-label">金額・上限</span><input name="moneyAmount" defaultValue={values.moneyAmount} className="form-control" /></label><label><span className="form-label">通貨</span><input name="moneyCurrency" defaultValue={values.moneyCurrency ?? 'JPY'} className="form-control" /></label><label><span className="form-label">支払先</span><input name="moneyRecipient" defaultValue={values.moneyRecipient} className="form-control" /></label><label><span className="form-label">徴収方法</span><input name="moneyCollection" defaultValue={values.moneyCollection} className="form-control" /></label><label><span className="form-label">精算方法（お金がある場合は必須）</span><input name="moneySettlement" placeholder="なし / 当日現金 / 振込 など" defaultValue={values.moneySettlement} className="form-control" /></label><label><span className="form-label">返金・中止時の扱い</span><input name="moneyRefunds" defaultValue={values.moneyRefunds} className="form-control" /></label><label><span className="form-label">変更条件</span><input name="moneyChangeTerms" defaultValue={values.moneyChangeTerms} className="form-control" /></label></div></fieldset>
     <ProposalImageField currentImageUrl={hasImage && proposalId ? `/api/proposals/${proposalId}/image` : undefined} defaultData={state.values?.imageData} />
-    <fieldset className="space-y-4 border-t border-white/10 pt-7"><legend className="font-mono text-xs tracking-[0.15em] text-[#c8a45a]">公開前の確認 *</legend><label className="flex gap-3 text-sm leading-7"><input name="prohibitedConfirmed" type="checkbox" required defaultChecked={checked('prohibitedConfirmed')} className="mt-2 h-4 w-4 accent-[#c8a45a]" />禁止事項（マルチ等の勧誘、アダルト系、違法行為、場を乱す行為）に該当しないことを確認しました。</label><label className="flex gap-3 text-sm leading-7"><input name="rightsConfirmed" type="checkbox" required defaultChecked={checked('rightsConfirmed')} className="mt-2 h-4 w-4 accent-[#c8a45a]" />掲載する文章・画像・会場情報を掲載する権利と必要な同意があります。</label><label className="flex gap-3 text-sm leading-7"><input name="moneyConfirmed" type="checkbox" required defaultChecked={checked('moneyConfirmed')} className="mt-2 h-4 w-4 accent-[#c8a45a]" />AIueoは金銭を受け取らず、主催者と参加者が直接確認することを理解しました。</label></fieldset>
+    <section aria-labelledby="publish-statement" className="border border-[#c8a45a]/45 bg-black/20 p-5"><h2 id="publish-statement" className="form-label">公開ボタンを押す前に確認してください</h2><ul data-testid="publish-statement" className="mt-3 list-disc space-y-2 pl-5 text-sm leading-7 text-white/80">{PUBLISH_STATEMENT_LINES.map((line) => <li key={line}>{line}</li>)}</ul><p className="mt-3 text-xs leading-6 text-white/55">公開ボタンを押すと、上の内容を確認したものとして記録します。下書き保存では記録しません。</p></section>
     {state.error && <p role="alert" className="border border-red-300/35 bg-red-950/30 p-4 text-sm leading-7 text-red-100">{state.error}</p>}
     <RequiredFieldsNotice items={missing} />
     {isPublished && <p className="text-sm leading-7 text-white/70">この企画はいま公開中です。書き直した内容をそのまま公開し続けるなら「公開したまま保存」、公開を取り下げるなら「下書きとして保存（公開はやめます）」を押してください。</p>}
-    <div className="flex flex-col gap-3 sm:flex-row"><button name="intent" value="draft" type="submit" onClick={checkBeforeSubmit} disabled={isPending} className="btn-ghost flex-1 disabled:opacity-45">{isPending ? '保存中…' : isPublished ? '下書きとして保存（公開はやめます）' : '下書き保存'}</button><button name="intent" value="publish" type="submit" onClick={checkBeforeSubmit} disabled={isPending} className="btn-solid flex-1 disabled:opacity-45">{isPublished ? '公開したまま保存' : '公開する'}</button></div>
+    <div className="flex flex-col gap-3 sm:flex-row"><button name="intent" value="draft" type="submit" onClick={checkBeforeSubmit} disabled={isPending} className="btn-ghost flex-1 disabled:opacity-45">{isPending ? '保存中…' : isPublished ? '下書きとして保存（公開はやめます）' : '下書き保存'}</button><button name="intent" value="publish" type="submit" onClick={checkBeforeSubmit} disabled={isPending} className="btn-solid flex-1 disabled:opacity-45">{isPublished ? '上記を確認して、公開したまま保存' : '上記を確認して公開する'}</button></div>
   </form>;
 }

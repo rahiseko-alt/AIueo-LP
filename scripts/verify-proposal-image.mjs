@@ -58,9 +58,6 @@ rec('I-03', '送信する画像が元より小さい', `元${Math.round(png.leng
 // 保存に必要な欄を埋める（金銭欄は「なし」でも入力が要る／掲載確認は編集画面では毎回外れている）
 await page.locator('input[name="moneyLabel"]').fill('なし');
 await page.locator('input[name="moneySettlement"]').fill('なし');
-for (const n of ['prohibitedConfirmed', 'rightsConfirmed', 'moneyConfirmed']) {
-  await page.locator(`input[name="${n}"]`).check();
-}
 await page.locator('button[name="intent"][value="draft"]').click();
 await page.waitForTimeout(3000);
 const err = await page.locator('[role="alert"]').allTextContents();
@@ -99,7 +96,6 @@ await page.waitForTimeout(500);
 await page.locator('input[name="imageRemove"]').check();
 await page.locator('input[name="moneyLabel"]').fill('なし');
 await page.locator('input[name="moneySettlement"]').fill('なし');
-for (const n of ['prohibitedConfirmed', 'rightsConfirmed', 'moneyConfirmed']) await page.locator(`input[name="${n}"]`).check();
 await page.locator('button[name="intent"][value="publish"]').click();
 await page.waitForTimeout(2500);
 const removed = (await pool.query('select image_mime, image_data from proposals where id = $1', [draft.id])).rows[0];

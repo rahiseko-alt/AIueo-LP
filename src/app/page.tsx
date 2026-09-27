@@ -17,6 +17,7 @@ import {
 import { getPublicProposals, type PublicProposal } from '@/lib/proposals/public';
 import type { Activity } from '@/types';
 import { headcountLabel } from '@/lib/proposals/headcount';
+import { formatStartsAt } from '@/lib/proposals/labels';
 
 export const dynamic = 'force-dynamic';
 
@@ -29,17 +30,6 @@ const FALLBACK_IMAGES = [
   '/images/japanese/meetup.png',
 ];
 
-function formatDisplayDate(iso: string | null): string {
-  if (!iso) return '日程調整中';
-  return new Date(iso).toLocaleString('ja-JP', {
-    timeZone: 'Asia/Tokyo',
-    month: 'numeric',
-    day: 'numeric',
-    weekday: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  });
-}
 
 function toActivity(p: PublicProposal, index: number): Activity {
   return {
@@ -50,7 +40,8 @@ function toActivity(p: PublicProposal, index: number): Activity {
     tags: [],
     status: 'UPCOMING',
     date: p.tentative_starts_at ?? p.published_at ?? new Date().toISOString(),
-    displayDate: formatDisplayDate(p.tentative_starts_at),
+    // 時刻を指定していない企画は日付だけを出す（0時開催に見せない）。
+    displayDate: formatStartsAt(p.tentative_starts_at, p.tentative_time_specified, 'short'),
     // 企画者が画像を添付していればそれを使う。無いときだけ既存の見本写真を
     // 順番に割り当てる（カードだけ真っ黒になるのを避けるため）。
     imageUrl: p.image_mime ? `/api/proposals/${p.id}/image` : FALLBACK_IMAGES[index % FALLBACK_IMAGES.length],

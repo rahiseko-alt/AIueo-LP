@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { getAuthContext } from '@/lib/auth/dal';
+import { NewProposalShortcut } from '@/components/new-proposal-shortcut';
 
 /**
  * 右上に固定表示する、ログイン状態を示す丸いバッジ。
@@ -41,6 +42,8 @@ export async function AccountBadge() {
   const destination = isActive ? '/member' : '/member/profile';
 
   return (
+    <>
+    {isActive && <NewProposalShortcut />}
     <Link
       href={destination}
       aria-label={label}
@@ -53,5 +56,6 @@ export async function AccountBadge() {
     >
       {initial}
     </Link>
+    </>
   );
 }

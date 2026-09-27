@@ -41,9 +41,9 @@ const EXPECTED_COLUMNS: ReadonlyArray<Expectation> = [
   // P37（参加人数）。2026-09-15に本番へ適用され、この窓口で present を確認したうえでコードを出した。
   { migration: '0005_proposal_headcount', table: 'proposals', column: 'capacity', status: 'required' },
   { migration: '0005_proposal_headcount', table: 'proposals', column: 'participant_count', status: 'required' },
-  // P40（企画登録の短縮）。本番へ適用し、ここで present を確かめてから列を使うコードを出す。
-  { migration: '0006_proposal_unspecified_flags', table: 'proposals', column: 'tentative_time_specified', status: 'pending' },
-  { migration: '0006_proposal_unspecified_flags', table: 'proposals', column: 'format_specified', status: 'pending' },
+  // P40（企画登録の短縮）。2026-09-27に本番へ適用され、この窓口で present を確認したうえでコードを出した。
+  { migration: '0006_proposal_unspecified_flags', table: 'proposals', column: 'tentative_time_specified', status: 'required' },
+  { migration: '0006_proposal_unspecified_flags', table: 'proposals', column: 'format_specified', status: 'required' },
 ];
 
 export async function GET() {

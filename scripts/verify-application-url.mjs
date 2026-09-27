@@ -33,9 +33,6 @@ async function saveWith(url) {
   await page.locator('input[name="applicationUrl"]').fill(url);
   await page.locator('input[name="moneyLabel"]').fill('なし');
   await page.locator('input[name="moneySettlement"]').fill('なし');
-  for (const n of ['prohibitedConfirmed', 'rightsConfirmed', 'moneyConfirmed']) {
-    await page.locator(`input[name="${n}"]`).check();
-  }
   await page.locator('button[name="intent"][value="publish"]').click();
   await page.waitForTimeout(3000);
   return (await page.locator('[role="alert"]').allTextContents()).join(' / ');

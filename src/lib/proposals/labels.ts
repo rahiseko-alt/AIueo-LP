@@ -65,3 +65,20 @@ export const eventStatusLabel = (value: unknown) => label(EVENT_STATUS_LABELS, v
 export const visibilityLabel = (value: unknown) => label(VISIBILITY_LABELS, value);
 export const memberStatusLabel = (value: unknown) => label(MEMBER_STATUS_LABELS, value);
 export const roleLabel = (value: unknown) => label(ROLE_LABELS, value);
+
+/**
+ * 開催日時の表示。時刻を指定していない企画は日付だけを出す（P40）。
+ *
+ * 時刻なしの企画は 00:00 JST で保存しているので、そのまま時刻を出すと
+ * 「深夜0時開催」に見える。**開催日時を画面へ出すときは必ずこれを通す。**
+ */
+export function formatStartsAt(value: unknown, timeSpecified: unknown, style: 'long' | 'short' = 'long'): string {
+  const date = value instanceof Date ? value : typeof value === 'string' && value ? new Date(value) : null;
+  if (!date || Number.isNaN(date.valueOf())) return '日程調整中';
+  const withTime = timeSpecified !== false;
+  const options: Intl.DateTimeFormatOptions = style === 'short'
+    ? { timeZone: 'Asia/Tokyo', month: 'numeric', day: 'numeric', weekday: 'short' }
+    : { timeZone: 'Asia/Tokyo', year: 'numeric', month: 'numeric', day: 'numeric', weekday: 'short' };
+  if (withTime) Object.assign(options, { hour: '2-digit', minute: '2-digit' });
+  return date.toLocaleString('ja-JP', options) + (withTime ? '' : '（時刻は本文参照）');
+}
