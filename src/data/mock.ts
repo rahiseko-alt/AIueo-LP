@@ -18,6 +18,14 @@ export const mockPeople: Person[] = [
     activityIds: [],
     bio: '子どもにも仕事にもAI活用をやさしく伴走します。小中学生と保護者が安心してAIを学べるプログラムと、仕事にAIを取り入れたい方への初回無料相談を準備しています。',
   },
+  {
+    id: 'person-3',
+    name: '堺 彬',
+    role: '株式会社SakAI Nexus 代表取締役',
+    avatarUrl: '/images/japanese/avatar-sakai-v1.png',
+    activityIds: [],
+    bio: 'Webライター・メディア運営の経験を経て、現在は生成AIを活用した業務改善、AI導入支援、システム開発、企業研修・講演を行う。',
+  },
 ];
 
 export const mockHeroActivity: Activity = {
