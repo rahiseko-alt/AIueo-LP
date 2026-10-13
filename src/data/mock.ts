@@ -9,7 +9,7 @@ export const mockPeople: Person[] = [
     // 見本の活動名を本人の実績として並べないため空にする。
     activityIds: [],
     // 本人（代表）の指示による文面
-    bio: 'play with AIをコンセプトに人の繋がりを広げる場としてAIueoを設立。他にもAI専門学校講師やAIコンサルティングなど教育現場や企業でのAI活用を行っている。',
+    bio: 'this way togetherをコンセプトに人の繋がりを広げる場としてAIueoを設立。他にもAI専門学校講師やAIコンサルティングなど教育現場や企業でのAI活用を行っている。',
   },
   {
     id: 'person-2',
