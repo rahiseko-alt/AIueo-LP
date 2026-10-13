@@ -48,7 +48,7 @@ export function TeamMembers({ people, activities }: TeamMembersProps) {
 
                   {person.bio ? (
                     <div className="mt-5 border-t border-[rgba(240,237,232,0.08)] pt-4">
-                      <p className="whitespace-pre-line font-sans text-xs leading-relaxed text-[rgba(240,237,232,0.7)]">
+                      <p className="font-sans text-xs leading-relaxed text-[rgba(240,237,232,0.7)]">
                         {person.bio}
                       </p>
                     </div>
