@@ -4,19 +4,20 @@ export const mockPeople: Person[] = [
   {
     id: 'person-1',
     name: '小齊平 恒平',
-    role: '主宰 / 業務改善・自動化・AI活用支援',
+    role: '代表 / AI活動家',
     avatarUrl: '/images/japanese/kosehirakouhei-profile.png',
     // 見本の活動名を本人の実績として並べないため空にする。
     activityIds: [],
-    bio: '中小企業や店舗のAI導入を支援しています。課題整理から業務フロー設計、試作、導入、教育までを一貫して担当。現場に立つ人が無理なく使い続けられるかを、判断の基準にしています。',
+    bio: 'AI専門学校講師、AI業務改善などジャンルを問わずAIに関する活動を行っている',
   },
   {
     id: 'person-2',
     name: '伊藤良二',
-    role: 'AI顧問',
+    role: 'プロデューサー',
     avatarUrl: '/images/japanese/avatar-2-v2.png',
     activityIds: [],
-    bio: '子どもにも仕事にもAI活用をやさしく伴走します。小中学生と保護者が安心してAIを学べるプログラムと、仕事にAIを取り入れたい方への初回無料相談を準備しています。',
+    // 出典: https://x.com/ohga_writer のプロフィール文
+    bio: 'Craft Line Works代表｜AI講師｜個人向けAI活用コンサル｜業務効率化の伴走サポーター｜SEO / MEO / AIO 対策｜店舗Web集客導線の改善（AIによる自動化）｜HP作成　Zoom無料相談受付中　まずはDMにて',
   },
   {
     id: 'person-3',
