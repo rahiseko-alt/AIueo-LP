@@ -26,6 +26,14 @@ export const mockPeople: Person[] = [
     activityIds: [],
     bio: 'Webライター・メディア運営の経験を経て、現在は生成AIを活用した業務改善、AI導入支援、システム開発、企業研修・講演を行う。',
   },
+  {
+    id: 'person-4',
+    name: '岡本ジュンイチ',
+    role: '顧問 / SNSマーケター・メディアプロデューサー',
+    avatarUrl: '/images/japanese/avatar-okamoto-v1.jpg',
+    activityIds: [],
+    bio: 'おもに個人事業主のマーケティング支援のために、SNS・出版・公認ネットラジオ局による冠番組等をプロデュースします。未経験からサポートする伴走型の起業支援や、実績ゼロからのメディアプロデュースを提供することができます。',
+  },
 ];
 
 export const mockHeroActivity: Activity = {
