@@ -20,7 +20,7 @@ export function TeamMembers({ people, activities }: TeamMembersProps) {
           肩書ではなく、一緒に何を作ったかでつながる草AIチームのメンバーとコラボレーター。
         </p>
 
-        <div className="mt-10 sm:mt-12 md:mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="mt-10 sm:mt-12 md:mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
           {people.map((person) => (
             <div
               key={person.id}
