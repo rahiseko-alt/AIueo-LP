@@ -37,8 +37,10 @@ export function TeamMembers({ people, activities }: TeamMembersProps) {
                     className="object-cover grayscale transition duration-500 group-hover:grayscale-0 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e0e] via-transparent to-transparent" />
+                  {/* 写真の下端を黒にする。リンクのアイコンはこの黒い帯の上に置く（全カード共通で揃える） */}
+                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#0e0e0e] from-60% to-transparent" />
                   {person.links && person.links.length > 0 && (
-                    <div className="absolute bottom-3 right-3 z-10 flex gap-2">
+                    <div className="absolute bottom-3 right-3 z-10 flex">
                       {person.links.map((link) => (
                         <a
                           key={`${link.kind}-${link.url}`}
@@ -46,9 +48,9 @@ export function TeamMembers({ people, activities }: TeamMembersProps) {
                           target="_blank"
                           rel="noopener noreferrer"
                           aria-label={`${person.name}の${SOCIAL_LABELS[link.kind]}（外部サイトが開きます）`}
-                          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[rgba(200,164,90,0.7)] bg-[rgba(8,8,8,0.65)] text-[#c8a45a] backdrop-blur-sm transition-colors duration-300 hover:bg-[#c8a45a] hover:text-[#080808]"
+                          className="inline-flex h-9 w-9 items-center justify-center text-[#f0ede8] opacity-70 transition-opacity duration-300 hover:opacity-100 focus-visible:opacity-100"
                         >
-                          <SocialIcon kind={link.kind} className="h-4 w-4" />
+                          <SocialIcon kind={link.kind} className="h-5 w-5" />
                         </a>
                       ))}
                     </div>
