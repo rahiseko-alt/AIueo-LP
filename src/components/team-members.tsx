@@ -37,9 +37,10 @@ export function TeamMembers({ people, activities }: TeamMembersProps) {
                     className="object-cover grayscale transition duration-500 group-hover:grayscale-0 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e0e] via-transparent to-transparent" />
-                  {/* 写真の下端を黒にする。リンクのアイコンはこの黒い帯の上に置く（全カード共通で揃える） */}
-                  <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-[#0e0e0e] from-60% to-transparent" />
                   {person.links && person.links.length > 0 && (
+                    <>
+                    {/* アイコンの背後だけを透過の黒でうっすら暗くする（面積は最小限、リンクのある人だけ） */}
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/60 to-transparent" />
                     <div className="absolute bottom-3 right-3 z-10 flex">
                       {person.links.map((link) => (
                         <a
@@ -54,6 +55,7 @@ export function TeamMembers({ people, activities }: TeamMembersProps) {
                         </a>
                       ))}
                     </div>
+                    </>
                   )}
                 </div>
 
