@@ -13,6 +13,18 @@ export type Tag =
   | 'EDUCATION'
   | 'LOCAL';
 
+export type SocialKind =
+  | 'x'
+  | 'instagram'
+  | 'facebook'
+  | 'youtube'
+  | 'linkedin'
+  | 'threads'
+  | 'tiktok'
+  | 'github'
+  | 'line'
+  | 'website';
+
 export interface Person {
   id: string;
   name: string;
@@ -26,10 +38,10 @@ export interface Person {
    */
   bio?: string;
   /**
-   * 写真の右下に出すリンクボタン。人によってリンク先（X・個人サイトなど）が違うので、
-   * 入っている人のカードにだけボタンを出す。label は「X」「SITE」のような短い名前。
+   * 写真の右下に出すリンクボタン。リンク先は人ごとに違うので、入っている人のカードにだけ出す。
+   * ボタンは種類（X・Instagram など）のロゴアイコンだけで、文字は出さない。
    */
-  link?: { url: string; label: string };
+  links?: { kind: SocialKind; url: string }[];
 }
 
 export interface Activity {

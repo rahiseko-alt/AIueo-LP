@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { Person, Activity } from '@/types';
+import { SocialIcon, SOCIAL_LABELS } from '@/components/social-icon';
 
 interface TeamMembersProps {
   people: Person[];
@@ -36,17 +37,21 @@ export function TeamMembers({ people, activities }: TeamMembersProps) {
                     className="object-cover grayscale transition duration-500 group-hover:grayscale-0 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e0e] via-transparent to-transparent" />
-                  {person.link && (
-                    <a
-                      href={person.link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      aria-label={`${person.name}の${person.link.label}（外部サイトが開きます）`}
-                      className="absolute bottom-3 right-3 z-10 inline-flex min-h-10 items-center gap-1.5 rounded-full border border-[rgba(200,164,90,0.7)] bg-[rgba(8,8,8,0.65)] px-4 font-mono text-[11px] font-semibold uppercase tracking-widest text-[#c8a45a] backdrop-blur-sm transition-colors duration-300 hover:bg-[#c8a45a] hover:text-[#080808]"
-                    >
-                      {person.link.label}
-                      <span aria-hidden="true">↗</span>
-                    </a>
+                  {person.links && person.links.length > 0 && (
+                    <div className="absolute bottom-3 right-3 z-10 flex gap-2">
+                      {person.links.map((link) => (
+                        <a
+                          key={`${link.kind}-${link.url}`}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`${person.name}の${SOCIAL_LABELS[link.kind]}（外部サイトが開きます）`}
+                          className="inline-flex h-9 w-9 items-center justify-center rounded-full border border-[rgba(200,164,90,0.7)] bg-[rgba(8,8,8,0.65)] text-[#c8a45a] backdrop-blur-sm transition-colors duration-300 hover:bg-[#c8a45a] hover:text-[#080808]"
+                        >
+                          <SocialIcon kind={link.kind} className="h-4 w-4" />
+                        </a>
+                      ))}
+                    </div>
                   )}
                 </div>
 
