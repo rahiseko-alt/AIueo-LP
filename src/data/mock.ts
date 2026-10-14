@@ -47,6 +47,8 @@ export const mockPeople: Person[] = [
     name: '八巻早紀',
     role: 'AIコミュニティ運営・編集者',
     avatarUrl: '/images/japanese/avatar-yamaki-v1.jpg',
+    // 本人から受け取ったリンク（2026-10-14）。共有用の追跡パラメータ（mibextid・rdid・share_url）は外し、プロフィールIDだけにした
+    links: [{ kind: 'facebook', url: 'https://www.facebook.com/profile.php?id=100029230621734' }],
     activityIds: [],
     bio: '個人がネットを活用して、自分の商品やサービスを届けるための発信、集客、導線づくり、AI活用をサポート。AIを使う、使わない両方の手段で商品づくりから販売につながる流れまで、初心者にもわかりやすく整理します。AI・WEB活用コミュニティも運営中。ご相談はDMにて。',
   },
