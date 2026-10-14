@@ -6,6 +6,11 @@ export const mockPeople: Person[] = [
     name: '小齊平 恒平',
     role: '代表 / AI活動家',
     avatarUrl: '/images/japanese/kosehirakouhei-profile.png',
+    // 本人から受け取ったリンク（2026-10-14）
+    links: [
+      { kind: 'x', url: 'https://x.com/kosehirax' },
+      { kind: 'website', url: 'https://kouheikosehira.com/' },
+    ],
     // 見本の活動名を本人の実績として並べないため空にする。
     activityIds: [],
     // 本人（代表）の指示による文面
@@ -31,8 +36,16 @@ export const mockPeople: Person[] = [
     name: '岡本ジュンイチ',
     role: '顧問 / SNSマーケター・メディアプロデューサー',
     avatarUrl: '/images/japanese/avatar-okamoto-v1.jpg',
-    // 本人から受け取ったリンク（2026-10-14）。lit.link はリンクまとめページなのでホームページのアイコンで出す
-    links: [{ kind: 'website', url: 'https://lit.link/okamotojuniti' }],
+    // 本人から受け取ったリンク（2026-10-14）。共有用の追跡パラメータ（xtok・mibextid・s・si・_r・_t）は外した。
+    // lit.link はリンクまとめページなのでホームページのアイコンで出す
+    links: [
+      { kind: 'instagram', url: 'https://instagram.com/okajun39' },
+      { kind: 'facebook', url: 'https://www.facebook.com/share/1KKbGU33b6/' },
+      { kind: 'x', url: 'https://x.com/okamotojuniti' },
+      { kind: 'tiktok', url: 'https://www.tiktok.com/@okamotojuniti1' },
+      { kind: 'youtube', url: 'https://youtube.com/@okamotojuniti' },
+      { kind: 'website', url: 'https://lit.link/okamotojuniti' },
+    ],
     activityIds: [],
     bio: 'おもに個人事業主のマーケティング支援のために、SNS・出版・公認ネットラジオ局による冠番組等をプロデュースします。未経験からサポートする伴走型の起業支援や、実績ゼロからのメディアプロデュースを提供することができます。',
   },
