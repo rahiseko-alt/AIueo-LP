@@ -36,6 +36,18 @@ export function TeamMembers({ people, activities }: TeamMembersProps) {
                     className="object-cover grayscale transition duration-500 group-hover:grayscale-0 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e0e] via-transparent to-transparent" />
+                  {person.link && (
+                    <a
+                      href={person.link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      aria-label={`${person.name}の${person.link.label}（外部サイトが開きます）`}
+                      className="absolute bottom-3 right-3 z-10 inline-flex min-h-10 items-center gap-1.5 rounded-full border border-[rgba(200,164,90,0.7)] bg-[rgba(8,8,8,0.65)] px-4 font-mono text-[11px] font-semibold uppercase tracking-widest text-[#c8a45a] backdrop-blur-sm transition-colors duration-300 hover:bg-[#c8a45a] hover:text-[#080808]"
+                    >
+                      {person.link.label}
+                      <span aria-hidden="true">↗</span>
+                    </a>
+                  )}
                 </div>
 
                 <div className="p-5 sm:p-6">

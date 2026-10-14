@@ -25,6 +25,11 @@ export interface Person {
    * 見せないため）。
    */
   bio?: string;
+  /**
+   * 写真の右下に出すリンクボタン。人によってリンク先（X・個人サイトなど）が違うので、
+   * 入っている人のカードにだけボタンを出す。label は「X」「SITE」のような短い名前。
+   */
+  link?: { url: string; label: string };
 }
 
 export interface Activity {
