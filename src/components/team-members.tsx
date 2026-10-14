@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import { Person, Activity } from '@/types';
+import { SocialIcon, SOCIAL_LABELS } from '@/components/social-icon';
 
 interface TeamMembersProps {
   people: Person[];
@@ -36,6 +37,26 @@ export function TeamMembers({ people, activities }: TeamMembersProps) {
                     className="object-cover grayscale transition duration-500 group-hover:grayscale-0 group-hover:scale-105"
                   />
                   <div className="absolute inset-0 bg-gradient-to-t from-[#0e0e0e] via-transparent to-transparent" />
+                  {person.links && person.links.length > 0 && (
+                    <>
+                    {/* アイコンの背後だけを透過の黒でうっすら暗くする（面積は最小限、リンクのある人だけ） */}
+                    <div className="pointer-events-none absolute inset-x-0 bottom-0 h-14 bg-gradient-to-t from-black/60 to-transparent" />
+                    <div className="absolute bottom-3 right-3 z-10 flex">
+                      {person.links.map((link) => (
+                        <a
+                          key={`${link.kind}-${link.url}`}
+                          href={link.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          aria-label={`${person.name}の${SOCIAL_LABELS[link.kind]}（外部サイトが開きます）`}
+                          className="inline-flex h-9 w-9 items-center justify-center text-[#f0ede8] opacity-70 transition-opacity duration-300 hover:opacity-100 focus-visible:opacity-100"
+                        >
+                          <SocialIcon kind={link.kind} className="h-5 w-5" />
+                        </a>
+                      ))}
+                    </div>
+                    </>
+                  )}
                 </div>
 
                 <div className="p-5 sm:p-6">

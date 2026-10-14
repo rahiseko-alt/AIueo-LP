@@ -16,6 +16,12 @@ export const mockPeople: Person[] = [
     name: '伊藤良二',
     role: 'プロデューサー',
     avatarUrl: '/images/japanese/avatar-2-v2.png',
+    // 本人から受け取ったリンク（2026-10-14）
+    links: [
+      { kind: 'facebook', url: 'https://www.facebook.com/ryouji.itou.3?locale=ja_JP' },
+      { kind: 'instagram', url: 'https://www.instagram.com/craftlineworks2026/' },
+      { kind: 'x', url: 'https://x.com/ohga_writer' },
+    ],
     activityIds: [],
     // 出典: https://x.com/ohga_writer のプロフィール文
     bio: 'Craft Line Works代表｜AI講師｜個人向けAI活用コンサル｜業務効率化の伴走サポーター｜SEO / MEO / AIO 対策｜店舗Web集客導線の改善（AIによる自動化）｜HP作成　Zoom無料相談受付中　まずはDMにて',
