@@ -31,8 +31,16 @@ export const mockPeople: Person[] = [
     name: '岡本ジュンイチ',
     role: '顧問 / SNSマーケター・メディアプロデューサー',
     avatarUrl: '/images/japanese/avatar-okamoto-v1.jpg',
-    // 本人から受け取ったリンク（2026-10-14）。lit.link はリンクまとめページなのでホームページのアイコンで出す
-    links: [{ kind: 'website', url: 'https://lit.link/okamotojuniti' }],
+    // 本人から受け取ったリンク（2026-10-14）。共有用の追跡パラメータ（xtok・mibextid・s・si・_r・_t）は外した。
+    // lit.link はリンクまとめページなのでホームページのアイコンで出す
+    links: [
+      { kind: 'instagram', url: 'https://instagram.com/okajun39' },
+      { kind: 'facebook', url: 'https://www.facebook.com/share/1KKbGU33b6/' },
+      { kind: 'x', url: 'https://x.com/okamotojuniti' },
+      { kind: 'tiktok', url: 'https://www.tiktok.com/@okamotojuniti1' },
+      { kind: 'youtube', url: 'https://youtube.com/@okamotojuniti' },
+      { kind: 'website', url: 'https://lit.link/okamotojuniti' },
+    ],
     activityIds: [],
     bio: 'おもに個人事業主のマーケティング支援のために、SNS・出版・公認ネットラジオ局による冠番組等をプロデュースします。未経験からサポートする伴走型の起業支援や、実績ゼロからのメディアプロデュースを提供することができます。',
   },
