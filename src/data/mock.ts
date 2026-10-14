@@ -6,6 +6,11 @@ export const mockPeople: Person[] = [
     name: '小齊平 恒平',
     role: '代表 / AI活動家',
     avatarUrl: '/images/japanese/kosehirakouhei-profile.png',
+    // 本人から受け取ったリンク（2026-10-14）
+    links: [
+      { kind: 'x', url: 'https://x.com/kosehirax' },
+      { kind: 'website', url: 'https://kouheikosehira.com/' },
+    ],
     // 見本の活動名を本人の実績として並べないため空にする。
     activityIds: [],
     // 本人（代表）の指示による文面
