@@ -54,6 +54,8 @@ export const mockPeople: Person[] = [
     name: '堺 彬',
     role: '株式会社SakAI Nexus 代表取締役',
     avatarUrl: '/images/japanese/avatar-sakai-v1.png',
+    // 本人から受け取ったリンク（2026-10-14）。株式会社SakAI Nexus の公式サイト
+    links: [{ kind: 'website', url: 'https://sakainexus.com/' }],
     activityIds: [],
     bio: 'Webライター・メディア運営の経験を経て、現在は生成AIを活用した業務改善、AI導入支援、システム開発、企業研修・講演を行う。',
   },
