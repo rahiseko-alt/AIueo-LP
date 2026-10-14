@@ -21,12 +21,12 @@ export const mockPeople: Person[] = [
     bio: 'Craft Line Works代表｜AI講師｜個人向けAI活用コンサル｜業務効率化の伴走サポーター｜SEO / MEO / AIO 対策｜店舗Web集客導線の改善（AIによる自動化）｜HP作成　Zoom無料相談受付中　まずはDMにて',
   },
   {
-    id: 'person-5',
-    name: '八巻早紀',
-    role: 'AIコミュニティ運営・編集者',
-    avatarUrl: '/images/japanese/avatar-yamaki-v1.jpg',
+    id: 'person-4',
+    name: '岡本ジュンイチ',
+    role: '顧問 / SNSマーケター・メディアプロデューサー',
+    avatarUrl: '/images/japanese/avatar-okamoto-v1.jpg',
     activityIds: [],
-    bio: '個人がネットを活用して、自分の商品やサービスを届けるための発信、集客、導線づくり、AI活用をサポート。AIを使う、使わない両方の手段で商品づくりから販売につながる流れまで、初心者にもわかりやすく整理します。AI・WEB活用コミュニティも運営中。ご相談はDMにて。',
+    bio: 'おもに個人事業主のマーケティング支援のために、SNS・出版・公認ネットラジオ局による冠番組等をプロデュースします。未経験からサポートする伴走型の起業支援や、実績ゼロからのメディアプロデュースを提供することができます。',
   },
   {
     id: 'person-3',
@@ -37,12 +37,12 @@ export const mockPeople: Person[] = [
     bio: 'Webライター・メディア運営の経験を経て、現在は生成AIを活用した業務改善、AI導入支援、システム開発、企業研修・講演を行う。',
   },
   {
-    id: 'person-4',
-    name: '岡本ジュンイチ',
-    role: '顧問 / SNSマーケター・メディアプロデューサー',
-    avatarUrl: '/images/japanese/avatar-okamoto-v1.jpg',
+    id: 'person-5',
+    name: '八巻早紀',
+    role: 'AIコミュニティ運営・編集者',
+    avatarUrl: '/images/japanese/avatar-yamaki-v1.jpg',
     activityIds: [],
-    bio: 'おもに個人事業主のマーケティング支援のために、SNS・出版・公認ネットラジオ局による冠番組等をプロデュースします。未経験からサポートする伴走型の起業支援や、実績ゼロからのメディアプロデュースを提供することができます。',
+    bio: '個人がネットを活用して、自分の商品やサービスを届けるための発信、集客、導線づくり、AI活用をサポート。AIを使う、使わない両方の手段で商品づくりから販売につながる流れまで、初心者にもわかりやすく整理します。AI・WEB活用コミュニティも運営中。ご相談はDMにて。',
   },
 ];
 
