@@ -69,6 +69,21 @@ export const mockPeople: Person[] = [
     activityIds: [],
     bio: '個人がネットを活用して、自分の商品やサービスを届けるための発信、集客、導線づくり、AI活用をサポート。AIを使う、使わない両方の手段で商品づくりから販売につながる流れまで、初心者にもわかりやすく整理します。AI・WEB活用コミュニティも運営中。ご相談はDMにて。',
   },
+  {
+    id: 'person-6',
+    name: '石田 恵美',
+    role: 'サンドアーティスト',
+    avatarUrl: '/images/japanese/avatar-ishida-v1.jpg',
+    // 本人から受け取ったリンク（2026-10-28）。追跡パラメータ（exln・dlrf・utm_source）は外した
+    links: [
+      { kind: 'website', url: 'http://www.shibumi-sandart.work/' },
+      { kind: 'instagram', url: 'https://www.instagram.com/handmade_shibumi' },
+      { kind: 'instagram', url: 'https://www.instagram.com/the_sandart_shibumi' },
+    ],
+    activityIds: [],
+    // 出典: 本人の公式サイト http://www.shibumi-sandart.work/ のプロフィール文
+    bio: '長野県安曇野市明科生まれ。2003年、車で1年間旅したニュージーランドで沢山の人々、美しい自然に出会い独自の表現方法でサンドアートの創作活動を開始。帰国後、安曇野を拠点に創作活動を続けながら安曇野、松本を中心に県内外で個展を開催。現在はオリジナルデザインで布・革製品の製作も行っている。',
+  },
 ];
 
 export const mockHeroActivity: Activity = {
