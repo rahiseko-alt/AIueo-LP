@@ -84,6 +84,15 @@ export const mockPeople: Person[] = [
     // 出典: 本人の公式サイト http://www.shibumi-sandart.work/ のプロフィール文
     bio: '長野県安曇野市明科生まれ。2003年、車で1年間旅したニュージーランドで沢山の人々、美しい自然に出会い独自の表現方法でサンドアートの創作活動を開始。帰国後、安曇野を拠点に創作活動を続けながら安曇野、松本を中心に県内外で個展を開催。現在はオリジナルデザインで布製品の製作も行っている。',
   },
+  {
+    id: 'person-7',
+    name: '裕太',
+    role: 'AI活用 × Web制作',
+    avatarUrl: '/images/japanese/avatar-yuta-v1.jpg',
+    links: [],
+    activityIds: [],
+    bio: 'AIツールを活用して、動画制作の企画・構成・編集やSNS運用、集客改善、HP・LP制作、業務効率化に取り組んでいます。初心者向けAI講師の実績あり。店舗PRショート動画、インタビュー動画などの撮影経験もあり。一つひとつのご縁を大切に、寄り添いながら価値を届けます。',
+  },
 ];
 
 export const mockHeroActivity: Activity = {
