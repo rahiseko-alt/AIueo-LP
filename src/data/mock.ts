@@ -86,7 +86,7 @@ export const mockPeople: Person[] = [
   },
   {
     id: 'person-7',
-    name: '裕太',
+    name: '渡辺 裕太',
     role: 'AI活用 × Web制作',
     avatarUrl: '/images/japanese/avatar-yuta-v1.jpg',
     links: [],
