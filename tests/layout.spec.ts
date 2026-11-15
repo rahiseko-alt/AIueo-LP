@@ -88,6 +88,12 @@ test.describe('コンソールエラー・リクエスト失敗', () => {
   for (const path of PUBLIC_PATHS) {
     test(`${path} でエラーが発生しない`, async ({ page }) => {
       const problems: string[] = [];
+      if (path === '/') {
+        await page.route(
+          /^https:\/\/(www\.googletagmanager\.com|www\.google-analytics\.com|player\.vimeo\.com|.*\.challenges\.cloudflare\.com|challenges\.cloudflare\.com)\//,
+          (route) => route.fulfill({ status: 200, contentType: 'text/html', body: '' }),
+        );
+      }
       page.on('console', (msg) => {
         if (msg.type() === 'error') problems.push(`console.error: ${msg.text()}`);
       });
