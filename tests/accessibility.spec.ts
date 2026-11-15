@@ -1,13 +1,37 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 
-test('ヘッダーメニューが開閉でき、Home / About / Events の各導線が利用可能である', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 800 });
+const STUB_EXTERNAL_RE =
+  /^https:\/\/(player\.vimeo\.com|f\.vimeocdn\.com|www\.googletagmanager\.com|static\.cloudflareinsights\.com)\//;
+
+async function prepareLpPage(page: Page, readySelector: string): Promise<void> {
+  test.slow();
+  await page.route(STUB_EXTERNAL_RE, (route) =>
+    route.fulfill({ status: 200, contentType: 'text/plain', body: '' })
+  );
   await page.goto('/', { waitUntil: 'load' });
-  await page.waitForSelector('#header-right-menu-btn');
+  await page.waitForSelector(readySelector);
   await page.evaluate(() => {
     const intro = document.getElementById('intro-warp-title');
     if (intro) intro.style.display = 'none';
   });
+  await page.waitForFunction(
+    (sel) => {
+      const w = window as unknown as { properties?: { hasStarted?: boolean } };
+      const pre = document.getElementById('preloader');
+      const preHidden =
+        !pre ||
+        getComputedStyle(pre).display === 'none' ||
+        getComputedStyle(pre).pointerEvents === 'none';
+      return !!document.querySelector(sel) && !!w.properties?.hasStarted && preHidden;
+    },
+    readySelector,
+    { timeout: 30000 }
+  );
+}
+
+test('ヘッダーメニューが開閉でき、Home / About / Events の各導線が利用可能である', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 800 });
+  await prepareLpPage(page, '#header-right-menu-btn');
 
   const toggle = page.locator('#header-right-menu-btn');
   await expect(toggle).toBeVisible();
@@ -24,39 +48,17 @@ test('ヘッダーメニューが開閉でき、Home / About / Events の各導�
 });
 
 test('企画提案モーダルがdialogとして開き、同意前は送信不可・Escapeで閉じる', async ({ page }) => {
-  test.slow();
-  await page.route(/^https:\/\/(player\.vimeo\.com|f\.vimeocdn\.com|www\.googletagmanager\.com|static\.cloudflareinsights\.com)\//, (route) =>
-    route.fulfill({ status: 200, contentType: 'text/plain', body: '' })
-  );
-  await page.goto('/', { waitUntil: 'load' });
-  await page.waitForSelector('#home-featured-cta');
-  await page.evaluate(() => {
-    const intro = document.getElementById('intro-warp-title');
-    if (intro) intro.style.display = 'none';
-  });
+  await prepareLpPage(page, '#home-featured-cta');
   await page.waitForFunction(
     () => {
       const w = window as unknown as {
-        properties?: { hasStarted?: boolean };
         scrollManager?: { contentSizePixel?: number; getDomRange?: (e: Element) => { top: number } };
       };
       const el = document.getElementById('home-featured-cta');
-      const pre = document.getElementById('preloader');
-      const preHidden =
-        !pre ||
-        getComputedStyle(pre).display === 'none' ||
-        getComputedStyle(pre).pointerEvents === 'none';
-      return (
-        !!el &&
-        !!w.properties?.hasStarted &&
-        !!w.scrollManager &&
-        (w.scrollManager.contentSizePixel ?? 0) > 0 &&
-        (w.scrollManager.getDomRange?.(el)?.top ?? 0) > 0 &&
-        preHidden
-      );
+      return !!el && !!w.scrollManager && (w.scrollManager.contentSizePixel ?? 0) > 0 && (w.scrollManager.getDomRange?.(el)?.top ?? 0) > 0;
     },
     null,
-    { timeout: 30000 }
+    { timeout: 20000 }
   );
   await page.evaluate(() => {
     const el = document.getElementById('home-featured-cta');
