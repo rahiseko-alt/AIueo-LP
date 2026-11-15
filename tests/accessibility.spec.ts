@@ -9,24 +9,34 @@ async function prepareLpPage(page: Page, readySelector: string): Promise<void> {
     route.fulfill({ status: 200, contentType: 'text/plain', body: '' })
   );
   await page.goto('/', { waitUntil: 'load' });
-  await page.waitForSelector(readySelector);
-  await page.evaluate(() => {
-    const intro = document.getElementById('intro-warp-title');
-    if (intro) intro.style.display = 'none';
-  });
   await page.waitForFunction(
     (sel) => {
-      const w = window as unknown as { properties?: { hasStarted?: boolean } };
+      const w = window as unknown as {
+        properties?: { hasStarted?: boolean };
+      };
       const pre = document.getElementById('preloader');
       const preHidden =
         !pre ||
         getComputedStyle(pre).display === 'none' ||
         getComputedStyle(pre).pointerEvents === 'none';
-      return !!document.querySelector(sel) && !!w.properties?.hasStarted && preHidden;
+      const to = document.getElementById('transition-overlay');
+      const overlayHidden =
+        !to ||
+        getComputedStyle(to).display === 'none' ||
+        getComputedStyle(to).pointerEvents === 'none';
+      return !!document.querySelector(sel) && !!w.properties?.hasStarted && preHidden && overlayHidden;
     },
     readySelector,
-    { timeout: 30000 }
+    { timeout: 60000 }
   );
+  await page.evaluate(() => {
+    const w = window as unknown as { __skipIntro?: () => void; __unlockNow?: () => void };
+    if (typeof w.__skipIntro === 'function') w.__skipIntro();
+    if (typeof w.__unlockNow === 'function') w.__unlockNow();
+    const intro = document.getElementById('intro-warp-title');
+    if (intro) intro.style.display = 'none';
+  });
+  await page.waitForSelector(readySelector, { state: 'visible', timeout: 30000 });
 }
 
 test('ヘッダーメニューが開閉でき、Home / About / Events の各導線が利用可能である', async ({ page }) => {

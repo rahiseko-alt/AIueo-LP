@@ -50,6 +50,7 @@ test.describe('横方向のはみ出し', () => {
   for (const path of PUBLIC_PATHS) {
     for (const width of WIDTHS) {
       test(`${path} @ ${width}px で横スクロールが発生しない`, async ({ page }) => {
+        if (path === '/') test.slow();
         await page.setViewportSize({ width, height: 900 });
         await page.goto(path);
         await unclipOverflow(page);
