@@ -93,6 +93,26 @@ export const mockPeople: Person[] = [
     activityIds: [],
     bio: 'AIツールを活用して、動画制作の企画・構成・編集やSNS運用、集客改善、HP・LP制作、業務効率化に取り組んでいます。初心者向けAI講師の実績あり。店舗PRショート動画、インタビュー動画などの撮影経験もあり。一つひとつのご縁を大切に、寄り添いながら価値を届けます。',
   },
+  {
+    id: 'person-8',
+    name: '毛利 圭子',
+    role: '地域文化 × AI発信',
+    avatarUrl: '/images/japanese/avatar-keiko-v1.jpg',
+    links: [],
+    activityIds: [],
+    // 出典: 本人提示のプロフィール文（2026-11-16、ユーザー経由）
+    bio: '地域の魅力を見つけ、伝え、つなぐ活動を展開。有松絞りの伝統や職人の技、ものづくりの楽しさを、AIとSNSを活用して新しい世代へ届ける。伝統文化と最新技術をつなぎ、地域に新しい可能性を生み出すことを目指す。',
+  },
+  {
+    id: 'person-9',
+    name: '原 瑞恵',
+    role: 'Atelier LUNA 代表',
+    avatarUrl: '/images/japanese/avatar-mizue-v1.jpg',
+    links: [],
+    activityIds: [],
+    // 出典: 本人提示のプロフィール文（2026-11-16、ユーザー経由）
+    bio: 'イラスト・カレンダー制作などのクリエイティブ事業をはじめ、通信代理店事業、DX支援、ホームページ制作など幅広い分野で活動。クリエイティブとデジタル技術を掛け合わせ、個人や企業の想いをカタチにするサービスを展開しています。',
+  },
 ];
 
 export const mockHeroActivity: Activity = {
