@@ -33,6 +33,13 @@ const nextConfig: NextConfig = {
   async headers() {
     return [{ source: '/:path*', headers: securityHeaders }];
   },
+  async rewrites() {
+    return {
+      beforeFiles: [
+        { source: '/', destination: '/lp.html' },
+      ],
+    };
+  },
 };
 
 export default nextConfig;

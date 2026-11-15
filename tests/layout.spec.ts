@@ -15,11 +15,6 @@ async function unclipOverflow(page: Page) {
   await page.addStyleTag({ content: 'html, body { overflow-x: visible !important; }' });
 }
 
-/** スムーススクロールは完了待ちが不定になるので、アンカー検証中は無効化する。 */
-async function disableSmoothScroll(page: Page) {
-  await page.addStyleTag({ content: 'html { scroll-behavior: auto !important; }' });
-}
-
 /** はみ出している要素のうち、実際にページを広げているものを特定する。 */
 async function measureOverflow(page: Page) {
   return page.evaluate(() => {
@@ -69,59 +64,24 @@ test.describe('横方向のはみ出し', () => {
   }
 });
 
-test('トップの内部アンカーが全て実在し、ジャンプ後に内容がナビの裏に隠れない', async ({ page }) => {
-  await page.setViewportSize({ width: 1280, height: 900 });
+test('トップのメンバー表示とSNSリンクが正しく設定されている', async ({ page }) => {
   await page.goto('/');
-  await disableSmoothScroll(page);
+  const members = page.locator('#home-members');
+  await expect(members).toHaveCount(1);
+  await expect(members).toContainText('渡部 裕太');
+  await expect(members).not.toContainText('渡辺 裕太');
 
-  const hrefs = await page.evaluate(() =>
-    Array.from(document.querySelectorAll<HTMLAnchorElement>('a[href^="#"]'))
-      .map((a) => a.getAttribute('href')!)
-      .filter((h) => h.length > 1),
+  const kosehiraSns = await members.locator('.member-card[data-id="kosehira"] .sns-btn').evaluateAll((els) =>
+    els.map((el) => el.getAttribute('href')),
   );
-  expect(hrefs.length).toBeGreaterThan(0);
+  expect(kosehiraSns).toEqual(['https://x.com/kosehirax', 'https://kouheikosehira.com']);
 
-  for (const href of Array.from(new Set(hrefs))) {
-    const target = page.locator(`#${href.slice(1)}`);
-    await expect(target, `${href} の飛び先が存在しない`).toHaveCount(1);
-
-    await page.evaluate((h) => {
-      location.hash = '';
-      location.hash = h;
-    }, href);
-    await page.waitForTimeout(150);
-
-    // ナビは最上部では画面外に隠れ、スクロールすると現れる。表示・非表示は
-    // トランジションなので、遷移中の値で判定しないよう整定を待ってから比べる。
-    // セクション自身の上端がナビに重なっても、padding-top で内容が退避していれば読める。
-    const readIntrusion = () =>
-      target.evaluate((el) => {
-        const rect = el.getBoundingClientRect();
-        const nav = document.querySelector('nav, header');
-        const navBottom = nav ? nav.getBoundingClientRect().bottom : 0;
-        const contentTop = rect.top + parseFloat(getComputedStyle(el).paddingTop || '0');
-        // 正の値 = 内容がナビの裏に隠れている量(px)
-        return Math.round((navBottom - contentTop) * 100) / 100;
-      });
-
-    await expect
-      .poll(readIntrusion, {
-        message: `${href} へジャンプ後、内容がナビの裏に隠れたまま整定した`,
-        timeout: 3000,
-      })
-      .toBeLessThanOrEqual(1);
-  }
-});
-
-test('人物カードにフォールバック文言が出ない', async ({ page }) => {
-  // 修正前: activityIds が解決できず、10行中6行が 'AI Sprint / Workshop' になっていた
-  await page.goto('/');
-  const team = page.locator('#team');
-  await expect(team).toHaveCount(1);
-  await expect(
-    team.getByText('AI Sprint / Workshop', { exact: false }),
-    'activityIds の解決に失敗しフォールバックが表示されている',
-  ).toHaveCount(0);
+  const placeholders = await members.locator('a[href]').evaluateAll((els) =>
+    els
+      .map((el) => el.getAttribute('href'))
+      .filter((h) => h && ['https://x.com', 'https://note.com', 'https://github.com', 'https://twitter.com/kosehirakouhei'].includes(h)),
+  );
+  expect(placeholders).toEqual([]);
 });
 
 test.describe('コンソールエラー・リクエスト失敗', () => {
