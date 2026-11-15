@@ -24,30 +24,40 @@ test('ヘッダーメニューが開閉でき、Home / About / Events の各導�
 });
 
 test('企画提案モーダルがdialogとして開き、同意前は送信不可・Escapeで閉じる', async ({ page }) => {
+  test.slow();
+  await page.route(/^https:\/\/(player\.vimeo\.com|f\.vimeocdn\.com|www\.googletagmanager\.com|static\.cloudflareinsights\.com)\//, (route) =>
+    route.fulfill({ status: 200, contentType: 'text/plain', body: '' })
+  );
   await page.goto('/', { waitUntil: 'load' });
   await page.waitForSelector('#home-featured-cta');
   await page.evaluate(() => {
     const intro = document.getElementById('intro-warp-title');
     if (intro) intro.style.display = 'none';
   });
-  await page
-    .waitForFunction(
-      () => {
-        const sm = (window as unknown as {
-          scrollManager?: { contentSizePixel?: number; getDomRange?: (e: Element) => { top: number } };
-        }).scrollManager;
-        const el = document.getElementById('home-featured-cta');
-        const pre = document.getElementById('preloader');
-        const preHidden =
-          !pre ||
-          getComputedStyle(pre).display === 'none' ||
-          getComputedStyle(pre).pointerEvents === 'none';
-        return !!el && !!sm && (sm.contentSizePixel ?? 0) > 0 && (sm.getDomRange?.(el)?.top ?? 0) > 0 && preHidden;
-      },
-      null,
-      { timeout: 20000 }
-    )
-    .catch(() => {});
+  await page.waitForFunction(
+    () => {
+      const w = window as unknown as {
+        properties?: { hasStarted?: boolean };
+        scrollManager?: { contentSizePixel?: number; getDomRange?: (e: Element) => { top: number } };
+      };
+      const el = document.getElementById('home-featured-cta');
+      const pre = document.getElementById('preloader');
+      const preHidden =
+        !pre ||
+        getComputedStyle(pre).display === 'none' ||
+        getComputedStyle(pre).pointerEvents === 'none';
+      return (
+        !!el &&
+        !!w.properties?.hasStarted &&
+        !!w.scrollManager &&
+        (w.scrollManager.contentSizePixel ?? 0) > 0 &&
+        (w.scrollManager.getDomRange?.(el)?.top ?? 0) > 0 &&
+        preHidden
+      );
+    },
+    null,
+    { timeout: 30000 }
+  );
   await page.evaluate(() => {
     const el = document.getElementById('home-featured-cta');
     const sm = (window as unknown as {
@@ -59,21 +69,21 @@ test('企画提案モーダルがdialogとして開き、同意前は送信不�
       el.scrollIntoView({ block: 'center' });
     }
   });
-  await page
-    .waitForFunction(
-      () => {
-        const el = document.getElementById('home-featured-cta');
-        if (!el) return false;
-        const r = el.getBoundingClientRect();
-        return r.height > 0 && r.top >= 0 && r.bottom <= window.innerHeight;
-      },
-      null,
-      { timeout: 5000 }
-    )
-    .catch(() => {});
+  await page.waitForFunction(
+    () => {
+      const el = document.getElementById('home-featured-cta');
+      if (!el) return false;
+      const r = el.getBoundingClientRect();
+      if (r.height <= 0 || r.top < 0 || r.bottom > window.innerHeight) return false;
+      const hit = document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2);
+      return !!hit && el.contains(hit);
+    },
+    null,
+    { timeout: 10000 }
+  );
 
   const trigger = page.locator('#home-featured-cta');
-  await trigger.click();
+  await trigger.click({ force: true });
 
   const modal = page.locator('#proposal-guidelines-modal');
   await expect(modal).toHaveAttribute('aria-hidden', 'false');
