@@ -1951,14 +1951,17 @@ html #page-container #home-hero-title .word {
   <script type="module" crossorigin src="./assets/index-BFGppTJe.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-DdhlDTr_.css">
 <style>
-/* Members auto horizontal scroll (2026-11-16) - pmndrs infinite-scroll方式: セット複製＋translateX -50%ラップ */
-#home-members .members-grid{display:block!important;overflow:hidden!important}
-#home-members .members-track{display:flex!important;width:max-content!important;animation:members-marquee 60s linear infinite!important}
+/* Members auto horizontal scroll (2026-11-16) - pmndrs infinite-scroll方式: セット複製＋半周ラップ。自動送りはJS、停止はクリックのみ、左右矢印でも移動できる */
+#home-members .members-scroll-wrap{position:relative!important}
+#home-members .members-grid{display:block!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-behavior:auto!important;scrollbar-width:none!important}
+#home-members .members-grid::-webkit-scrollbar{display:none!important}
+#home-members .members-track{display:flex!important;width:max-content!important}
 #home-members .members-track .member-card{flex:0 0 auto!important;width:529px!important;margin-right:clamp(16px,2vw,22px)!important}
-#home-members .members-grid:hover .members-track,#home-members .members-grid:active .members-track{animation-play-state:paused!important}
-@keyframes members-marquee{from{transform:translateX(0)}to{transform:translateX(-50%)}}
-@media (max-width:900px){#home-members .members-track .member-card{width:calc(100vw - 14px)!important}}
-@media (prefers-reduced-motion:reduce){#home-members .members-track{animation:none!important}#home-members .members-grid{overflow-x:auto!important}}
+#home-members .members-nav{position:absolute!important;top:50%!important;transform:translateY(-50%)!important;z-index:20!important;width:46px!important;height:46px!important;border-radius:50%!important;border:1px solid rgba(255,255,255,.35)!important;background:rgba(10,14,28,.72)!important;color:#fff!important;display:flex!important;align-items:center!important;justify-content:center!important;cursor:pointer!important;padding:0!important}
+#home-members .members-nav:hover{background:rgba(10,14,28,.92)!important}
+#home-members .members-nav-prev{left:10px!important}
+#home-members .members-nav-next{right:10px!important}
+@media (max-width:900px){#home-members .members-track .member-card{width:calc(100vw - 14px)!important}#home-members .members-nav{width:40px!important;height:40px!important}}
 </style>
 </head> <body>
   <div id="intro-warp-title">
@@ -2020,6 +2023,7 @@ html #page-container #home-hero-title .word {
     <div class="members-header-desc">「こういうのやるので、一緒にどうですか？」を形にするコアメンバー。</div>
   </div>
 
+    <div class="members-scroll-wrap">
     <div class="members-grid">
     <div class="members-track">
     <!-- Card 01: 小齊平 恒平 -->
@@ -2420,6 +2424,9 @@ html #page-container #home-hero-title .word {
     </div>
     </div>
   </div>
+    <button class="members-nav members-nav-prev" type="button" aria-label="前のメンバーへ"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 5.5 8 12 14.5 18.5"/></svg></button>
+    <button class="members-nav members-nav-next" type="button" aria-label="次のメンバーへ"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9.5 5.5 16 12 9.5 18.5"/></svg></button>
+  </div>
 </div> <div id="home-goal" class="section"> <div id="home-goal-context"> <div id="home-goal-context-inner"> <div id="home-goal-title">運営のかかわり方・スタンス（Operating Guidelines）</div> <div id="home-goal-texts"> <div class="home-goal-cta-wrap"> <a id="home-goal-details-btn" class="pill-cta-btn pill-cta-white" href="./guidelines.html" data-link-type="external" aria-label="詳細な運営規約・スタンスを見る"> <div class="pill-cta-container"> <span class="pill-cta-arrow"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.343 8h11.314m0 0-4.984 4.984M13.657 8 8.673 3.016"></path></svg> </span> <span class="pill-cta-text">詳細な運営規約・スタンスを見る</span> <span class="pill-cta-dots"><span class="pill-cta-dot"></span></span> </div> </a> </div> </div> </div> </div> <div id="home-goal-tunnel-title" style="display: none !important; visibility: hidden !important;">
   <div id="tunnel-title-phase1" class="tunnel-title-phase">
     <div class="home-goal-tunnel-title-line"></div>
@@ -2472,4 +2479,58 @@ html #page-container #home-hero-title .word {
 
 
 
+
+<script>
+/* Members marquee controller (2026-11-16): 自動送り／クリックで停止・再開／左右矢印で1枚分移動 */
+(function () {
+  var grid = document.querySelector('#home-members .members-grid');
+  if (!grid) return;
+  var track = grid.querySelector('.members-track');
+  var prev = document.querySelector('#home-members .members-nav-prev');
+  var next = document.querySelector('#home-members .members-nav-next');
+  var paused = false;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var SPEED = 165;
+  function half() { return track ? track.scrollWidth / 2 : 0; }
+  function wrap() {
+    var h = half();
+    if (h <= 0) return;
+    while (grid.scrollLeft >= h) grid.scrollLeft -= h;
+    while (grid.scrollLeft < 0) grid.scrollLeft += h;
+  }
+  var last = null;
+  function frame(ts) {
+    if (last === null) last = ts;
+    var dt = Math.min((ts - last) / 1000, 0.05);
+    last = ts;
+    if (!paused && !reduce) {
+      grid.scrollLeft += SPEED * dt;
+      wrap();
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  function stepSize() {
+    var card = track ? track.querySelector('.member-card') : null;
+    if (!card) return 551;
+    var mr = parseFloat(window.getComputedStyle(card).marginRight) || 0;
+    return card.offsetWidth + mr;
+  }
+  if (prev) prev.addEventListener('click', function () {
+    var h = half();
+    if (h > 0 && grid.scrollLeft < stepSize()) grid.scrollLeft += h;
+    grid.scrollLeft -= stepSize();
+    wrap();
+  });
+  if (next) next.addEventListener('click', function () {
+    grid.scrollLeft += stepSize();
+    wrap();
+  });
+  grid.addEventListener('click', function (e) {
+    if (e.target.closest('a') || e.target.closest('button')) return;
+    paused = !paused;
+    grid.classList.toggle('is-paused', paused);
+  });
+})();
+</script>
 </body></html>
