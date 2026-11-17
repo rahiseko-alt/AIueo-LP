@@ -1950,6 +1950,22 @@ html #page-container #home-hero-title .word {
 
   <script type="module" crossorigin src="./assets/index-BFGppTJe.js"></script>
   <link rel="stylesheet" crossorigin href="./assets/index-DdhlDTr_.css">
+<style>
+/* Members auto horizontal scroll (2026-11-16) - pmndrs infinite-scroll方式: セット複製＋半周ラップ。自動送りはJS、停止はクリックのみ、左右矢印でも移動できる */
+#home-members .members-scroll-wrap{position:relative!important}
+#home-members .members-grid{display:block!important;overflow-x:auto!important;overflow-y:hidden!important;scroll-behavior:auto!important;scrollbar-width:none!important}
+#home-members .members-grid::-webkit-scrollbar{display:none!important}
+#home-members .members-track{display:flex!important;width:max-content!important}
+#home-members .members-track .member-card{flex:0 0 auto!important;width:529px!important;margin-right:clamp(16px,2vw,22px)!important}
+#home-members .members-track .member-card-inner{flex-direction:row!important;gap:16px!important}
+#home-members .members-track .member-photo-frame{flex:0 0 196px!important;width:196px!important;margin-bottom:0!important;align-self:flex-start!important}
+#home-members .members-track .member-card-body{min-width:0!important}
+#home-members .members-nav{position:absolute!important;top:50%!important;transform:translateY(-50%)!important;z-index:20!important;width:46px!important;height:46px!important;border-radius:50%!important;border:1px solid rgba(255,255,255,.35)!important;background:rgba(10,14,28,.72)!important;color:#fff!important;display:flex!important;align-items:center!important;justify-content:center!important;cursor:pointer!important;padding:0!important}
+#home-members .members-nav:hover{background:rgba(10,14,28,.92)!important}
+#home-members .members-nav-prev{left:10px!important}
+#home-members .members-nav-next{right:10px!important}
+@media (max-width:900px){#home-members .members-track .member-card{width:calc(100vw - 14px)!important}#home-members .members-nav{width:40px!important;height:40px!important}#home-members .members-track .member-photo-frame{flex-basis:118px!important;width:118px!important;height:auto!important;aspect-ratio:3/4!important}#home-members .members-track .member-card-inner{gap:12px!important}}
+</style>
 </head> <body>
   <div id="intro-warp-title">
     <div id="intro-warp-p1" class="intro-warp-phase is-active">
@@ -2010,7 +2026,9 @@ html #page-container #home-hero-title .word {
     <div class="members-header-desc">「こういうのやるので、一緒にどうですか？」を形にするコアメンバー。</div>
   </div>
 
+    <div class="members-scroll-wrap">
     <div class="members-grid">
+    <div class="members-track">
     <!-- Card 01: 小齊平 恒平 -->
     <div class="member-card" data-id="kosehira">
       <div class="member-card-glow glow-cyan"></div>
@@ -2177,13 +2195,17 @@ html #page-container #home-hero-title .word {
         <div class="member-photo-frame">
           <img src="./assets/member-mouri-v1.jpg" alt="毛利 圭子" class="member-photo-img" loading="lazy">
           <div class="member-photo-overlay"></div>
+          <div class="member-photo-sns">
+            <a class="sns-btn" href="https://inazawa.mypl.net/" target="_blank" rel="noopener noreferrer" aria-label="Website"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></a>
+            <a class="sns-btn" href="https://www.instagram.com/mypl.inazawa" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg></a>
+          </div>
         </div>
         <div class="member-card-body">
           <div class="member-card-title-row">
             <h4 class="member-card-name">毛利 圭子</h4>
-            <span class="member-card-role-title">地域文化 × AI発信</span>
+            <span class="member-card-role-title">合同会社SunnyMoon 代表社員</span>
           </div>
-          <div class="member-card-sub">地域情報発信 • SNSコンテンツ制作</div>
+          <div class="member-card-sub">まいぷれ稲沢・あま・津島・愛西 運営 • 地域情報発信</div>
           <p class="member-card-desc">有松絞りの伝統や職人の技、ものづくりの楽しさを、AIとSNSで新しい世代へ届ける。地域の魅力を見つけ、伝え、つなぎ、伝統文化と最新技術の橋渡しで地域に新しい可能性を生む。</p>
         </div>
       </div>
@@ -2194,6 +2216,12 @@ html #page-container #home-hero-title .word {
         <div class="member-photo-frame">
           <img src="./assets/member-hara-v1.jpg" alt="原 瑞恵" class="member-photo-img" loading="lazy">
           <div class="member-photo-overlay"></div>
+          <div class="member-photo-sns">
+            <a class="sns-btn" href="https://line.me/ti/p/So0QR977ze" target="_blank" rel="noopener noreferrer" aria-label="LINE"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg></a>
+            <a class="sns-btn" href="https://olaiwwly.dbuilder.site/" target="_blank" rel="noopener noreferrer" aria-label="Website"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></a>
+            <a class="sns-btn" href="https://www.instagram.com/atelierluna_official/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg></a>
+            <a class="sns-btn" href="https://www.facebook.com/profile.php?id=61572596287251" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"/></svg></a>
+          </div>
         </div>
         <div class="member-card-body">
           <div class="member-card-title-row">
@@ -2205,6 +2233,214 @@ html #page-container #home-hero-title .word {
         </div>
       </div>
     </div>
+    <!-- Card 01: 小齊平 恒平 -->
+    <div class="member-card" aria-hidden="true" data-id="kosehira-clone">
+      <div class="member-card-glow glow-cyan"></div>
+      <div class="member-card-inner">
+        <div class="member-photo-frame">
+          <img src="./assets/member-kosehira-DdHJMXlT.jpg" alt="小齊平 恒平" class="member-photo-img" loading="lazy">
+          <div class="member-photo-overlay"></div>
+          <div class="member-photo-sns">
+            <a class="sns-btn" href="https://x.com/kosehirax" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></svg></a>
+            <a class="sns-btn" href="https://kouheikosehira.com" target="_blank" rel="noopener noreferrer" aria-label="Website"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></a>
+          </div>
+        </div>
+        <div class="member-card-body">
+          <div class="member-card-title-row">
+            <h4 class="member-card-name">小齊平 恒平</h4>
+            <span class="member-card-role-title">代表 / AI活動家</span>
+          </div>
+          <div class="member-card-sub">play with AI • 専門学校講師</div>
+          <p class="member-card-desc">「今度何かやりましょう」を「こういうのやるので、一緒にどうですか？」に変える。草AI同盟の創設者。理論より実践、対等に実験できる場づくりを牽引。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 02: 伊藤 良二 -->
+    <div class="member-card" aria-hidden="true" data-id="ito-clone">
+      <div class="member-card-glow glow-magenta"></div>
+      <div class="member-card-inner">
+        <div class="member-photo-frame">
+          <img src="./assets/member-ito-CKzIg9lU.jpg" alt="伊藤 良二" class="member-photo-img" loading="lazy">
+          <div class="member-photo-overlay"></div>
+          <div class="member-photo-sns">
+            <a class="sns-btn" href="https://www.facebook.com/ryouji.itou.3?locale=ja_JP" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"/></svg></a>
+            <a class="sns-btn" href="https://www.instagram.com/craftlineworks2026/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg></a>
+            <a class="sns-btn" href="https://x.com/ohga_writer" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></svg></a>
+          </div>
+        </div>
+        <div class="member-card-body">
+          <div class="member-card-title-row">
+            <h4 class="member-card-name">伊藤 良二</h4>
+            <span class="member-card-role-title">プロデューサー</span>
+          </div>
+          <div class="member-card-sub">Craft Line Works代表 • 業務効率化</div>
+          <p class="member-card-desc">ビジネス現場のリアルな課題をAIと仕組みで最短解決する伴走者。企画の立ち上げから持続可能な社会実装までを一気通貫でプロデュース。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 03: 岡本 ジュンイチ -->
+    <div class="member-card" aria-hidden="true" data-id="okamoto-clone">
+      <div class="member-card-glow glow-amber"></div>
+      <div class="member-card-inner">
+        <div class="member-photo-frame">
+          <img src="./assets/member-okamoto-D5U-aAgr.jpg" alt="岡本 ジュンイチ" class="member-photo-img" loading="lazy">
+          <div class="member-photo-overlay"></div>
+          <div class="member-photo-sns">
+            <a class="sns-btn" href="https://instagram.com/okajun39" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg></a>
+            <a class="sns-btn" href="https://www.facebook.com/share/1KKbGU33b6/" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"/></svg></a>
+            <a class="sns-btn" href="https://x.com/okamotojuniti" target="_blank" rel="noopener noreferrer" aria-label="X (Twitter)"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M14.234 10.162 22.977 0h-2.072l-7.591 8.824L7.251 0H.258l9.168 13.343L.258 24H2.33l8.016-9.318L16.749 24h6.993zm-2.837 3.299-.929-1.329L3.076 1.56h3.182l5.965 8.532.929 1.329 7.754 11.09h-3.182z"/></svg></a>
+            <a class="sns-btn" href="https://www.tiktok.com/@okamotojuniti1" target="_blank" rel="noopener noreferrer" aria-label="TikTok"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1Z"/></svg></a>
+            <a class="sns-btn" href="https://youtube.com/@okamotojuniti" target="_blank" rel="noopener noreferrer" aria-label="YouTube"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814ZM9.545 15.568V8.432L15.818 12l-6.273 3.568Z"/></svg></a>
+            <a class="sns-btn" href="https://lit.link/okamotojuniti" target="_blank" rel="noopener noreferrer" aria-label="Website"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></a>
+          </div>
+        </div>
+        <div class="member-card-body">
+          <div class="member-card-title-row">
+            <h4 class="member-card-name">岡本 ジュンイチ</h4>
+            <span class="member-card-role-title">顧問 / メディアプロデューサー</span>
+          </div>
+          <div class="member-card-sub">SNSマーケター • メディア戦略</div>
+          <p class="member-card-desc">熱量を最大化し、共感と連鎖を生み出すストーリーテラー。発信力とメディアディレクションで草AI同盟のビジョンを広く社会へ届ける。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 04: 堺 彬 -->
+    <div class="member-card" aria-hidden="true" data-id="sakai-clone">
+      <div class="member-card-glow glow-emerald"></div>
+      <div class="member-card-inner">
+        <div class="member-photo-frame">
+          <img src="./assets/member-sakai-CjJGwC1l.jpg" alt="堺 彬" class="member-photo-img" loading="lazy">
+          <div class="member-photo-overlay"></div>
+          <div class="member-photo-sns">
+            <a class="sns-btn" href="https://sakainexus.com/" target="_blank" rel="noopener noreferrer" aria-label="Website"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></a>
+          </div>
+        </div>
+        <div class="member-card-body">
+          <div class="member-card-title-row">
+            <h4 class="member-card-name">堺 彬</h4>
+            <span class="member-card-role-title">開発 / AI導入支援</span>
+          </div>
+          <div class="member-card-sub">株式会社SakAI Nexus 代表取締役</div>
+          <p class="member-card-desc">先端LLMと最新アーキテクチャで「動くもの」を最速で具現化するエンジニアリングの要。生成AIアプリの高速プロトタイプから企業導入までを推進。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 05: 八巻 早紀 -->
+    <div class="member-card" aria-hidden="true" data-id="yamaki-clone">
+      <div class="member-card-glow glow-rose"></div>
+      <div class="member-card-inner">
+        <div class="member-photo-frame">
+          <img src="./assets/member-yamaki-Di81CKTl.jpg" alt="八巻 早紀" class="member-photo-img" loading="lazy">
+          <div class="member-photo-overlay"></div>
+          <div class="member-photo-sns">
+            <a class="sns-btn" href="https://www.facebook.com/profile.php?id=100029230621734" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"/></svg></a>
+          </div>
+        </div>
+        <div class="member-card-body">
+          <div class="member-card-title-row">
+            <h4 class="member-card-name">八巻 早紀</h4>
+            <span class="member-card-role-title">AIコミュニティ運営 / 編集者</span>
+          </div>
+          <div class="member-card-sub">発信・集客導線 • 商品づくり</div>
+          <p class="member-card-desc">想いを形にする導線をつくるコミュニティ運営者。発信・集客・商品づくりとAI活用をわかりやすく整理し、最初の一歩に伴走。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 06: 石田 恵美 -->
+    <div class="member-card" aria-hidden="true" data-id="ishida-clone">
+      <div class="member-card-glow glow-violet"></div>
+      <div class="member-card-inner">
+        <div class="member-photo-frame">
+          <img src="./assets/member-ishida-DwsT39e0.jpg" alt="石田 恵美" class="member-photo-img" loading="lazy">
+          <div class="member-photo-overlay"></div>
+          <div class="member-photo-sns">
+            <a class="sns-btn" href="http://www.shibumi-sandart.work/" target="_blank" rel="noopener noreferrer" aria-label="Website"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></a>
+            <a class="sns-btn" href="https://www.instagram.com/the_sandart_shibumi" target="_blank" rel="noopener noreferrer" aria-label="Instagram (Sand Art)"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg></a>
+            <a class="sns-btn" href="https://www.instagram.com/handmade_shibumi" target="_blank" rel="noopener noreferrer" aria-label="Instagram (Handmade)"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg></a>
+          </div>
+        </div>
+        <div class="member-card-body">
+          <div class="member-card-title-row">
+            <h4 class="member-card-name">石田 恵美</h4>
+            <span class="member-card-role-title">サンドアーティスト</span>
+          </div>
+          <div class="member-card-sub">安曇野拠点 • サンドアート / 布製品デザイン</div>
+          <p class="member-card-desc">ニュージーランドを車で1年旅した経験から独自の表現でサンドアートを創作。安曇野を拠点に県内外で個展を開催し、オリジナルデザインの布製品も手がける。</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card 07: 渡部 裕太 -->
+    <div class="member-card" aria-hidden="true" data-id="watanabe-clone">
+      <div class="member-card-glow glow-sky"></div>
+      <div class="member-card-inner">
+        <div class="member-photo-frame">
+          <img src="./assets/member-watanabe-CLeIAZmQ.jpg" alt="渡部 裕太" class="member-photo-img" loading="lazy">
+          <div class="member-photo-overlay"></div>
+        </div>
+        <div class="member-card-body">
+          <div class="member-card-title-row">
+            <h4 class="member-card-name">渡部 裕太</h4>
+            <span class="member-card-role-title">AI活用 × Web制作</span>
+          </div>
+          <div class="member-card-sub">動画制作 • SNS運用 • HP/LP制作</div>
+          <p class="member-card-desc">AIツールを活用した動画の企画・編集、SNS運用、集客改善、HP・LP制作、業務効率化に取り組む。初心者向けAI講師の実績あり。一つひとつのご縁を大切に価値を届ける。</p>
+        </div>
+      </div>
+    </div>
+    <div class="member-card" aria-hidden="true" data-id="mouri-clone">
+      <div class="member-card-glow glow-cyan"></div>
+      <div class="member-card-inner">
+        <div class="member-photo-frame">
+          <img src="./assets/member-mouri-v1.jpg" alt="毛利 圭子" class="member-photo-img" loading="lazy">
+          <div class="member-photo-overlay"></div>
+          <div class="member-photo-sns">
+            <a class="sns-btn" href="https://inazawa.mypl.net/" target="_blank" rel="noopener noreferrer" aria-label="Website"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></a>
+            <a class="sns-btn" href="https://www.instagram.com/mypl.inazawa" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg></a>
+          </div>
+        </div>
+        <div class="member-card-body">
+          <div class="member-card-title-row">
+            <h4 class="member-card-name">毛利 圭子</h4>
+            <span class="member-card-role-title">合同会社SunnyMoon 代表社員</span>
+          </div>
+          <div class="member-card-sub">まいぷれ稲沢・あま・津島・愛西 運営 • 地域情報発信</div>
+          <p class="member-card-desc">有松絞りの伝統や職人の技、ものづくりの楽しさを、AIとSNSで新しい世代へ届ける。地域の魅力を見つけ、伝え、つなぎ、伝統文化と最新技術の橋渡しで地域に新しい可能性を生む。</p>
+        </div>
+      </div>
+    </div>
+    <div class="member-card" aria-hidden="true" data-id="hara-clone">
+      <div class="member-card-glow glow-magenta"></div>
+      <div class="member-card-inner">
+        <div class="member-photo-frame">
+          <img src="./assets/member-hara-v1.jpg" alt="原 瑞恵" class="member-photo-img" loading="lazy">
+          <div class="member-photo-overlay"></div>
+          <div class="member-photo-sns">
+            <a class="sns-btn" href="https://line.me/ti/p/So0QR977ze" target="_blank" rel="noopener noreferrer" aria-label="LINE"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M19.365 9.863c.349 0 .63.285.63.631 0 .345-.281.63-.63.63H17.61v1.125h1.755c.349 0 .63.283.63.63 0 .344-.281.629-.63.629h-2.386c-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63h2.386c.346 0 .627.285.627.63 0 .349-.281.63-.63.63H17.61v1.125h1.755zm-3.855 3.016c0 .27-.174.51-.432.596-.064.021-.133.031-.199.031-.211 0-.391-.09-.51-.25l-2.443-3.317v2.94c0 .344-.279.629-.631.629-.346 0-.626-.285-.626-.629V8.108c0-.27.173-.51.43-.595.06-.023.136-.033.194-.033.195 0 .375.104.495.254l2.462 3.33V8.108c0-.345.282-.63.63-.63.345 0 .63.285.63.63v4.771zm-5.741 0c0 .344-.282.629-.631.629-.345 0-.627-.285-.627-.629V8.108c0-.345.282-.63.63-.63.346 0 .628.285.628.63v4.771zm-2.466.629H4.917c-.345 0-.63-.285-.63-.629V8.108c0-.345.285-.63.63-.63.348 0 .63.285.63.63v4.141h1.756c.348 0 .629.283.629.63 0 .344-.282.629-.629.629M24 10.314C24 4.943 18.615.572 12 .572S0 4.943 0 10.314c0 4.811 4.27 8.842 10.035 9.608.391.082.923.258 1.058.59.12.301.079.766.038 1.08l-.164 1.02c-.045.301-.24 1.186 1.049.645 1.291-.539 6.916-4.078 9.436-6.975C23.176 14.393 24 12.458 24 10.314"/></svg></a>
+            <a class="sns-btn" href="https://olaiwwly.dbuilder.site/" target="_blank" rel="noopener noreferrer" aria-label="Website"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg></a>
+            <a class="sns-btn" href="https://www.instagram.com/atelierluna_official/" target="_blank" rel="noopener noreferrer" aria-label="Instagram"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="20" height="20" x="2" y="2" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" x2="17.51" y1="6.5" y2="6.5"/></svg></a>
+            <a class="sns-btn" href="https://www.facebook.com/profile.php?id=61572596287251" target="_blank" rel="noopener noreferrer" aria-label="Facebook"><svg class="member-sns-svg" xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M9.101 23.691v-7.98H6.627v-3.667h2.474v-1.58c0-4.085 1.848-5.978 5.858-5.978.401 0 .955.042 1.468.103a8.68 8.68 0 0 1 1.141.195v3.325a8.623 8.623 0 0 0-.653-.036 26.805 26.805 0 0 0-.733-.009c-.707 0-1.259.096-1.675.309a1.686 1.686 0 0 0-.679.622c-.258.42-.374.995-.374 1.752v1.297h3.919l-.386 2.103-.287 1.564h-3.246v8.245C19.396 23.238 24 18.179 24 12.044c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.628 3.874 10.35 9.101 11.647Z"/></svg></a>
+          </div>
+        </div>
+        <div class="member-card-body">
+          <div class="member-card-title-row">
+            <h4 class="member-card-name">原 瑞恵</h4>
+            <span class="member-card-role-title">Atelier LUNA 代表</span>
+          </div>
+          <div class="member-card-sub">イラスト・カレンダー制作 • 通信代理店 • DX支援 • HP制作</div>
+          <p class="member-card-desc">イラスト・カレンダー制作をはじめ、通信代理店、DX支援、ホームページ制作まで幅広く活動。クリエイティブとデジタル技術を掛け合わせ、個人や企業の想いをカタチにするサービスを展開する。</p>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+    <button class="members-nav members-nav-prev" type="button" aria-label="前のメンバーへ"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="14.5 5.5 8 12 14.5 18.5"/></svg></button>
+    <button class="members-nav members-nav-next" type="button" aria-label="次のメンバーへ"><svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="9.5 5.5 16 12 9.5 18.5"/></svg></button>
   </div>
 </div> <div id="home-goal" class="section"> <div id="home-goal-context"> <div id="home-goal-context-inner"> <div id="home-goal-title">運営のかかわり方・スタンス（Operating Guidelines）</div> <div id="home-goal-texts"> <div class="home-goal-cta-wrap"> <a id="home-goal-details-btn" class="pill-cta-btn pill-cta-white" href="./guidelines.html" data-link-type="external" aria-label="詳細な運営規約・スタンスを見る"> <div class="pill-cta-container"> <span class="pill-cta-arrow"> <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="none" viewBox="0 0 16 16"><path stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.343 8h11.314m0 0-4.984 4.984M13.657 8 8.673 3.016"></path></svg> </span> <span class="pill-cta-text">詳細な運営規約・スタンスを見る</span> <span class="pill-cta-dots"><span class="pill-cta-dot"></span></span> </div> </a> </div> </div> </div> </div> <div id="home-goal-tunnel-title" style="display: none !important; visibility: hidden !important;">
   <div id="tunnel-title-phase1" class="tunnel-title-phase">
@@ -2258,4 +2494,58 @@ html #page-container #home-hero-title .word {
 
 
 
+
+<script>
+/* Members marquee controller (2026-11-16): 自動送り／クリックで停止・再開／左右矢印で1枚分移動 */
+(function () {
+  var grid = document.querySelector('#home-members .members-grid');
+  if (!grid) return;
+  var track = grid.querySelector('.members-track');
+  var prev = document.querySelector('#home-members .members-nav-prev');
+  var next = document.querySelector('#home-members .members-nav-next');
+  var paused = false;
+  var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var SPEED = 165;
+  function half() { return track ? track.scrollWidth / 2 : 0; }
+  function wrap() {
+    var h = half();
+    if (h <= 0) return;
+    while (grid.scrollLeft >= h) grid.scrollLeft -= h;
+    while (grid.scrollLeft < 0) grid.scrollLeft += h;
+  }
+  var last = null;
+  function frame(ts) {
+    if (last === null) last = ts;
+    var dt = Math.min((ts - last) / 1000, 0.05);
+    last = ts;
+    if (!paused && !reduce) {
+      grid.scrollLeft += SPEED * dt;
+      wrap();
+    }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+  function stepSize() {
+    var card = track ? track.querySelector('.member-card') : null;
+    if (!card) return 551;
+    var mr = parseFloat(window.getComputedStyle(card).marginRight) || 0;
+    return card.offsetWidth + mr;
+  }
+  if (prev) prev.addEventListener('click', function () {
+    var h = half();
+    if (h > 0 && grid.scrollLeft < stepSize()) grid.scrollLeft += h;
+    grid.scrollLeft -= stepSize();
+    wrap();
+  });
+  if (next) next.addEventListener('click', function () {
+    grid.scrollLeft += stepSize();
+    wrap();
+  });
+  grid.addEventListener('click', function (e) {
+    if (e.target.closest('a') || e.target.closest('button')) return;
+    paused = !paused;
+    grid.classList.toggle('is-paused', paused);
+  });
+})();
+</script>
 </body></html>

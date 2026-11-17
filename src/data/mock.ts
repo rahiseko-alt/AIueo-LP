@@ -96,9 +96,13 @@ export const mockPeople: Person[] = [
   {
     id: 'person-8',
     name: '毛利 圭子',
-    role: '地域文化 × AI発信',
+    role: '合同会社SunnyMoon 代表社員',
     avatarUrl: '/images/japanese/avatar-keiko-v1.jpg',
-    links: [],
+    // 運営会社は合同会社SunnyMoon（代表社員：毛利圭子）。まいぷれ稲沢・あま・津島・愛西の運営会社概要（FLNプレスリリース 2024-12-01）より
+    links: [
+      { kind: 'website', url: 'https://inazawa.mypl.net/' },
+      { kind: 'instagram', url: 'https://www.instagram.com/mypl.inazawa' },
+    ],
     activityIds: [],
     // 出典: 本人提示のプロフィール文（2026-11-16、ユーザー経由）
     bio: '地域の魅力を見つけ、伝え、つなぐ活動を展開。有松絞りの伝統や職人の技、ものづくりの楽しさを、AIとSNSを活用して新しい世代へ届ける。伝統文化と最新技術をつなぎ、地域に新しい可能性を生み出すことを目指す。',
@@ -108,7 +112,13 @@ export const mockPeople: Person[] = [
     name: '原 瑞恵',
     role: 'Atelier LUNA 代表',
     avatarUrl: '/images/japanese/avatar-mizue-v1.jpg',
-    links: [],
+    // 本人提供のリンク（2026-11-17、伊藤 良二経由で受領）
+    links: [
+      { kind: 'line', url: 'https://line.me/ti/p/So0QR977ze' },
+      { kind: 'website', url: 'https://olaiwwly.dbuilder.site/' },
+      { kind: 'instagram', url: 'https://www.instagram.com/atelierluna_official/' },
+      { kind: 'facebook', url: 'https://www.facebook.com/profile.php?id=61572596287251' },
+    ],
     activityIds: [],
     // 出典: 本人提示のプロフィール文（2026-11-16、ユーザー経由）
     bio: 'イラスト・カレンダー制作などのクリエイティブ事業をはじめ、通信代理店事業、DX支援、ホームページ制作など幅広い分野で活動。クリエイティブとデジタル技術を掛け合わせ、個人や企業の想いをカタチにするサービスを展開しています。',
