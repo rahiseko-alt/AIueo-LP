@@ -10,6 +10,8 @@
 
 ## 現在の状態
 
+- **2026-11-17: イベントの日付修正と学習会カードの追加（本番反映済み）。** ①AIアート展覧会（重要文化財企画）の日付チップを「2027年1月頃」から「2027年3月6日(土)・7日(日)」へ変更。②AI小技 発表会の日付チップを「11/11(水) 20:00」から「12/11(金) 20:00」へ変更。③新規カード「Google認定教育者 Level 1 学習会」を追加（data-id: google_educator、日付 11/29(日) 13:00〜14:30、会場 Voltage名古屋、申込は Peatix https://peatix.com/event/5231669 へ外部リンク）。画像は提供バナーを 1024×768 に収めた `public/assets/projects/google_educator/home.webp` と深度マップ `home_depth.webp`。ユーザーが仮リンク（aiueo-aa17oeatg-rahisekos-projects.vercel.app）で最終確認し、同日 main へ反映した。
+
 - **2026-11-17: プレビュー確認済みの一式を本番（main）へ反映。** ユーザーが仮リンク（aiueo-89jkqxxck-rahisekos-projects.vercel.app）で最終確認し、承認したため、プレビュー用ブランチ preview/members-marquee の内容を main へ反映した。内容は、メンバー欄の自動横スクロール（JS制御・クリックで停止／再開・左右矢印・カード横並びの低背化）、毛利 圭子の肩書きとリンク修正、原 瑞恵のリンク4件追加。対象ファイルは `public/lp.html`、`src/data/mock.ts`、台帳2件。
 
 - **2026-11-17: 原 瑞恵にリンク4件を追加（本番反映済み）。** 本人提供のリンク（伊藤 良二経由で受領）を person-9 と `public/lp.html` のカード（本体＋複製）へ追加した。LINE https://line.me/ti/p/So0QR977ze 、公式サイト（Atelier LUNA） https://olaiwwly.dbuilder.site/ 、Instagram @atelierluna_official、Facebook（profile.php?id=61572596287251）。LINEアイコンは `src/components/social-icon.tsx` の既存パスを使用。2026-11-17にユーザーの承認を得て main へ反映した。
