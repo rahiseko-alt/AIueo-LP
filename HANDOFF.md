@@ -10,6 +10,8 @@
 
 ## 現在の状態
 
+- **2026-11-18: スマホでメンバー写真がSNSアイコンに隠れる問題を修正（本番反映済み）。** 指摘を受けて確認したところ、SP（横幅900px以下）では写真枠が幅118pxしかなく、32pxのSNSボタンが2個×最大3段で写真の下部約7割を覆っていた。SPのみ、アイコン列を写真の下（枠内の帯）へ移し、ボタンを28pxに縮小した（PCは無変更）。390px幅の実測で全カードの重なり0pxを確認し、ユーザーが仮リンク（aiueo-o41f6fbqe-rahisekos-projects.vercel.app）で確認のうえ、同日 main へ反映した。
+
 - **2026-11-17: イベントの日付修正と学習会カードの追加（本番反映済み）。** ①AIアート展覧会（重要文化財企画）の日付チップを「2027年1月頃」から「2027年3月6日(土)・7日(日)」へ変更。②AI小技 発表会の日付チップを「11/11(水) 20:00」から「12/11(金) 20:00」へ変更。③新規カード「Google認定教育者 Level 1 学習会」を追加（data-id: google_educator、日付 11/29(日) 13:00〜14:30、会場 Voltage名古屋、申込は Peatix https://peatix.com/event/5231669 へ外部リンク）。画像は提供バナーを 1024×768 に収めた `public/assets/projects/google_educator/home.webp` と深度マップ `home_depth.webp`。ユーザーが仮リンク（aiueo-aa17oeatg-rahisekos-projects.vercel.app）で最終確認し、同日 main へ反映した。
 
 - **2026-11-17: プレビュー確認済みの一式を本番（main）へ反映。** ユーザーが仮リンク（aiueo-89jkqxxck-rahisekos-projects.vercel.app）で最終確認し、承認したため、プレビュー用ブランチ preview/members-marquee の内容を main へ反映した。内容は、メンバー欄の自動横スクロール（JS制御・クリックで停止／再開・左右矢印・カード横並びの低背化）、毛利 圭子の肩書きとリンク修正、原 瑞恵のリンク4件追加。対象ファイルは `public/lp.html`、`src/data/mock.ts`、台帳2件。
