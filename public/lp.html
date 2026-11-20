@@ -2585,4 +2585,24 @@ html #page-container #home-hero-title .word {
   });
 })();
 </script>
+
+<!-- 上書きスクリプト (2026-11-20): 最終セクションの見出し3行目「AIueoに参加する」は、既存バンドル側のクリック処理でメール作成へ飛ぶ作りになっているため、その処理より先に受けて参加申し込みフォームへ差し替える。1行目(企画を提案する)と2行目(企画に参加する)の動作は変えない。 -->
+<script>
+(function () {
+  var JOIN_FORM_URL = 'https://docs.google.com/forms/d/e/1FAIpQLSdG_43rkxpDT5p7YlI58SrgB1r5SNBDHmU88iUR9F0nD4rq0w/viewform';
+  document.addEventListener('click', function (e) {
+    var t = e.target;
+    if (!t || !t.closest) return;
+    var line = t.closest('.end-section-title-link-line');
+    if (!line) return;
+    var lines = Array.from(document.querySelectorAll('.end-section-title-link-line'));
+    var isJoinLine = lines.indexOf(line) === 2 || /AIueo/.test(line.textContent || '');
+    if (!isJoinLine) return;
+    e.preventDefault();
+    e.stopPropagation();
+    e.stopImmediatePropagation();
+    window.open(JOIN_FORM_URL, '_blank', 'noopener,noreferrer');
+  }, true);
+})();
+</script>
 </body></html>
