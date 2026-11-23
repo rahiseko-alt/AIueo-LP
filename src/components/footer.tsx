@@ -87,14 +87,6 @@ export function Footer() {
         <div className="mt-12 sm:mt-16 flex flex-col items-center justify-between gap-4 border-t border-[rgba(240,237,232,0.08)] pt-8 font-mono text-xs text-[rgba(240,237,232,0.6)] sm:flex-row text-center sm:text-left">
           <p>© 2026 AI League AIueo. Activities &amp; Experiment First.</p>
           <div className="flex items-center gap-6">
-            <a
-              href="https://aiueo-announcements.vercel.app/"
-              target="_blank"
-              rel="noreferrer"
-              className="flex min-h-[44px] items-center transition-colors hover:text-white"
-            >
-              メンバー向け告知
-            </a>
             <a href="#home" className="flex min-h-[44px] items-center transition-colors hover:text-white">
               Back to Top ↑
             </a>

@@ -108,20 +108,6 @@ export function UpcomingEvents({ activities }: UpcomingEventsProps) {
           </div>
         </div>
 
-        {/* Announcements */}
-        <div className="mt-6 border-t border-[rgba(240,237,232,0.08)] pt-6 sm:mt-8 sm:flex sm:items-center sm:justify-between sm:gap-6">
-          <p className="font-sans text-sm font-light leading-relaxed text-[rgba(240,237,232,0.65)]">
-            イベントの告知は、メンバー向け告知ページにまとめています。
-          </p>
-          <a
-            href="https://aiueo-announcements.vercel.app/"
-            target="_blank"
-            rel="noreferrer"
-            className="mt-4 inline-flex min-h-[44px] items-center justify-center rounded border border-[rgba(240,237,232,0.15)] px-6 py-2.5 font-mono text-[11px] font-medium tracking-wider text-[#f0ede8] uppercase transition-all duration-200 hover:border-[#c8a45a] hover:bg-[#c8a45a] hover:text-[#080808] sm:mt-0 sm:shrink-0"
-          >
-            メンバー向け告知ページ →
-          </a>
-        </div>
       </div>
     </section>
   );
